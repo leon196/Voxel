@@ -1,134 +1,72 @@
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-camera.position.z = 20;
 
-var renderer = new THREE.WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
+// Elements
+var camera, scene, renderer, vertexShader, fragmentShader;
+var geometry, material, cube;
+var controls, clock;
 
-var controls = new THREE.OrbitControls( camera, renderer.domElement );
-
-var rootCube = new THREE.Object3D();
-scene.add(rootCube);
-
-var cubes = [];
-
-var vertexShader = document.getElementById( 'vertexShader' ).textContent;
-var fragmentShader = document.getElementById( 'fragmentShader' ).textContent;
-
+//var automata = new Automata(dimension * dimension);
 var colorWire = 0xcccccc;
-var dimension = 8;
 
-function Automata(cellCount) {
-	this.cells = [];
-	for (var i = 0; i < cellCount; i++) {
-		this.cells.push(new Cell(i, (Math.random() > 0.5 ? true : false)));
-	}
+function init()
+{
+	camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+	camera.position.z = 20;
+
+	scene = new THREE.Scene();
+
+	renderer = new THREE.WebGLRenderer();
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	document.body.appendChild( renderer.domElement );
+
+	vertexShader = document.getElementById( 'vertexShader' ).textContent;
+	fragmentShader = document.getElementById( 'fragmentShader' ).textContent;
+
+	geometry = new THREE.BoxGeometry(11,11,11);
+	material = new THREE.ShaderMaterial( { uniforms: {}, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader } );
+	cube = new THREE.Mesh( geometry, material );
+
+	scene.add(cube);
+
+	controls = new THREE.FirstPersonControls(camera);
+	controls.movementSpeed = 10;
+	controls.lookSpeed = 0.125;
+	controls.lookVertical = true;
+
+	clock = new THREE.Clock();
 }
 
-Automata.prototype.cellAt = function(index) {
-	return this.cells[index];
-}
-
-Automata.prototype.cellIsAlive = function (index) {
-	return this.cellAt(index).alive;
-}
-
-function Cell(index, visible) {
-	this.index = index;
-	var position = getPosition(index);
-	this.object = createCube(position);
-	this.object.visible = visible;
-	this.alive = visible;
-}
-
-Cell.prototype.neighborCount = function () {
-	var top = checkCell(this.index - dimension);
-	var bottom = checkCell(this.index + dimension);
-	var left = checkCell(this.index - 1);
-	var right = checkCell(this.index + 1);
-	return top + bottom + left + right;
-}
-
-Cell.prototype.spawn = function() {
-	this.object.visible = true;
-	this.alive = true;
-}
-
-Cell.prototype.live = function() {
-	this.object.visible = true;
-	this.alive = true;
-}
-
-Cell.prototype.die = function() {
-	this.object.visible = false;
-	this.alive = false;
-}
-
-
-function createCube(position) {
-	var geometry = new THREE.BoxGeometry(1,1,1);
-	var attributes = { center: { type: 'v3', boundTo: 'faceVertices', value: [] }  };
-	var values = attributes.center.value;
-	setupAttributes( geometry, values );
-	var material = new THREE.ShaderMaterial( { uniforms: {}, attributes: attributes, vertexShader: vertexShader, fragmentShader: fragmentShader } );
-	var cube = new THREE.Mesh( geometry, material );
-	cube.position = position;
-	rootCube.add(cube);
-	cubes.push(cube);
-	return cube
-}
-
-var automata = new Automata(dimension * dimension);
-window.setInterval(checkAutomata, 100);
-
-/**************************/
-
-function render() {
+function render()
+{
 	requestAnimationFrame(render);
-	
+
+	/*if (mouseDown) {
+		camera.rotation.y += mouseDeltaPosition.x * 0.001;
+		camera.rotation.x += mouseDeltaPosition.y * 0.001;
+	}
+*/
+	controls.update(clock.getDelta());
 	renderer.render(scene, camera);
 }
 
-render();
-
-/***********************/
-
-function checkAutomata() {
-	for (var i = 0; i < dimension * dimension; i++) {
-		var cell = automata.cellAt(i);
-		var neighborCount = cell.neighborCount();
-		switch (neighborCount) {
-			default :
-			case 0 : 
-				cell.die(); 
-				break;
-			case 1 :
-				cell.spawn();
-				break;
-			case 2 : 
-			case 3 :
-				cell.live(); 
-				break;
-		}
-	}
-}
-
-function checkCell(index) {
-	return (index >= 0 ? (index < dimension * dimension ? (automata.cellIsAlive(index) ? 1 : 0 ) : 0) : 0);
-	alert(index);
-}
-
-function getPosition(index) {
-	return new THREE.Vector3(index % dimension, Math.floor(index / dimension), 0.0);
-}
-
-function setupAttributes( geometry, values ) {
-
+function CreateCubeWired(position)
+{
+	// setup shader uniforms
+	var uniforms = { time: { type: 'f', value: timeElapsed }  };
+	// setup shader attributes
+	var attributes = { center: { type: 'v3', boundTo: 'faceVertices', value: [] }  };
+	var values = attributes.center.value;
 	for( var f = 0; f < geometry.faces.length; f ++ ) {
-
 		values[ f ] = [ new THREE.Vector3( 1, 0, 0 ), new THREE.Vector3( 0, 1, 0 ), new THREE.Vector3( 0, 0, 1 ) ];
-
 	}
-
+	// setup material
+	var mat = new THREE.ShaderMaterial( { uniforms: uniforms, attributes: attributes, vertexShader: vertexShader, fragmentShader: fragmentShader } );
+	// setup mesh
+	var cube = new THREE.Mesh( geometry, mat );
+	// place the cube in scene
+	cube.position = position;
+	objects.push(cube);
+	return cube
 }
+
+init();
+render();
