@@ -9,14 +9,14 @@ var colorWire = 0xcccccc;
 
 function init()
 {
-	camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-	camera.position.z = 20;
 
 	scene = new THREE.Scene();
 
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	document.body.appendChild( renderer.domElement );
+	document.addEventListener( 'mousedown', mousedown, false );
+	document.addEventListener( 'mouseup', mouseup, false );
 
 	vertexShader = document.getElementById( 'vertexShader' ).textContent;
 	fragmentShader = document.getElementById( 'fragmentShader' ).textContent;
@@ -26,13 +26,38 @@ function init()
 	cube = new THREE.Mesh( geometry, material );
 
 	scene.add(cube);
+	
+	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+	var VIEW_ANGLE = 75, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
+	camera.position.z = 20;
+	scene.add(camera);
+
+	textureCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
+	textureCamera.position.z = 20;
+	scene.add(textureCamera);
 
 	controls = new THREE.FirstPersonControls(camera);
-	controls.movementSpeed = 10;
+	controls.movementSpeed = 60;
 	controls.lookSpeed = 0.125;
 	controls.lookVertical = true;
+	controls.mouseDragOn = false;
+
+	camera.position = new THREE.Vector3(-100, 0, 0);
 
 	clock = new THREE.Clock();
+}
+
+function mousedown(event)
+{
+	mouseDown = true;
+	//controls.freeze = false;
+}
+
+function mouseup(event)
+{
+	mouseDown = false;
+	//controls.freeze = true;
 }
 
 function render()
