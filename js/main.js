@@ -1,7 +1,7 @@
 
 // Elements
 var camera, textureCamera, scene, renderer, vertexShader, fragmentShader;
-var geometry, material, cube;
+var geometry, material, cube, planeScreen;
 var controls, clock;
 var finalRenderTarget;
 
@@ -10,13 +10,15 @@ var colorWire = 0xcccccc;
 
 function init()
 {
+	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+	var VIEW_ANGLE = 75, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 
 	clock = new THREE.Clock();
 
 	scene = new THREE.Scene();
 
-	finalRenderTarget = new THREE.WebGLRenderTarget( 512, 512, { format: THREE.RGBFormat } );
-	renderer = new THREE.WebGLRenderer();
+	finalRenderTarget = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight, { format: THREE.RGBAFormat, alpha: true } );
+	renderer = new THREE.WebGLRenderer({ antialias:true, alpha: true });
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	document.body.appendChild( renderer.domElement );
 	document.addEventListener( 'mousedown', mousedown, false );
@@ -29,7 +31,8 @@ function init()
 
 	
 	var uniforms = { texture: { type: "t", value: finalRenderTarget  } };
-	material = new THREE.ShaderMaterial( { uniforms: {}, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader } );
+	material = new THREE.ShaderMaterial( { uniforms: {}, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader, transparent: true } );
+	material.transparent = true;
 	
 	//material = new THREE.MeshBasicMaterial( { map: finalRenderTarget } );
 	cube = new THREE.Mesh( geometry, material );
@@ -37,33 +40,37 @@ function init()
 	scene.add(cube);
 	//CreateCubeWired(new THREE.Vector3(0,0,0));
 
-	var planeGeometry = new THREE.BoxGeometry(11, 11, 11);
+	var planeGeometry = new THREE.PlaneGeometry(ASPECT * 10, 10);
 	//var planeMaterial = new THREE.MeshBasicMaterial( { map: finalRenderTarget } );
 	vertexShader = document.getElementById( 'vertexRender' ).textContent;
 	fragmentShader = document.getElementById( 'fragmentRender' ).textContent;
-	var planeMaterial = new THREE.ShaderMaterial( { uniforms: uniforms, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader } );
-	var plane = new THREE.Mesh( planeGeometry, planeMaterial );
-	plane.position.y = -11;
-
-	scene.add(plane);
+	var planeMaterial = new THREE.ShaderMaterial( { uniforms: uniforms, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader, antialias:false } );
+	planeMaterial.transparent = true;
+	planeScreen = new THREE.Mesh( planeGeometry, planeMaterial );
+	//planeScreen.position.y = -11;
+	planeScreen.position.z = -1.0;
+	//planeScreen.rotation.y = 3.14 * -0.5;
 	
-	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
-	var VIEW_ANGLE = 75, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-	camera.position.z = 20;
 	scene.add(camera);
 
 	textureCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-	textureCamera.position.z = 20;
-	scene.add(textureCamera);
+	textureCamera.position.z = 300;
+	textureCamera.lookAt(new THREE.Vector3(0,0,0));
 
 	controls = new THREE.FirstPersonControls(camera);
 	controls.movementSpeed = 60;
 	controls.lookSpeed = 0.125;
 	controls.lookVertical = true;
 	controls.mouseDragOn = false;
+	controls.freeze = true;
 
 	camera.position = new THREE.Vector3(-100, 0, 0);
+	camera.lookAt(new THREE.Vector3(0,0,0));
+
+	//planeScreen.position.x = 10.0;
+	camera.add(planeScreen);
+	camera.add(textureCamera);
 }
 
 function mousedown(event)
@@ -87,8 +94,16 @@ function render()
 		camera.rotation.x += mouseDeltaPosition.y * 0.001;
 	}
 */
-	renderer.render( scene, camera, finalRenderTarget, true );
+
+	planeScreen.visible = false;
+
+	renderer.render( scene, textureCamera, finalRenderTarget, true );
 	controls.update(clock.getDelta());
+
+
+	planeScreen.visible = true;
+	//planeScreen.rotation.y = Math.cos(clock.getElapsedTime()) * 3.14 * 2.0;
+
 	renderer.render(scene, camera);
 }
 
