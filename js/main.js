@@ -17,7 +17,7 @@ function init()
 
 	scene = new THREE.Scene();
 
-	finalRenderTarget = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight, { format: THREE.RGBAFormat, alpha: true } );
+	finalRenderTarget = new THREE.WebGLRenderTarget( 1024, 1024, { format: THREE.RGBAFormat, alpha: true } );
 	renderer = new THREE.WebGLRenderer({ antialias:true, alpha: true });
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	document.body.appendChild( renderer.domElement );
@@ -39,8 +39,8 @@ function init()
 
 	scene.add(cube);
 	//CreateCubeWired(new THREE.Vector3(0,0,0));
-
-	var planeGeometry = new THREE.PlaneGeometry(ASPECT * 10, 10);
+	var planeSize = 1.5;
+	var planeGeometry = new THREE.PlaneGeometry(ASPECT * planeSize, planeSize);
 	//var planeMaterial = new THREE.MeshBasicMaterial( { map: finalRenderTarget } );
 	vertexShader = document.getElementById( 'vertexRender' ).textContent;
 	fragmentShader = document.getElementById( 'fragmentRender' ).textContent;
@@ -55,12 +55,12 @@ function init()
 	scene.add(camera);
 
 	textureCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-	textureCamera.position.z = 300;
+	textureCamera.position.z = 500;
 	textureCamera.lookAt(new THREE.Vector3(0,0,0));
 
 	controls = new THREE.FirstPersonControls(camera);
 	controls.movementSpeed = 60;
-	controls.lookSpeed = 0.125;
+	controls.lookSpeed = 20;
 	controls.lookVertical = true;
 	controls.mouseDragOn = false;
 	controls.freeze = true;
