@@ -10,8 +10,13 @@ var viewHalfX, viewHalfY;
 
 // Voxels
 var voxels = [];
+var voxelsBuffer = [];
 var voxelSize = 11.0;
 var gridSize = 8;
+
+// Timing
+var delayIteration = 0.5;
+var lastIteration = -delayIteration;
 
 // Consts
 var distMax = voxelSize * 2;
@@ -62,7 +67,7 @@ function init()
 		texture: { type: "t", value: finalRenderTarget  },
 		transitionAlpha: { type: "f", value: 0.0}};
 	// Diplay Rendered Texture on Screen with a Plane
-	var planeSize = voxelSize;
+	var planeSize = 1.5;
 	var planeGeometry = new THREE.PlaneGeometry(ASPECT * planeSize, planeSize);
 	var planeMaterial = new THREE.ShaderMaterial( { uniforms: uniformsRender, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader, antialias:false } );
 	planeMaterial.transparent = true;
@@ -71,7 +76,7 @@ function init()
 
 	// Camera used for Rendered Texture
 	textureCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-	textureCamera.position = new THREE.Vector3(0, 0, 1000);
+	textureCamera.position = new THREE.Vector3(0, 0, 800);
 	textureCamera.lookAt(new THREE.Vector3(0,0,0));
 
 	camera.add(planeScreen);
@@ -97,20 +102,110 @@ function getGridPosition(index)
 			voxelSize * (Math.floor(index / (gridSize*gridSize)) % gridSize));
 }
 
+function getIndexPosition(position)
+{
+	return Math.floor((position.x + position.y * gridSize + position.z * gridSize * gridSize) / voxelSize);
+}
+
 function generateVoxels()
 {
-	var halfGrid = gridSize * voxelSize * -0.5;
-	var randCount = Math.ceil(50 + Math.random() * 100);
-	for (var i = 0; i < randCount; i++) {
-		var voxel = new THREE.Mesh( geometry, material );
+	var count = gridSize*gridSize*gridSize;
 
-		var randIndex = Math.floor(Math.random() * gridSize * gridSize * gridSize);
+	for (var i = 0; i < count; i++) {
+		var voxel = { mesh: null, status: 0 };
 
-		voxel.position = getGridPosition(randIndex);// - new THREE.Vector3(halfGrid, halfGrid, halfGrid);
-		voxel.name = randIndex;
+		if (Math.random() < 0.25) {
+			var mesh = new THREE.Mesh( geometry, material );
+			mesh.position = getGridPosition(i);
+			scene.add(mesh);
 
-		scene.add(voxel);
+			voxel.mesh = mesh;
+			voxel.status = 1;
+		}
+
 		voxels.push(voxel);
+		voxelsBuffer.push(voxel.status);
+	}
+}
+
+function getNeighborCount(index)
+{
+	var count = 0;
+	var position = getGridPosition(index);
+	var neighbors = [
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y - voxelSize, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y + voxelSize, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y, position.z + voxelSize)),
+
+		getIndexPosition(new THREE.Vector3(position.x, position.y - voxelSize, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y - voxelSize, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y + voxelSize, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y + voxelSize, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y - voxelSize, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y + voxelSize, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y - voxelSize, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y + voxelSize, position.z)),
+/*
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y - voxelSize, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y - voxelSize, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y + voxelSize, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y - voxelSize, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y + voxelSize, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y + voxelSize, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y - voxelSize, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y + voxelSize, position.z + voxelSize))
+*/
+	];
+	for (var n = neighbors.length; n >= 0; n--) {
+		if (neighbors[n] >= 0 && neighbors[n] < gridSize*gridSize*gridSize) {
+			count += voxels[neighbors[n]].status;
+		}
+	}
+	return count;
+}
+
+function iterateGameOfLife()
+{
+	var count = gridSize * gridSize * gridSize;
+	for (var i = 0; i < count; i++) {
+		var neighborCount = getNeighborCount(i);
+
+		// Dead
+		if (voxelsBuffer[i] == 0) {
+			// Birth
+			if (neighborCount == 2) {
+				voxels[i].status = 1;
+				if (voxels[i].mesh == null) {
+					var mesh = new THREE.Mesh( geometry, material );
+					mesh.position = getGridPosition(i);
+					scene.add(mesh);
+					voxels[i].mesh = mesh;
+				} else {
+					voxels[i].mesh.visible = true;
+				}
+			}
+		}
+		// Alive
+		else {
+			// Death
+			if (neighborCount != 2 && neighborCount != 3) {
+				voxels[i].status = 0;
+				if (voxels[i].mesh != null) {
+					voxels[i].mesh.visible = false;
+				}
+			}
+		}
+	}
+
+	for (var i = 0; i < count; i++) {
+		voxelsBuffer[i] = voxels[i].status;
 	}
 }
 
@@ -126,23 +221,30 @@ function render()
 
 	update();
 
-	//planeScreen.rotation.y = Math.cos(clock.getElapsedTime());
-
 	renderer.render(scene, camera);
 }
 
 function update()
 {
+	// Behaviors
+	if (lastIteration + delayIteration < clock.getElapsedTime()) {
+		iterateGameOfLife();
+		lastIteration = clock.getElapsedTime();
+	}
 
+	// Controls
 	if (controls.object.id != textureCamera.id) {
 
 		var nearestVoxel = null;
 		var nearestDist = 1000.0;
 		for (var i = 0; i < voxels.length; i++) {
-			var distObject = camera.position.distanceTo(voxels[i].position);
-			if (distObject < distMax && nearestDist > distObject) {
-				nearestVoxel = voxels[i];
-				nearestDist = distObject;
+			var voxel = voxels[i].mesh;
+			if (voxel) {
+				var distObject = camera.position.distanceTo(voxel.position);
+				if (distObject < distMax && nearestDist > distObject) {
+					nearestVoxel = voxel;
+					nearestDist = distObject;
+				}
 			}
 		}
 
