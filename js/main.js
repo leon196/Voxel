@@ -23,6 +23,7 @@ var distMax = voxelSize * 2;
 var distMin = voxelSize * 0.75;
 var moveSpeed = 60;
 var lookSpeed = 20;
+var textureCameraDistance = 400;
 
 init();
 render();
@@ -76,7 +77,7 @@ function init()
 
 	// Camera used for Rendered Texture
 	textureCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-	textureCamera.position = new THREE.Vector3(0, 0, 400);
+	textureCamera.position = new THREE.Vector3(0, 0, textureCameraDistance);
 	textureCamera.lookAt(new THREE.Vector3(0,0,0));
 
 	camera.add(planeScreen);
@@ -276,6 +277,8 @@ function update()
 			controls.movementSpeed = moveSpeed;
 			controls.lookSpeed = lookSpeed;
 			uniformsRender.transitionAlpha.value = 0.0;
+
+			textureCamera.position = new THREE.Vector3(0, 0, textureCameraDistance);
 		}
 	}
 }
