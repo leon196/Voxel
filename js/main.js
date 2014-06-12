@@ -76,7 +76,7 @@ function init()
 
 	// Camera used for Rendered Texture
 	textureCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-	textureCamera.position = new THREE.Vector3(0, 0, 800);
+	textureCamera.position = new THREE.Vector3(0, 0, 400);
 	textureCamera.lookAt(new THREE.Vector3(0,0,0));
 
 	camera.add(planeScreen);
@@ -228,7 +228,7 @@ function update()
 {
 	// Behaviors
 	if (lastIteration + delayIteration < clock.getElapsedTime()) {
-		iterateGameOfLife();
+		//iterateGameOfLife();
 		lastIteration = clock.getElapsedTime();
 	}
 
@@ -266,6 +266,16 @@ function update()
 				controls.lookSpeed = lookSpeed * 0.1;
 				uniformsRender.transitionAlpha.value = 1.0;
 			}
+		}
+	} else {
+		if (textureCamera.position.length() < gridSize * voxelSize) {
+			camera.position.x += textureCamera.position.x;
+			camera.position.y += textureCamera.position.y;
+			camera.position.z += textureCamera.position.z;
+			controls.object = camera;
+			controls.movementSpeed = moveSpeed;
+			controls.lookSpeed = lookSpeed;
+			uniformsRender.transitionAlpha.value = 0.0;
 		}
 	}
 }
