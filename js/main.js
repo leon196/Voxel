@@ -1,14 +1,23 @@
 
 // Elements
 var camera, scene, renderer;
-var textureCamera, planeScreen, finalRenderTarget;
+var textureCamera, planeScreen, finalRenderTarget, uniformsRender;
 var geometry, material;
-var controls, clock;
+var controls, clock, projector;
+var INTERSECTED;
+var mouse = { x:0, y:0 };
+var viewHalfX, viewHalfY;
 
 // Voxels
 var voxels = [];
-var voxelSize = 11;
+var voxelSize = 11.0;
 var gridSize = 8;
+
+// Consts
+var distMax = voxelSize * 2;
+var distMin = voxelSize * 0.75;
+var moveSpeed = 60;
+var lookSpeed = 20;
 
 init();
 render();
@@ -16,8 +25,13 @@ render();
 function init()
 {
 	clock = new THREE.Clock();
+	viewHalfX = window.innerWidth / 2;
+	viewHalfY = window.innerHeight / 2;
 	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 	var VIEW_ANGLE = 75, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+
+	// initialize object to perform world/screen calculations
+	projector = new THREE.Projector();
 
 	// Setup Render
 	renderer = new THREE.WebGLRenderer({ antialias:true, alpha: true });
@@ -28,34 +42,36 @@ function init()
 	scene = new THREE.Scene();
 
 	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-	camera.position = new THREE.Vector3(-100, 0, 0);
-	camera.lookAt(new THREE.Vector3(0,0,0));
+	camera.position = new THREE.Vector3(0, 0, 100);
 	scene.add(camera);
 
-	// Controls
+	// Control Camera 1
 	controls = new THREE.FirstPersonControls(camera);
-	controls.movementSpeed = 60;
-	controls.lookSpeed = 20;
+	controls.movementSpeed = moveSpeed;
+	controls.lookSpeed = lookSpeed;
 	controls.lookVertical = true;
 	controls.mouseDragOn = false;
-	controls.freeze = true;
+	controls.lon = -90;
 
 	// Render to Texture
 	finalRenderTarget = new THREE.WebGLRenderTarget( 1024, 1024, { format: THREE.RGBAFormat, alpha: true } );
 	// Shaders
 	var vertexShader = document.getElementById( 'vertexRender' ).textContent;
 	var fragmentShader = document.getElementById( 'fragmentRender' ).textContent;
-	var uniforms = { texture: { type: "t", value: finalRenderTarget  } };
+	uniformsRender = {
+		texture: { type: "t", value: finalRenderTarget  },
+		transitionAlpha: { type: "f", value: 0.0}};
 	// Diplay Rendered Texture on Screen with a Plane
 	var planeSize = voxelSize;
 	var planeGeometry = new THREE.PlaneGeometry(ASPECT * planeSize, planeSize);
-	var planeMaterial = new THREE.ShaderMaterial( { uniforms: uniforms, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader, antialias:false } );
+	var planeMaterial = new THREE.ShaderMaterial( { uniforms: uniformsRender, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader, antialias:false } );
 	planeMaterial.transparent = true;
 	planeScreen = new THREE.Mesh( planeGeometry, planeMaterial );
 	planeScreen.position.z = -1.0;
+
 	// Camera used for Rendered Texture
 	textureCamera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-	textureCamera.position.z = 100;
+	textureCamera.position = new THREE.Vector3(0, 0, 1000);
 	textureCamera.lookAt(new THREE.Vector3(0,0,0));
 
 	camera.add(planeScreen);
@@ -91,9 +107,10 @@ function generateVoxels()
 		var randIndex = Math.floor(Math.random() * gridSize * gridSize * gridSize);
 
 		voxel.position = getGridPosition(randIndex);// - new THREE.Vector3(halfGrid, halfGrid, halfGrid);
+		voxel.name = randIndex;
 
 		scene.add(voxel);
-		voxels.push({object:voxel, index:randIndex});
+		voxels.push(voxel);
 	}
 }
 
@@ -107,10 +124,50 @@ function render()
 
 	controls.update(clock.getDelta());
 
+	update();
+
 	//planeScreen.rotation.y = Math.cos(clock.getElapsedTime());
 
 	renderer.render(scene, camera);
 }
+
+function update()
+{
+
+	if (controls.object.id != textureCamera.id) {
+
+		var nearestVoxel = null;
+		var nearestDist = 1000.0;
+		for (var i = 0; i < voxels.length; i++) {
+			var distObject = camera.position.distanceTo(voxels[i].position);
+			if (distObject < distMax && nearestDist > distObject) {
+				nearestVoxel = voxels[i];
+				nearestDist = distObject;
+			}
+		}
+
+		if (nearestVoxel != null) {
+
+			var ratio = Math.max(0, nearestDist / distMax);
+			
+			// Slow Down on Face
+			controls.movementSpeed = moveSpeed * (ratio - distMin / distMax);
+			controls.lookSpeed = lookSpeed * (ratio - distMin / distMax);
+
+			// Scale Plane Renderer
+			var invert = 1.0 - Math.max(0, Math.min(ratio + distMin / distMax, 1));
+			uniformsRender.transitionAlpha.value = invert;
+
+			if (controls.movementSpeed < 1.0) {
+				controls.object = textureCamera;
+				controls.movementSpeed = moveSpeed;
+				controls.lookSpeed = lookSpeed * 0.1;
+				uniformsRender.transitionAlpha.value = 1.0;
+			}
+		}
+	}
+}
+
 
 function CreateCubeWired(position)
 {
@@ -136,6 +193,10 @@ function CreateCubeWired(position)
 	scene.add(cube);
 	return cube
 }
+function mousemove( event )
+{
+	mouse = { x:event.pageX - viewHalfX, y:event.pageY - viewHalfY };
+}
 
 function mousedown(event)
 {
@@ -145,4 +206,39 @@ function mousedown(event)
 function mouseup(event)
 {
 	mouseDown = false;
+}
+
+function lerp(start, end, percent)
+{
+     return (start + percent*(end - start));
+}
+
+function intersection()
+{
+	// find intersections
+	// create a Ray with origin at the mouse position
+	//   and direction into the scene (camera direction)
+	var vector = new THREE.Vector3( mouse.X, mouse.Y, 1 );
+	projector.unprojectVector( vector, camera );
+	var direction = vector.sub( camera.position ).normalize()
+	var ray = new THREE.Raycaster( camera.position, direction );
+
+	// create an array containing all objects in the scene with which the ray intersects
+	var intersects = ray.intersectObjects( voxels );
+	
+	// if there is one (or more) intersections
+	if ( intersects.length > 0 )
+	{
+		// if the closest object intersected is not the currently stored intersection object
+		if ( intersects[ 0 ].object != INTERSECTED ) 
+		{
+			// store reference to closest object as current intersection object
+			INTERSECTED = intersects[ 0 ].object;
+		}
+	} else {
+		INTERSECTED = null;
+	}
+
+	if (INTERSECTED != null) {
+	}
 }

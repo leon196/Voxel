@@ -56,6 +56,7 @@
 
 			varying vec2 vUv;
 			uniform sampler2D texture;
+			uniform float transitionAlpha;
 
 			void main() {
 
@@ -63,7 +64,7 @@
 				//float lum = (color.r + color.g + color.b) / 3.0;
 				//float grid = step(0.9, vUv.x) + step(0.9, 1.0 - vUv.x) + step(0.9, vUv.y) + step(0.9, 1.0 - vUv.y);
 				gl_FragColor.rgb = color.rgb;// + vec3(0, grid, 0);
-				gl_FragColor.a = color.a;// + grid;
+				gl_FragColor.a = color.a * transitionAlpha;// + grid;
 			}
 
 		</script>
