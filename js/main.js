@@ -9,13 +9,14 @@ var mouse = { x:0, y:0 };
 var viewHalfX, viewHalfY;
 
 // Voxels
+var lodCount = 4;
 var voxels = [];
-var voxelsBuffer = [];
+//var voxelsBuffer = [];
 var voxelSize = 11.0;
 var gridSize = 8;
 
 // Timing
-var delayIteration = 0.5;
+var delayIteration = 1.0;
 var lastIteration = -delayIteration;
 
 // Consts
@@ -95,120 +96,95 @@ function init()
 	generateVoxels();
 }
 
-function getGridPosition(index)
+function getGridPosition(index, lod)
 {
+	var gSize = gridSize / Math.max(1, (2 * lod));
+	var vSize = voxelSize * (1 + lod);
 	return new THREE.Vector3 (
-			voxelSize * (index % gridSize),
-			voxelSize * (Math.floor(index / gridSize) % gridSize),
-			voxelSize * (Math.floor(index / (gridSize*gridSize)) % gridSize));
+			vSize * (index % gSize),
+			vSize * (Math.floor(index / gSize) % gSize),
+			vSize * (Math.floor(index / (gSize*gSize)) % gSize));
 }
 
-function getIndexPosition(position)
+function getIndexPosition (position)
 {
 	return Math.floor((position.x + position.y * gridSize + position.z * gridSize * gridSize) / voxelSize);
 }
 
-function generateVoxels()
+function LODTest (indexRatio)
 {
-	var count = gridSize*gridSize*gridSize;
-
-	for (var i = 0; i < count; i++) {
-		var voxel = { mesh: null, status: 0 };
-
-		if (Math.random() < 0.25) {
-			var mesh = new THREE.Mesh( geometry, material );
-			mesh.position = getGridPosition(i);
-			scene.add(mesh);
-
-			voxel.mesh = mesh;
-			voxel.status = 1;
-		}
-
-		voxels.push(voxel);
-		voxelsBuffer.push(voxel.status);
+	var i = Math.floor(indexRatio * gridSize * gridSize * gridSize);
+	if (voxels[0][i].status == 1) {
+		return true;
+	} else {
+		return false;
 	}
+
 }
 
-function getNeighborCount(index)
+function CreateVoxelMesh (index, lod)
 {
-	var count = 0;
-	var position = getGridPosition(index);
-	var neighbors = [
-		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y, position.z)),
-		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y, position.z)),
-		getIndexPosition(new THREE.Vector3(position.x, position.y - voxelSize, position.z)),
-		getIndexPosition(new THREE.Vector3(position.x, position.y + voxelSize, position.z)),
-		getIndexPosition(new THREE.Vector3(position.x, position.y, position.z - voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x, position.y, position.z + voxelSize)),
-
-		getIndexPosition(new THREE.Vector3(position.x, position.y - voxelSize, position.z - voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x, position.y - voxelSize, position.z + voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x, position.y + voxelSize, position.z - voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x, position.y + voxelSize, position.z + voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y, position.z - voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y, position.z + voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y - voxelSize, position.z)),
-		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y + voxelSize, position.z)),
-		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y, position.z - voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y, position.z + voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y - voxelSize, position.z)),
-		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y + voxelSize, position.z)),
-/*
-		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y - voxelSize, position.z - voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y - voxelSize, position.z + voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y + voxelSize, position.z - voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y - voxelSize, position.z - voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y + voxelSize, position.z + voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y + voxelSize, position.z - voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y - voxelSize, position.z + voxelSize)),
-		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y + voxelSize, position.z + voxelSize))
-*/
-	];
-	for (var n = neighbors.length; n >= 0; n--) {
-		if (neighbors[n] >= 0 && neighbors[n] < gridSize*gridSize*gridSize) {
-			count += voxels[neighbors[n]].status;
-		}
-	}
-	return count;
+	var mesh = new THREE.Mesh( geometry, material );
+	mesh.position = getGridPosition(index, lod);
+	var scale = 1 + lod;
+	mesh.scale.set(scale, scale, scale);
+	scene.add(mesh);
+	return mesh;
 }
 
-function iterateGameOfLife()
+function generateVoxels ()
 {
-	var count = gridSize * gridSize * gridSize;
-	for (var i = 0; i < count; i++) {
-		var neighborCount = getNeighborCount(i);
+	voxels = [];
 
-		// Dead
-		if (voxelsBuffer[i] == 0) {
-			// Birth
-			if (neighborCount == 2) {
-				voxels[i].status = 1;
-				if (voxels[i].mesh == null) {
-					var mesh = new THREE.Mesh( geometry, material );
-					mesh.position = getGridPosition(i);
-					scene.add(mesh);
-					voxels[i].mesh = mesh;
-				} else {
-					voxels[i].mesh.visible = true;
+	for (var l = 0; l < lodCount; l++)
+	{
+		voxels.push([]);
+		var count = Math.pow(gridSize / Math.max(1, (2 * l)), 3);
+
+		for (var i = 0; i < count; i++)
+		{
+			var voxel = { mesh: null, status: 0 };
+			var thereIsAVoxel = false;
+
+			// LEVEL OF DETAILS 0
+			if (l == 0) {
+				if (Math.random() < 0.25) {
+					thereIsAVoxel = true;
 				}
 			}
-		}
-		// Alive
-		else {
-			// Death
-			if (neighborCount != 2 && neighborCount != 3) {
-				voxels[i].status = 0;
-				if (voxels[i].mesh != null) {
-					voxels[i].mesh.visible = false;
-				}
+			// LEVELS OF DETAILS HIGHER
+			else if (LODTest(i / count)) {
+				thereIsAVoxel = true;
 			}
+
+			if (thereIsAVoxel) {
+				var mesh = CreateVoxelMesh(i, l);
+				voxel.mesh = mesh;
+				voxel.status = 1;
+			}
+
+			voxels[l].push(voxel);
+			//voxelsBuffer.push(voxel.status);
 		}
 	}
 
-	for (var i = 0; i < count; i++) {
-		voxelsBuffer[i] = voxels[i].status;
+}
+
+function showLOD(lod) 
+{
+	// For each level of details
+	for (var i = 0; i < lodCount; i++) {
+		var show = i == lod;
+		var count = voxels[i].length;
+		// For each voxels
+		for (var v = 0; v < count; v++) {
+			var voxel = voxels[i][v];
+			if (voxel.mesh != null)
+				voxel.mesh.visible = show;
+		}
 	}
 }
+
 
 function render()
 {
@@ -218,6 +194,7 @@ function render()
 	renderer.render( scene, textureCamera, finalRenderTarget, true );
 	planeScreen.visible = true;
 
+
 	controls.update(clock.getDelta());
 
 	update();
@@ -225,17 +202,22 @@ function render()
 	renderer.render(scene, camera);
 }
 
+var lodCurrent = 0;
+
 function update()
 {
 	// Behaviors
 	if (lastIteration + delayIteration < clock.getElapsedTime()) {
 		//iterateGameOfLife();
 		lastIteration = clock.getElapsedTime();
+		//var lod = Math.floor(lodCount * (Math.cos(clock.getElapsedTime()) + 1.0) * 0.5);
+		lodCurrent = (lodCurrent + 1) % lodCount;
+		showLOD(lodCurrent);
 	}
 
 	// Controls
 	if (controls.object.id != textureCamera.id) {
-
+/*
 		var nearestVoxel = null;
 		var nearestDist = 1000.0;
 		for (var i = 0; i < voxels.length; i++) {
@@ -268,6 +250,7 @@ function update()
 				uniformsRender.transitionAlpha.value = 1.0;
 			}
 		}
+*/
 	} else {
 		if (textureCamera.position.length() < gridSize * voxelSize) {
 			camera.position.x += textureCamera.position.x;

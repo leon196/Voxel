@@ -1,5 +1,87 @@
 
 
+function getNeighborCount(index)
+{
+	var count = 0;
+	var position = getGridPosition(index);
+	var neighbors = [
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y - voxelSize, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y + voxelSize, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y, position.z + voxelSize)),
+
+		getIndexPosition(new THREE.Vector3(position.x, position.y - voxelSize, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y - voxelSize, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y + voxelSize, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x, position.y + voxelSize, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y - voxelSize, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y + voxelSize, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y - voxelSize, position.z)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y + voxelSize, position.z)),
+/*
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y - voxelSize, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y - voxelSize, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y + voxelSize, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y - voxelSize, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x - voxelSize, position.y + voxelSize, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y + voxelSize, position.z - voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y - voxelSize, position.z + voxelSize)),
+		getIndexPosition(new THREE.Vector3(position.x + voxelSize, position.y + voxelSize, position.z + voxelSize))
+*/
+	];
+	for (var n = neighbors.length; n >= 0; n--) {
+		if (neighbors[n] >= 0 && neighbors[n] < gridSize*gridSize*gridSize) {
+			count += voxels[neighbors[n]].status;
+		}
+	}
+	return count;
+}
+
+function iterateGameOfLife()
+{
+	var count = gridSize * gridSize * gridSize;
+	for (var i = 0; i < count; i++) {
+		var neighborCount = getNeighborCount(i);
+
+		// Dead
+		if (voxelsBuffer[i] == 0) {
+			// Birth
+			if (neighborCount == 2) {
+				voxels[i].status = 1;
+				if (voxels[i].mesh == null) {
+					var mesh = new THREE.Mesh( geometry, material );
+					mesh.position = getGridPosition(i);
+					scene.add(mesh);
+					voxels[i].mesh = mesh;
+				} else {
+					voxels[i].mesh.visible = true;
+				}
+			}
+		}
+		// Alive
+		else {
+			// Death
+			if (neighborCount != 2 && neighborCount != 3) {
+				voxels[i].status = 0;
+				if (voxels[i].mesh != null) {
+					voxels[i].mesh.visible = false;
+				}
+			}
+		}
+	}
+
+	for (var i = 0; i < count; i++) {
+		voxelsBuffer[i] = voxels[i].status;
+	}
+}
+
+/*
 // Cellular Automaton
 var dimension = 8;
 
@@ -77,3 +159,4 @@ function checkCell(index) {
 function getPosition(index) {
 	return new THREE.Vector3(index % dimension, Math.floor(index / dimension), 0.0);
 }
+*/
