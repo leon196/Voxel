@@ -9,19 +9,19 @@ var mouse = { x:0, y:0 };
 var viewHalfX, viewHalfY;
 
 // Voxels
-var lodCount = 4;
+var LOD_COUNT = 4;
 var voxels = [];
 //var voxelsBuffer = [];
-var voxelSize = 11.0;
-var gridSize = 8;
+var VOXEL_SIZE = 1.0;
+var GRID_SIZE = 8;
 
 // Timing
 var delayIteration = 1.0;
 var lastIteration = -delayIteration;
 
 // Consts
-var distMax = voxelSize * 2;
-var distMin = voxelSize * 0.75;
+var distMax = VOXEL_SIZE * 2;
+var distMin = VOXEL_SIZE * 0.75;
 var moveSpeed = 60;
 var lookSpeed = 20;
 var textureCameraDistance = 400;
@@ -88,7 +88,7 @@ function init()
 	vertexShader = document.getElementById( 'vertexShader' ).textContent;
 	fragmentShader = document.getElementById( 'fragmentShader' ).textContent;
 	// Basic Voxel Shape
-	geometry = new THREE.BoxGeometry(voxelSize,voxelSize,voxelSize);
+	geometry = new THREE.BoxGeometry(VOXEL_SIZE,VOXEL_SIZE,VOXEL_SIZE);
 	material = new THREE.ShaderMaterial( { uniforms: {}, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader, transparent: true } );
 	material.transparent = true;
 
@@ -98,21 +98,24 @@ function init()
 
 function getGridPosition(index, lod)
 {
-	var gSize = gridSize / Math.max(1, (2 * lod));
-	var vSize = voxelSize * (1 + lod);//(2 * lod));
+	var gSize = GRID_SIZE / Math.pow(2, lod);
+	var vSize = VOXEL_SIZE * Math.pow(2, lod);//(2 * lod));
 	return new THREE.Vector3 (
-			vSize * (index % gSize),
-			vSize * (Math.floor(index / gSize) % gSize),
-			vSize * (Math.floor(index / (gSize*gSize)) % gSize));
+			vSize * ((index % gSize)),
+			vSize * ((Math.floor(index / gSize) % gSize)),
+			vSize * ((Math.floor(index / (gSize*gSize)) % gSize)));
 }
 
 function getIndexPosition (position)
 {
-	return Math.floor((position.x + position.y * gridSize + position.z * gridSize * gridSize) / voxelSize);
+	return Math.floor((position.x
+					 + position.y * GRID_SIZE
+					 + position.z * GRID_SIZE * GRID_SIZE) / VOXEL_SIZE);
 }
 
 function LODTest (index, lod)
 {
+	/*
 	var pos = getGridPosition(index, lod);
 	for (var x = 0; x < 3; x++) {
 		for (var y = 0; y < 3; y++) {
@@ -123,13 +126,13 @@ function LODTest (index, lod)
 				}
 			}
 		}
-	}
-	/*var i = Math.floor(indexRatio * gridSize * gridSize * gridSize);
+	}*/
+	var i = Math.floor(index * GRID_SIZE * GRID_SIZE * GRID_SIZE);
 	if (voxels[0][i].status == 1) {
 		return true;
-	} else {*/
+	} else {
 		return false;
-	//}
+	}
 
 }
 
@@ -137,7 +140,7 @@ function CreateVoxelMesh (index, lod)
 {
 	var mesh = new THREE.Mesh( geometry, material );
 	mesh.position = getGridPosition(index, lod);
-	var scale = 1 + (2 * lod);
+	var scale = Math.pow(2, lod);
 	mesh.scale.set(scale, scale, scale);
 	scene.add(mesh);
 	return mesh;
@@ -147,11 +150,10 @@ function generateVoxels ()
 {
 	voxels = [];
 
-	for (var l = 0; l < lodCount; l++)
+	for (var l = 0; l < LOD_COUNT; l++)
 	{
 		voxels.push([]);
-		var count = Math.pow(gridSize / Math.max(1, Math.pow(l,2)), 3);
-		alert(count);
+		var count = Math.pow(GRID_SIZE / Math.pow(2, l), 3);
 
 		for (var i = 0; i < count; i++)
 		{
@@ -165,7 +167,7 @@ function generateVoxels ()
 				}
 			}
 			// LEVELS OF DETAILS HIGHER
-			else if (LODTest(i, l)) {
+			else if (LODTest(i/count, l)) {
 				thereIsAVoxel = true;
 			}
 
@@ -185,7 +187,7 @@ function generateVoxels ()
 function showLOD(lod) 
 {
 	// For each level of details
-	for (var i = 0; i < lodCount; i++) {
+	for (var i = 0; i < LOD_COUNT; i++) {
 		var show = i == lod;
 		var count = voxels[i].length;
 		// For each voxels
@@ -222,9 +224,9 @@ function update()
 	if (lastIteration + delayIteration < clock.getElapsedTime()) {
 		//iterateGameOfLife();
 		lastIteration = clock.getElapsedTime();
-		//var lod = Math.floor(lodCount * (Math.cos(clock.getElapsedTime()) + 1.0) * 0.5);
-		lodCurrent = (lodCurrent + 1) % lodCount;
-		//showLOD(lodCurrent);
+		//var lod = Math.floor(LOD_COUNT * (Math.cos(clock.getElapsedTime()) + 1.0) * 0.5);
+		lodCurrent = (lodCurrent + 1) % LOD_COUNT;
+		showLOD(lodCurrent);
 	}
 
 	// Controls
@@ -264,7 +266,7 @@ function update()
 		}
 	} else {
 */
-		if (textureCamera.position.length() < gridSize * voxelSize) {
+		if (textureCamera.position.length() < GRID_SIZE * VOXEL_SIZE) {
 			camera.position.x += textureCamera.position.x;
 			camera.position.y += textureCamera.position.y;
 			camera.position.z += textureCamera.position.z;
