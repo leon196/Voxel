@@ -1,6 +1,6 @@
 var buffer = [];
 
-function visitAll(gx0, gy0, gz0, gx1, gy1, gz1, visitor) {
+function visitAll(gx0, gy0, gz0, gx1, gy1, gz1, visitor, scale) {
 	
 	var gx0idx = Math.floor(gx0);
 	var gy0idx = Math.floor(gy0);
@@ -82,7 +82,7 @@ function makeCube(x,y,z) {
  	lines.push(mesh);
 }
 function testLine(l0,l1, scale) {
-    visitAll(l0.x * scale, l0.y * scale, l0.z * scale, l1.x * scale, l1.y * scale, l1.z * scale, makeCube);
+    visitAll(l0.x * scale, l0.y * scale, l0.z * scale, l1.x * scale, l1.y * scale, l1.z * scale, makeCube, scale);
 }
 function randomVector(length) {
     return new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).multiplyScalar(length);

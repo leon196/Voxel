@@ -17,7 +17,7 @@ var GRID_SIZE = 8;
 var lines = [];
 
 // Timing
-var delayIteration = 0.1;
+var delayIteration = 0.01;
 var lastIteration = -delayIteration;
 
 // Consts
@@ -245,7 +245,7 @@ function update()
 				scene.remove(lines[i]);
 			}		
 			lines = [];
-			voxelize(meshLoaded.vertices, meshLoaded.faces, 4 + (Math.cos(clock.getElapsedTime()) + 1) * 2);
+			voxelize(meshLoaded.vertices, meshLoaded.faces, 4 + (Math.cos(clock.getElapsedTime()) + 1) * 10);
 			console.log("voxels : " + lines.length);
 		}
 /*
