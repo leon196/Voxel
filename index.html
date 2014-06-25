@@ -34,7 +34,7 @@
 			void main() {
 
 				gl_FragColor.rgb = vec3(0, step(0.9, vUv.x) + step(0.9, 1.0 - vUv.x) + step(0.9, vUv.y) + step(0.9, 1.0 - vUv.y), 0);
-				gl_FragColor.a = 1.0;
+				gl_FragColor.a = 0.5;
 			}
 
 		</script>

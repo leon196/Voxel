@@ -17,7 +17,7 @@ var GRID_SIZE = 8;
 var lines = [];
 
 // Timing
-var delayIteration = 0.01;
+var delayIteration = 0.1;
 var lastIteration = -delayIteration;
 
 // Consts
@@ -98,6 +98,7 @@ function init()
 	loader.load( 'obj/mesh.wavefront', function ( object ) {
 		object.traverse( function ( child ) {
 			if ( child instanceof THREE.Mesh ) {
+				meshLoaded = child.geometry;
 				voxelize(child.geometry.vertices, child.geometry.faces, 10);
 			}
 		});
@@ -238,6 +239,15 @@ function update()
 		//var lod = Math.floor(LOD_COUNT * (Math.cos(clock.getElapsedTime()) + 1.0) * 0.5);
 		lodCurrent = (lodCurrent + 1) % LOD_COUNT;
 		//showLOD(lodCurrent);
+
+		if (meshLoaded != undefined) {
+			for (var i = 0; i < lines.length; i++) {
+				scene.remove(lines[i]);
+			}		
+			lines = [];
+			voxelize(meshLoaded.vertices, meshLoaded.faces, 4 + (Math.cos(clock.getElapsedTime()) + 1) * 2);
+			console.log("voxels : " + lines.length);
+		}
 /*
 		for (var i = 0; i < lines.length; i++) {
 			scene.remove(lines[i]);

@@ -1,3 +1,5 @@
+var buffer = [];
+
 function visitAll(gx0, gy0, gz0, gx1, gy1, gz1, visitor) {
 	
 	var gx0idx = Math.floor(gx0);
@@ -40,29 +42,33 @@ function visitAll(gx0, gy0, gz0, gx1, gy1, gz1, visitor) {
 	var derry = sy * vxvz;
 	var derrz = sz * vxvy;
     
-    var testEscape = 20;
+    var testEscape = 10;
     do {
-        visitor(gx, gy, gz);
-		
-		if (gx === gx1idx && gy === gy1idx && gz === gz1idx) break;
 
-        //Which plane do we cross first?
-		var xr = Math.abs(errx);
-		var yr = Math.abs(erry);
-		var zr = Math.abs(errz);
-		
-		if (sx !== 0 && (sy === 0 || xr < yr) && (sz === 0 || xr < zr)) {
-			gx += sx;
-			errx += derrx;
+    	if (-1 == buffer.indexOf(gx + "" + gy + "" + gz)) {
+	        visitor(gx, gy, gz);
+	        buffer.push(gx + "" + gy + "" + gz);
 		}
-		else if (sy !== 0 && (sz === 0 || yr < zr)) {
-			gy += sy;
-			erry += derry;
-		}
-		else if (sz !== 0) {
-			gz += sz;
-			errz += derrz;
-		}
+			
+			if (gx === gx1idx && gy === gy1idx && gz === gz1idx) break;
+
+	        //Which plane do we cross first?
+			var xr = Math.abs(errx);
+			var yr = Math.abs(erry);
+			var zr = Math.abs(errz);
+			
+			if (sx !== 0 && (sy === 0 || xr < yr) && (sz === 0 || xr < zr)) {
+				gx += sx;
+				errx += derrx;
+			}
+			else if (sy !== 0 && (sz === 0 || yr < zr)) {
+				gy += sy;
+				erry += derry;
+			}
+			else if (sz !== 0) {
+				gz += sz;
+				errz += derrz;
+			}
 
 //	} while (true);
 	} while (testEscape-- > 0);
@@ -87,8 +93,10 @@ function testRandom(length) {
 }
 
 function voxelize(vertices, triangles, scale) {
+	buffer = [];
 	for (var i = 0; i < triangles.length; i++) {
 		var tri = triangles[i];
 		testLine(vertices[tri.a], vertices[tri.b], scale);
+		testLine(vertices[tri.b], vertices[tri.c], scale);
 	}
 }
