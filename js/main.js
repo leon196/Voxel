@@ -95,7 +95,7 @@ function init()
 
 	// Voxelize loaded Mesh
 	var loader = new THREE.OBJLoader();
-	loader.load( 'obj/mesh.obj', function ( object ) {
+	loader.load( 'obj/mesh.wavefront', function ( object ) {
 		object.traverse( function ( child ) {
 			if ( child instanceof THREE.Mesh ) {
 				voxelize(child.geometry.vertices, child.geometry.faces, 10);
