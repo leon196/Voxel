@@ -2,7 +2,7 @@
 // Elements
 var camera, scene, renderer;
 var textureCamera, planeScreen, finalRenderTarget, uniformsRender;
-var geometry, material;
+var meshLoaded, geometry, material;
 var controls, clock, projector;
 var INTERSECTED;
 var mouse = { x:0, y:0 };
@@ -14,14 +14,16 @@ var voxels = [];
 var VOXEL_SIZE = 1.0;
 var GRID_SIZE = 8;
 
+var lines = [];
+
 // Timing
-var delayIteration = 1.0;
+var delayIteration = 0.01;
 var lastIteration = -delayIteration;
 
 // Consts
 var distMax = VOXEL_SIZE * 2;
 var distMin = VOXEL_SIZE * 0.75;
-var moveSpeed = 60;
+var moveSpeed = 6;
 var lookSpeed = 20;
 var textureCameraDistance = 400;
 
@@ -48,7 +50,7 @@ function init()
 	scene = new THREE.Scene();
 
 	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-	camera.position = new THREE.Vector3(0, 0, 100);
+	camera.position = new THREE.Vector3(0, 10, 30);
 	scene.add(camera);
 
 	// Control Camera 1
@@ -91,8 +93,19 @@ function init()
 	material = new THREE.ShaderMaterial( { uniforms: {}, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader, transparent: true } );
 	material.transparent = true;
 
+	// Voxelize loaded Mesh
+	var loader = new THREE.OBJLoader();
+	loader.load( 'obj/mesh.obj', function ( object ) {
+		object.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				voxelize(child.geometry.vertices, child.geometry.faces, 10);
+			}
+		});
+	});
+
 	// Generate
-	generateVoxels();
+	//generateVoxels();
+
 }
 
 function getGridPosition(index, lod)
@@ -180,7 +193,6 @@ function generateVoxels ()
 			//voxelsBuffer.push(voxel.status);
 		}
 	}
-
 }
 
 function showLOD(lod) 
@@ -225,7 +237,12 @@ function update()
 		lastIteration = clock.getElapsedTime();
 		//var lod = Math.floor(LOD_COUNT * (Math.cos(clock.getElapsedTime()) + 1.0) * 0.5);
 		lodCurrent = (lodCurrent + 1) % LOD_COUNT;
-		showLOD(lodCurrent);
+		//showLOD(lodCurrent);
+/*
+		for (var i = 0; i < lines.length; i++) {
+			scene.remove(lines[i]);
+		}
+		testLine(new THREE.Vector3(Math.cos(clock.getElapsedTime()) * 10, 10a, Math.sin(clock.getElapsedTime()) * 10), new THREE.Vector3(0, 20, 0));*/
 	}
 
 	// Controls

@@ -40,9 +40,7 @@ function visitAll(gx0, gy0, gz0, gx1, gy1, gz1, visitor) {
 	var derry = sy * vxvz;
 	var derrz = sz * vxvy;
     
-        console.log("v",vx,vy,vz);
-        console.log("step",sx,sy,sz);
-    var testEscape = 100;
+    var testEscape = 20;
     do {
         visitor(gx, gy, gz);
 		
@@ -52,8 +50,6 @@ function visitAll(gx0, gy0, gz0, gx1, gy1, gz1, visitor) {
 		var xr = Math.abs(errx);
 		var yr = Math.abs(erry);
 		var zr = Math.abs(errz);
-        
-        console.log("err",errx,erry,errz);
 		
 		if (sx !== 0 && (sy === 0 || xr < yr) && (sz === 0 || xr < zr)) {
 			gx += sx;
@@ -69,65 +65,30 @@ function visitAll(gx0, gy0, gz0, gx1, gy1, gz1, visitor) {
 		}
 
 //	} while (true);
-	} while (testEscape-->0);
+	} while (testEscape-- > 0);
 }
-
-var renderer = new THREE.WebGLRenderer();
-renderer.setSize( 600,400 );
-document.body.appendChild( renderer.domElement );
-
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 75, renderer.domElement.width / renderer.domElement.height, 0.1, 1000 );
-
-camera.position.set(-5,-10,15);
-camera.up.set(0,0,1);
-camera.lookAt(new THREE.Vector3(0,0,0));
-
-document.onmousemove = function (e) {
-    var a = (e.x - renderer.domElement.width/2)/50;
-    var b = (e.y - renderer.domElement.height / 2)/50;
-    camera.position.set(
-        Math.sin(a) * Math.cos(b),
-        Math.cos(a) * Math.cos(b),
-        Math.sin(b)).multiplyScalar(5);
-    camera.lookAt(new THREE.Vector3(0,0,0));
-    renderer.render(scene,camera);
-}
-
-var light = new THREE.PointLight( 0xffffff, 1, 200 );
-light.position.set( 15, 15, 50 );
-scene.add( light );
-
-var cubeGeom = new THREE.CubeGeometry(1,1,1);
-var material = new THREE.MeshLambertMaterial({color:0x33cc33, opacity:0.5, transparent:true});
 
 function makeCube(x,y,z) {
-    console.log("makeCube",x,y,z);
-    var mesh = new THREE.Mesh(cubeGeom, material);
+    var mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(x+0.5,y+0.5,z+0.5);
     mesh.matrixNeedsUpdate = true;
     scene.add(mesh);
+ 	lines.push(mesh);
 }
-function testLine(l0,l1) {
-    document.getElementById('a').textContent = l0.x.toFixed(3) + ','+l0.y.toFixed(3)+','+l0.z.toFixed(3);
-    document.getElementById('b').textContent = l1.x.toFixed(3) + ','+l1.y.toFixed(3)+','+l1.z.toFixed(3);
-    var geometry = new THREE.Geometry();
-    geometry.vertices.push( l0 );
-    geometry.vertices.push( l1 );
-    scene.add(new THREE.Line(geometry, new THREE.LineBasicMaterial({color:0xff00ff})));
-    visitAll(l0.x,l0.y,l0.z, l1.x,l1.y,l1.z, makeCube);
+function testLine(l0,l1, scale) {
+    visitAll(l0.x * scale, l0.y * scale, l0.z * scale, l1.x * scale, l1.y * scale, l1.z * scale, makeCube);
 }
-function randomVector() {
-    return new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).multiplyScalar(3);
+function randomVector(length) {
+    return new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).multiplyScalar(length);
 }
 
-function testRandom() {
-    scene = new THREE.Scene();
-    scene.add(light);
-    testLine(randomVector(), randomVector(), makeCube);
+function testRandom(length) {
+    testLine(randomVector(length), randomVector(length), makeCube);
 }
-testLine(new THREE.Vector3(0.5,1.5,0.5 ),new THREE.Vector3(4.5,0.5,0.5));
-//testRandom();
-renderer.domElement.onclick=testRandom;
-renderer.setClearColorHex(0x333333);
-renderer.render(scene,camera);
+
+function voxelize(vertices, triangles, scale) {
+	for (var i = 0; i < triangles.length; i++) {
+		var tri = triangles[i];
+		testLine(vertices[tri.a], vertices[tri.b], scale);
+	}
+}
