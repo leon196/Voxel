@@ -12,7 +12,7 @@ var viewHalfX, viewHalfY;
 var lodCount = 4;
 var voxels = [];
 //var voxelsBuffer = [];
-var voxelSize = 11.0;
+var voxelSize = 1.0;
 var gridSize = 8;
 
 // Timing
