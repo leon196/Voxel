@@ -66,9 +66,11 @@ function init()
 	// Shaders
 	var vertexShader = document.getElementById( 'vertexRender' ).textContent;
 	var fragmentShader = document.getElementById( 'fragmentRender' ).textContent;
+	var textureShader = THREE.ImageUtils.loadTexture( "textures/hoho.jpg" );
+	textureShader.magFilter = THREE.NearestFilter;
 	uniformsRender = {
-		texture: { type: "t", value: finalRenderTarget  },
-		transitionAlpha: { type: "f", value: 0.0}};
+		texture: { type: "t", value: textureShader  },
+		transitionAlpha : { type: "f", value: 0.0} };
 	// Diplay Rendered Texture on Screen with a Plane
 	var planeSize = 1.5;
 	var planeGeometry = new THREE.PlaneGeometry(ASPECT * planeSize, planeSize);
@@ -241,12 +243,13 @@ function update()
 		//showLOD(lodCurrent);
 
 		if (meshLoaded != undefined) {
+			
 			for (var i = 0; i < lines.length; i++) {
 				scene.remove(lines[i]);
 			}		
 			lines = [];
 			voxelize(meshLoaded.vertices, meshLoaded.faces, 4 + (Math.cos(clock.getElapsedTime()) + 1) * 10);
-			console.log("voxels : " + lines.length);
+			//uniformsRender.uVoxels.value = voxels;
 		}
 /*
 		for (var i = 0; i < lines.length; i++) {

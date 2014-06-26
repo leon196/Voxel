@@ -42,7 +42,7 @@ function visitAll(gx0, gy0, gz0, gx1, gy1, gz1, visitor, scale) {
 	var derry = sy * vxvz;
 	var derrz = sz * vxvy;
     
-    var testEscape = 10;
+    var testEscape = 80;
     do {
 
     	if (-1 == buffer.indexOf(gx + "" + gy + "" + gz)) {
@@ -73,7 +73,9 @@ function visitAll(gx0, gy0, gz0, gx1, gy1, gz1, visitor, scale) {
 //	} while (true);
 	} while (testEscape-- > 0);
 }
-
+function makeVoxel(x, y, z) {
+	//voxels.push()
+}
 function makeCube(x,y,z) {
     var mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(x+0.5,y+0.5,z+0.5);
