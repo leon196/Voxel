@@ -1,5 +1,33 @@
 var buffer = [];
 
+	/*
+function drawLine(p0, p1) {
+	//var dx = p1.x - p0.x;
+	//var dy = p1.y - p0.y;
+
+	var d = p1.sub(p0);
+  	var D = p0.distanceTo(p1);
+	var slope = d.y / d.x;  	
+
+	makeCube(p0);
+	var p = p0;
+
+	for (var x = p0.x + 1; x < p1.x; x++) {
+		if (D > 0) {
+			p.y = p.y + 1;
+			D += 2 * (d.y - d.x);
+			//D = D + (2 * dy - 2 * dx);
+		} else {
+			//D = D + (2 * dy);
+			D += 2 * d.y;
+		}
+		p.x = x;
+		makeCube(p);
+	}
+}
+*/
+
+
 function visitAll(gx0, gy0, gz0, gx1, gy1, gz1, visitor, scale) {
 	
 	var gx0idx = Math.floor(gx0);
@@ -76,12 +104,12 @@ function visitAll(gx0, gy0, gz0, gx1, gy1, gz1, visitor, scale) {
 function makeVoxel(x, y, z) {
 	//voxels.push()
 }
-function makeCube(x,y,z) {
+function makeCube(p) {
     var mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(x+0.5,y+0.5,z+0.5);
+    mesh.position.set(p.x+0.5,p.y+0.5,p.z+0.5);
     mesh.matrixNeedsUpdate = true;
     scene.add(mesh);
- 	lines.push(mesh);
+    return mesh;
 }
 function testLine(l0,l1, scale) {
     visitAll(l0.x * scale, l0.y * scale, l0.z * scale, l1.x * scale, l1.y * scale, l1.z * scale, makeCube, scale);
@@ -97,8 +125,16 @@ function testRandom(length) {
 function voxelize(vertices, triangles, scale) {
 	buffer = [];
 	for (var i = 0; i < triangles.length; i++) {
-		var tri = triangles[i];
-		testLine(vertices[tri.a], vertices[tri.b], scale);
-		testLine(vertices[tri.b], vertices[tri.c], scale);
+		var pA = vertices[triangles[i].a];
+		var pB = vertices[triangles[i].b];
+		var pC = vertices[triangles[i].c];
+		drawLine(new THREE.Vector3(Math.floor(pA.x * scale), Math.floor(pA.y * scale), Math.floor(pA.z * scale)),
+			new THREE.Vector3(Math.floor(pB.x * scale), Math.floor(pB.y * scale), Math.floor(pB.z)),
+			scale);
+		drawLine(new THREE.Vector3(Math.floor(pB.x * scale), Math.floor(pB.y * scale), Math.floor(pB.z * scale)),
+			new THREE.Vector3(Math.floor(pC.x * scale), Math.floor(pC.y * scale), Math.floor(pC.z)),
+			scale);
+		//testLine(vertices[tri.a], vertices[tri.b], scale);
+		//testLine(vertices[tri.b], vertices[tri.c], scale);
 	}
 }
