@@ -6,8 +6,8 @@ function initParticleSystem(vertices, scale)
 	var particles = vertices.length;
 
 	geometryBuffer = new THREE.BufferGeometry();
-	geometryBuffer.addAttribute( 'position', new THREE.Float32Attribute( particles * 3, 3 ));
-	geometryBuffer.addAttribute( 'color', new THREE.Float32Attribute( particles * 3, 3 ));
+	geometryBuffer.addAttribute( 'position', new THREE.Float32Attribute( particles, 3 ));
+	geometryBuffer.addAttribute( 'color', new THREE.Float32Attribute( particles, 3 ));
 
 	var positions = geometryBuffer.getAttribute( 'position' ).array;
 	var colors = geometryBuffer.getAttribute( 'color' ).array;
@@ -15,9 +15,8 @@ function initParticleSystem(vertices, scale)
 	var color = new THREE.Color();
 
 	var n = 100, n2 = n / 2; // particles spread in the cube
-
 	var iV = 0;
-	for ( var i = 0; i < positions.length && iV < vertices.length; i += 3 ) {
+	for ( var i = 0; i < particles * 3; i += 3 ) {
 
 		// positions
 		var p = vertices[iV];
@@ -60,11 +59,9 @@ function updateParticleSystem(vertices)
 	var positions = particleSystem.geometry.attributes.position.array;
 	//var colors = particleSystem.geometry.getAttribute( 'color' ).array;
 
-	//var color = new THREE.Color();
-
 	var n = 10, n2 = n / 2; // particles spread in the cube
 	var iV = 0;
-	for ( var i = 0; i < positions.length && iV < vertices.length; i += 3 ) {
+	for ( var i = 0; i < positions.length; i += 3 ) {
 
 		// positions
 		var p = vertices[iV];
@@ -90,6 +87,7 @@ function updateParticleSystem(vertices)
 
 	}
 
+	particleSystem.geometry.buffersNeedUpdate=true;
 	particleSystem.geometry.verticesNeedUpdate=true;
 	particleSystem.geometry.attributes.position.needsUpdate = true;
 }

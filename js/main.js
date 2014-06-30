@@ -101,9 +101,9 @@ function init()
 	loader.load( 'obj/mesh.wavefront', function ( object ) {
 		object.traverse( function ( child ) {
 			if ( child instanceof THREE.Mesh ) {
-				meshLoaded = child.geometry;
-				voxelsMesh = getVoxelsFromMesh(child.geometry.vertices, child.geometry.faces, 1);
-				initParticleSystem(voxelsMesh, 1);
+				meshLoaded = child;
+				voxelsMesh = getVoxelsFromMesh(child.geometry.vertices, child.geometry.faces, 4);
+				initParticleSystem(voxelsMesh, 4);
 			}
 		});
 	});
@@ -118,20 +118,27 @@ function render()
 
 	controls.update(clock.getDelta());
 
-	//update();
+	update();
 
 	renderer.render(scene, camera);
 }
 
 function update()
 {
-	/*
+
 	// Behaviors
 	if (lastIteration + delayIteration < clock.getElapsedTime())
 	{
 		lastIteration = clock.getElapsedTime();
+
+		if (meshLoaded != undefined) {
+			var oscillo = 0.1 + (Math.cos(clock.getElapsedTime()) + 1) * 2;
+			voxelsMesh = getVoxelsFromMesh(meshLoaded.geometry.vertices, meshLoaded.geometry.faces, oscillo);
+			scene.remove(particleSystem);
+			initParticleSystem(voxelsMesh, 4 - (Math.cos(clock.getElapsedTime()) + 1) * 2);
+		}
 	}
-	*/
+
 }
 
 function mousemove( event )
