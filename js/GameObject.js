@@ -4,6 +4,21 @@ GameObject = function ()
 	this.voxels = [];
 	this.mesh;
 	this.particleSystem;
+	this.rotation = new THREE.Vector3();
+	this.position = new THREE.Vector3();
+
+	this.moveTo = function (position)
+	{
+		this.position.set(Math.floor(position.x), Math.floor(position.y), Math.floor(position.z));
+		if (this.particleSystem != undefined) {
+			this.particleSystem.position = this.position;
+		}	
+	}
+
+	this.rotateTo = function (rotation) 
+	{
+		this.rotation.set(rotation.x, rotation.y, rotation.z)
+	}
 
 	this.initWithMesh = function (meshName) 
 	{
@@ -36,8 +51,12 @@ GameObject = function ()
 			var n = 100, n2 = n / 2; // particles spread in the cube
 			for ( var i = 0; i < positions.length; i += 3 ) {
 
-				var p = this.voxels[iV];
+				var v = this.voxels[iV];
 				++iV;
+
+				var p = new THREE.Vector3(v.x, v.y, v.z);
+
+				p.applyAxisAngle(new THREE.Vector3(1, 0, 0), this.rotation.x);
 
 				positions[ i ]     = Math.floor(p.x * scale);
 				positions[ i + 1 ] = Math.floor(p.y * scale);
@@ -45,8 +64,8 @@ GameObject = function ()
 
 				positions.needsUpdate = true;
 
-				// colors
-				color.setRGB( p.n.x, p.n.y, p.n.z );
+				// colors from normal voxel
+				color.setRGB( v.n.x, v.n.y, v.n.z );
 
 				colors[ i ]     = color.r;
 				colors[ i + 1 ] = color.g;

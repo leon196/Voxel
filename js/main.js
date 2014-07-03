@@ -62,7 +62,7 @@ function init()
 	scene.add( light2 );
 
 	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-	camera.position = new THREE.Vector3(0, 10, 30);
+	camera.position = new THREE.Vector3(0, 10, 110);
 	scene.add(camera);
 
 	// Control Camera 1
@@ -131,8 +131,9 @@ function update()
 	{
 		lastIteration = clock.getElapsedTime();
 
-		var oscillo = 0.1 + (Math.cos(clock.getElapsedTime()) + 1) * 0.9 * 0.5;
-		monkey.updateParticleSystem(oscillo);
+		var oscillo = (Math.cos(clock.getElapsedTime()) + 1) * 0.9 * 0.5;
+		//monkey.moveTo({x:0, y:0, z:oscillo * 100});
+		monkey.rotateTo({x:oscillo * 3.14, y:0, z:0});
 /*
 		if (meshLoaded != undefined) {
 			voxelsMesh = getVoxelsFromMesh(meshLoaded.geometry.vertices, meshLoaded.geometry.faces, oscillo);
@@ -140,6 +141,12 @@ function update()
 			updateParticleSystem(4 - (Math.cos(clock.getElapsedTime()) + 1) * 2);
 		}
 		*/
+	}
+
+	if (monkey.particleSystem != undefined) {
+		var distancePlayer = camera.position.distanceTo(monkey.particleSystem.position);
+		var scale = Math.max(0, (100 - distancePlayer) / 100);
+		monkey.updateParticleSystem(scale);
 	}
 
 }
