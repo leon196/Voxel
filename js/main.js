@@ -13,7 +13,7 @@ var LOD_COUNT = 4;
 var voxelsMesh = [];
 var VOXEL_SIZE = 1;
 var GRID_SIZE = 8;
-var ERASE_MODE = true;
+var ERASE_MODE = false;
 
 var lines = [];
 
@@ -171,9 +171,22 @@ function init()
 	camera.add(planeScreen);
 	camera.add(textureCamera);
 
-	// 
-	monkey = new GameObject();
-	monkey.initWithMesh('obj/mesh.wavefront');
+	// Load Mesh
+	var loader = new THREE.OBJLoader();
+	loader.load( 'obj/mesh.wavefront', function ( object ) {
+		object.traverse( function ( child ) {
+			// Find mesh in object
+			if ( child instanceof THREE.Mesh ) {
+				// 
+				for (var i = 0; i < 4; i++) {
+					var gameObject = new GameObject();
+					gameObject.initWithMesh(child);
+					gameObject.moveTo({x:i * 100, y:0, z:0});
+					gameObjects.push(gameObject);
+				}
+			}
+		});
+	});
 
 // Debug
 
@@ -211,14 +224,17 @@ function update()
 		}
 		*/
 	}
-
+/*
 	if (mouseDown && ERASE_MODE) {
 		paint();
 	}
-
-	var distancePlayer = distance(monkey.position, camera.position);//monkey.nearestVoxelFrom(camera.position);
-	var scale = Math.max(0, (100 - distancePlayer) / 10);
-	monkey.updateParticleSystem(scale);
+*/
+	//var distancePlayer = distance(monkey.position, camera.position);//monkey.nearestVoxelFrom(camera.position);
+	//var scale = Math.max(0, (100 - distancePlayer) / 10);
+	for (var i = 0; i < gameObjects.length; i++) {
+		var gameObject = gameObjects[i];
+		gameObject.updateParticleSystem(camera.position);
+	}
 /*
 */
 }

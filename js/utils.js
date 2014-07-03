@@ -1,5 +1,5 @@
 
-function drawLine (p0, p1, normal)
+function drawLine (p0, p1, normal, scale)
 {
 	var points = [];
 	var p = {x:p0.x, y:p0.y, z:p0.z, n: normal};
@@ -8,9 +8,9 @@ function drawLine (p0, p1, normal)
 	var s = {x:d.x/N, y:d.y/N, z:d.z/N};
 	points.push(p);
 	for (var i = 1; i < N; i++) {
-		p = { 	x: p.x + s.x,
-				y: p.y + s.y,
-				z: p.z + s.z,
+		p = { 	x: Math.floor(p.x + s.x) * scale,
+				y: Math.floor(p.y + s.y) * scale,
+				z: Math.floor(p.z + s.z) * scale,
 				n: normal }; // normal from triangle
 		points.push(p);
 	}
@@ -24,17 +24,17 @@ function getVoxelsFromMesh(vertices, faces, scale) {
 	for (var f = 0; f < faces.length; f++) {
 		var face = faces[f];
 		var pA = {
-			x:vertices[face.a].x * scale,
-			y:vertices[face.a].y * scale,
-			z:vertices[face.a].z * scale};
+			x:vertices[face.a].x ,
+			y:vertices[face.a].y ,
+			z:vertices[face.a].z };
 		var pB = {
-			x:vertices[face.b].x * scale,
-			y:vertices[face.b].y * scale,
-			z:vertices[face.b].z * scale};
+			x:vertices[face.b].x ,
+			y:vertices[face.b].y ,
+			z:vertices[face.b].z };
 		var pC = {
-			x:vertices[face.c].x * scale,
-			y:vertices[face.c].y * scale,
-			z:vertices[face.c].z * scale};
+			x:vertices[face.c].x ,
+			y:vertices[face.c].y ,
+			z:vertices[face.c].z };
 
 		// Distance from A to C
 		var dAC =  Math.floor(distance(pA, pC));
@@ -55,7 +55,7 @@ function getVoxelsFromMesh(vertices, faces, scale) {
 				x:pB.x * (1 - delta) + delta * pC.x,
 				y:pB.y * (1 - delta) + delta * pC.y,
 				z:pB.z * (1 - delta) + delta * pC.z};
-			var line = drawLine(p0, p1, {x:cb.x, y:cb.y, z:cb.z});
+			var line = drawLine(p0, p1, {x:cb.x, y:cb.y, z:cb.z}, scale);
 			voxels.push.apply(voxels, line);
 		}
 	}

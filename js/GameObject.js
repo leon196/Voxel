@@ -1,12 +1,17 @@
 GameObject = function () 
 {
-	this.scale = 4;
-	this.gridSize = 1;
+	this.scale = 2;
+
 	this.voxels = [];
 	this.mesh;
 	this.particleSystem;
+	
 	this.rotation = new THREE.Vector3();
 	this.position = new THREE.Vector3();
+
+	this.areaNear = 50;
+	this.areaFar = 200;
+
 	this.freeze = false;
 
 	this.moveTo = function (position)
@@ -35,31 +40,26 @@ GameObject = function ()
 		return nearest;
 	}
 
-	this.initWithMesh = function (meshName) 
+	this.initWithMesh = function (mesh) 
 	{
-		var gameObject = this;
-
-		// Load Mesh
-		var loader = new THREE.OBJLoader();
-		loader.load( meshName, function ( object ) {
-			object.traverse( function ( child ) {
-				// Find mesh in object
-				if ( child instanceof THREE.Mesh ) {
-					// Setup voxels
-					gameObject.mesh = child;
-					gameObject.voxels = getVoxelsFromMesh(gameObject.mesh.geometry.vertices, gameObject.mesh.geometry.faces, gameObject.scale);
-					// Setup particles
-					gameObject.particleSystem = initParticleSystem(gameObject.voxels, gameObject.scale);
-				}
-			});
-		});
+		// Setup voxels
+		this.mesh = mesh;
+		this.voxels = getVoxelsFromMesh(this.mesh.geometry.vertices, this.mesh.geometry.faces, this.scale);
+		// Setup particles
+		this.particleSystem = initParticleSystem(this.voxels, this.scale);
 	};
 
-	this.updateParticleSystem = function (scale)
+	this.updateScaleFromPosition = function (position)
+	{
+		var dist = distance(this.position, position);
+		return Math.max(0.01, ((this.areaFar - dist) - this.areaNear) / (this.areaFar - this.areaNear));
+	}
+
+	this.updateParticleSystem = function (position)
 	{
 		if (!this.freeze && this.particleSystem != undefined) {
 
-			this.scale = scale;
+			this.scale = this.updateScaleFromPosition(position);
 
 			var positions = this.particleSystem.geometry.attributes.position.array;
 			var colors = this.particleSystem.geometry.attributes.color.array;
@@ -75,9 +75,9 @@ GameObject = function ()
 
 				p.applyAxisAngle(new THREE.Vector3(1, 0, 0), this.rotation.x);
 
-				positions[ i ]     = Math.floor(p.x * scale);
-				positions[ i + 1 ] = Math.floor(p.y * scale);
-				positions[ i + 2 ] = Math.floor(p.z * scale);
+				positions[ i ]     = Math.floor(p.x * this.scale);
+				positions[ i + 1 ] = Math.floor(p.y * this.scale);
+				positions[ i + 2 ] = Math.floor(p.z * this.scale);
 
 				// colors from normal voxel
 				var light = (v.n.x + v.n.y + v.n.z) * 0.333;
