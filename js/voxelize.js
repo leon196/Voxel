@@ -27,7 +27,6 @@ function drawLine(p0, p1) {
 }
 */
 
-
 function visitAll(gx0, gy0, gz0, gx1, gy1, gz1, visitor, scale) {
 	
 	var gx0idx = Math.floor(gx0);

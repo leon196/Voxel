@@ -24,7 +24,8 @@ function initParticleSystem(vertices, scale)
 		positions[ i + 2 ] = p.z;
 
 		// colors
-		color.setRGB( p.n.x, p.n.y, p.n.z );
+		var light = (p.n.x + p.n.y + p.n.z) * 0.333;
+		color.setRGB(light , light, light);
 
 		colors[ i ]     = color.r;
 		colors[ i + 1 ] = color.g;
@@ -48,6 +49,12 @@ function initParticleSystem(vertices, scale)
 
 function CreateCubeWired(position)
 {
+
+	// Shader Voxel
+	vertexShader = document.getElementById( 'vertexShader' ).textContent;
+	fragmentShader = document.getElementById( 'fragmentShader' ).textContent;
+	// Basic Voxel Shape
+	var geometry = new THREE.BoxGeometry(VOXEL_SIZE,VOXEL_SIZE,VOXEL_SIZE);
 	// setup shader uniforms
 	var uniforms = { time: { type: 'f', value: clock.getElapsedTime() } };
 	// setup shader attributes
@@ -62,9 +69,12 @@ function CreateCubeWired(position)
 	}
 	geometry.uvNeedUpdate = true;
 	// setup material
-	var mat = new THREE.ShaderMaterial( { uniforms: {}, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader } );
+	//var mat = new THREE.ShaderMaterial( { uniforms: {}, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader } );
+
+	var material = new THREE.ShaderMaterial( { uniforms: {}, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader, transparent: true } );
+	material.transparent = true;
 	// setup mesh
-	var cube = new THREE.Mesh( geometry, mat );
+	var cube = new THREE.Mesh( geometry, material );
 	// place the cube in scene
 	cube.position = position;
 	scene.add(cube);

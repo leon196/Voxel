@@ -37,7 +37,7 @@ function getVoxelsFromMesh(vertices, faces, scale) {
 			z:vertices[face.c].z * scale};
 
 		// Distance from A to C
-		var dAC = Math.floor(Math.sqrt((pC.x-pA.x)*(pC.x-pA.x)+(pC.y-pA.y)*(pC.y-pA.y)+(pC.z-pA.z)*(pC.z-pA.z)));
+		var dAC =  Math.floor(distance(pA, pC));
 
 		// Normal
 		cb.subVectors( pC, pB );
@@ -62,8 +62,20 @@ function getVoxelsFromMesh(vertices, faces, scale) {
 	return voxels;
 }
 
+function distance (p0, p1)
+{
+	return Math.sqrt((p1.x-p0.x)*(p1.x-p0.x)+(p1.y-p0.y)*(p1.y-p0.y)+(p1.z-p0.z)*(p1.z-p0.z));
+}
 
-function getGridPosition(index, lod)
+function getGridPosition (index)
+{
+	return new THREE.Vector3 (
+			VOXEL_SIZE * ((index % GRID_SIZE)),
+			VOXEL_SIZE * ((Math.floor(index / GRID_SIZE) % GRID_SIZE)),
+			VOXEL_SIZE * ((Math.floor(index / (GRID_SIZE*GRID_SIZE)) % GRID_SIZE)));
+}
+/*
+function getGridPosition (index, lod)
 {
 	var gSize = GRID_SIZE / Math.pow(2, lod);
 	var vSize = VOxEL_SIZE * Math.pow(2, lod);
@@ -72,7 +84,7 @@ function getGridPosition(index, lod)
 			vSize * ((Math.floor(index / gSize) % gSize)),
 			vSize * ((Math.floor(index / (gSize*gSize)) % gSize)));
 }
-
+*/
 function getIndexPosition (position)
 {
 	return Math.floor((position.x
