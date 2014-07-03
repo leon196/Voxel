@@ -5,13 +5,12 @@ var textureCamera, planeScreen, finalRenderTarget, uniformsRender;
 var controls, clock, projector;
 var INTERSECTED;
 var mouse = { x:0, y:0 };
-var mouseDown = false;
 var viewHalfX, viewHalfY;
 
 // Voxels
 var LOD_COUNT = 4;
 var voxelsMesh = [];
-var VOXEL_SIZE = 1;
+var VOXEL_SIZE = 1.0;
 var GRID_SIZE = 8;
 
 var lines = [];
@@ -26,15 +25,65 @@ var lastIteration = -delayIteration;
 // Consts
 var distMax = VOXEL_SIZE * 2;
 var distMin = VOXEL_SIZE * 0.75;
-var moveSpeed = 40;
+var moveSpeed = 6;
 var lookSpeed = 20;
 var textureCameraDistance = 400;
 
-// Debug cube
-var debug;
+// Debug
+var ERASE_MODE = false;
 
 init();
 render();
+
+$( document ).ready(function() {
+	
+	$( "#grid_size_plus" ).click(function() {
+		if (document.getElementById("grid_size").value < 20) {
+			document.getElementById("grid_size").value++;
+			GRID_SIZE = document.getElementById("grid_size").value;
+		}
+	});
+	
+	$( "#grid_size_minus" ).click(function() {
+		if (document.getElementById("grid_size").value > 0) {
+			document.getElementById("grid_size").value--;
+			GRID_SIZE = document.getElementById("grid_size").value;
+		}
+	});
+	
+	$( "#voxel_size_plus" ).click(function() {
+		if (document.getElementById("voxel_size").value < 20) {
+			document.getElementById("voxel_size").value++;
+			VOXEL_SIZE = document.getElementById("voxel_size").value;
+		}
+	});
+	
+	$( "#voxel_size_minus" ).click(function() {
+		if (document.getElementById("voxel_size").value > 0) {
+			document.getElementById("voxel_size").value--;
+			VOXEL_SIZE = document.getElementById("voxel_size").value;
+		}
+	});
+	
+	$( "#lod_plus" ).click(function() {
+		if (document.getElementById("lod_level").value < 5) {
+			document.getElementById("lod_level").value++;
+			LOD_COUNT = document.getElementById("lod_level").value;
+		}
+	});
+	
+	$( "#lod_minus" ).click(function() {
+		if (document.getElementById("lod_level").value > 0) {
+			document.getElementById("lod_level").value--;
+			LOD_COUNT = document.getElementById("lod_level").value;
+		}
+	});
+	
+	$( "#erase_mode" ).click(function() {
+	  ERASE_MODE = document.getElementById("erase_mode").checked;
+	  if (ERASE_MODE) console.log("Erase mode activated !");
+	});
+});
 
 function init()
 {
@@ -74,7 +123,7 @@ function init()
 	controls.movementSpeed = moveSpeed;
 	controls.lookSpeed = lookSpeed;
 	controls.lookVertical = true;
-	controls.mouseDragOn = true;
+	controls.mouseDragOn = false;
 	controls.lon = -90;
 
 	// Render to Texture
@@ -103,13 +152,17 @@ function init()
 	camera.add(planeScreen);
 	camera.add(textureCamera);
 
+	// Shader Voxel
+	vertexShader = document.getElementById( 'vertexShader' ).textContent;
+	fragmentShader = document.getElementById( 'fragmentShader' ).textContent;
+	// Basic Voxel Shape
+	var geometry = new THREE.BoxGeometry(VOXEL_SIZE,VOXEL_SIZE,VOXEL_SIZE);
+	var material = new THREE.ShaderMaterial( { uniforms: {}, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader, transparent: true } );
+	material.transparent = true;
+
 	// 
 	monkey = new GameObject();
 	monkey.initWithMesh('obj/mesh.wavefront');
-
-// Debug
-
-	debug = CreateCubeWired(new THREE.Vector3());
 }
 
 function render()
@@ -131,10 +184,9 @@ function update()
 	{
 		lastIteration = clock.getElapsedTime();
 
-		var oscillo = (Math.cos(clock.getElapsedTime()) + 1) * 0.8;
+		var oscillo = (Math.cos(clock.getElapsedTime()) + 1) * 0.9 * 0.5;
 		//monkey.moveTo({x:0, y:0, z:oscillo * 100});
-		//monkey.rotateTo({x:oscillo * 3.14, y:0, z:0});
-		//monkey.updateParticleSystem(oscillo);
+		monkey.rotateTo({x:oscillo * 3.14, y:0, z:0});
 /*
 		if (meshLoaded != undefined) {
 			voxelsMesh = getVoxelsFromMesh(meshLoaded.geometry.vertices, meshLoaded.geometry.faces, oscillo);
@@ -144,16 +196,12 @@ function update()
 		*/
 	}
 
-	if (mouseDown) {
-		paint();
-	}
-/*
 	if (monkey.particleSystem != undefined) {
-		var distancePlayer = monkey.nearestVoxelFrom(camera.position);
-		var scale = Math.max(0, (100 - distancePlayer) / 10);
+		var distancePlayer = camera.position.distanceTo(monkey.particleSystem.position);
+		var scale = Math.max(0, (100 - distancePlayer) / 100);
 		monkey.updateParticleSystem(scale);
 	}
-*/
+
 }
 
 function mousemove( event )
@@ -169,25 +217,4 @@ function mousedown(event)
 function mouseup(event)
 {
 	mouseDown = false;
-}
-
-function paint ()
-{
-	var dist = 20;
-	var vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
-	projector.unprojectVector( vector, camera );
-	var ray = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() ).ray;
-	//var step = 3;
-	
-	var cursor = { 	x: camera.position.x + ray.direction.x * dist,
-					y: camera.position.y + ray.direction.y * dist,
-					z: camera.position.z + ray.direction.z * dist }
-	debug.position.set(cursor.x, cursor.y, cursor.z);
-	debug.position.matrixNeedsUpdate = true;
-	//for (var i = 0; i < dist; i++) {
-	var indexes = monkey.isVoxelHere(cursor, 0.2);
-	if (indexes.length > 0) {
-		monkey.eraseVoxels(indexes);
-	}
-	//}
 }
