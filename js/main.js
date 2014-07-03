@@ -42,7 +42,7 @@ render();
 
 $( document ).ready(function() {
 	
-	$( "#grid_size_plus" ).click(function() {
+	/*$( "#grid_size_plus" ).click(function() {
 		if (document.getElementById("grid_size").value < 20) {
 			document.getElementById("grid_size").value++;
 			GRID_SIZE = document.getElementById("grid_size").value;
@@ -81,6 +81,20 @@ $( document ).ready(function() {
 		if (document.getElementById("lod_level").value > 0) {
 			document.getElementById("lod_level").value--;
 			LOD_COUNT = document.getElementById("lod_level").value;
+		}
+	});*/
+	
+	$( "#pen_plus" ).click(function() {
+		if (document.getElementById("pen_size").value < 10) {
+			document.getElementById("pen_size").value++;
+			LOD_COUNT = document.getElementById("pen_size").value;
+		}
+	});
+	
+	$( "#pen_minus" ).click(function() {
+		if (document.getElementById("pen_size").value > 0) {
+			document.getElementById("pen_size").value--;
+			LOD_COUNT = document.getElementById("pen_size").value;
 		}
 	});
 	
