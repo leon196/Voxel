@@ -75,9 +75,9 @@ GameObject = function ()
 
 				p.applyAxisAngle(new THREE.Vector3(1, 0, 0), this.rotation.x);
 
-				positions[ i ]     = Math.floor(p.x);
-				positions[ i + 1 ] = Math.floor(p.y);
-				positions[ i + 2 ] = Math.floor(p.z);
+				positions[ i ]     = Math.floor(p.x * scale);
+				positions[ i + 1 ] = Math.floor(p.y * scale);
+				positions[ i + 2 ] = Math.floor(p.z * scale);
 
 				// colors from normal voxel
 				var light = (v.n.x + v.n.y + v.n.z) * 0.333;
@@ -107,9 +107,9 @@ GameObject = function ()
 		var result = [];
 		var vX, vY, vZ, pX, pY, pZ;
 		for (var i = 0; i < this.voxels.length; i++) {
-			vX = Math.floor(this.voxels[i].x * aproximation);
-			vY = Math.floor(this.voxels[i].y * aproximation);
-			vZ = Math.floor(this.voxels[i].z * aproximation);
+			vX = Math.floor(this.voxels[i].x * this.scale * aproximation);
+			vY = Math.floor(this.voxels[i].y * this.scale * aproximation);
+			vZ = Math.floor(this.voxels[i].z * this.scale * aproximation);
 			pX = Math.floor(position.x * aproximation);
 			pY = Math.floor(position.y * aproximation);
 			pZ = Math.floor(position.z * aproximation);

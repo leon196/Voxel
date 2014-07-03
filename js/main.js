@@ -13,11 +13,15 @@ var LOD_COUNT = 4;
 var voxelsMesh = [];
 var VOXEL_SIZE = 1;
 var GRID_SIZE = 8;
+var ERASE_MODE = true;
 
 var lines = [];
 
 var gameObjects = [];
 var monkey;
+
+// Paint mode
+var brushThickness = 0.2; // [0.01 ... 1.0]
 
 // Timing
 var delayIteration = 0.01;
@@ -194,15 +198,14 @@ function update()
 		*/
 	}
 
-	if (mouseDown) {
+	if (mouseDown && ERASE_MODE) {
 		paint();
 	}
+
+	var distancePlayer = distance(monkey.position, camera.position);//monkey.nearestVoxelFrom(camera.position);
+	var scale = Math.max(0, (100 - distancePlayer) / 10);
+	monkey.updateParticleSystem(scale);
 /*
-	if (monkey.particleSystem != undefined) {
-		var distancePlayer = monkey.nearestVoxelFrom(camera.position);
-		var scale = Math.max(0, (100 - distancePlayer) / 10);
-		monkey.updateParticleSystem(scale);
-	}
 */
 }
 
@@ -235,9 +238,12 @@ function paint ()
 	debug.position.set(cursor.x, cursor.y, cursor.z);
 	debug.position.matrixNeedsUpdate = true;
 	//for (var i = 0; i < dist; i++) {
-	var indexes = monkey.isVoxelHere(cursor, 0.2);
+	var indexes = monkey.isVoxelHere(cursor, brushThickness);
 	if (indexes.length > 0) {
-		monkey.eraseVoxels(indexes);
+
+		if (ERASE_MODE) {
+			monkey.eraseVoxels(indexes);
+		}
 	}
 	//}
 }
