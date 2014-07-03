@@ -131,7 +131,7 @@ function update()
 	{
 		lastIteration = clock.getElapsedTime();
 
-		var oscillo = 0.1 + (Math.cos(clock.getElapsedTime()) + 1) * 2;
+		var oscillo = 0.1 + (Math.cos(clock.getElapsedTime()) + 1) * 0.9 * 0.5;
 		monkey.updateParticleSystem(oscillo);
 /*
 		if (meshLoaded != undefined) {

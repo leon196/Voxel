@@ -24,12 +24,7 @@ function initParticleSystem(vertices, scale)
 		positions[ i + 2 ] = p.z;
 
 		// colors
-
-		var vx = ( p.x / n ) + 0.5;
-		var vy = ( p.y / n ) + 0.5;
-		var vz = ( p.z / n ) + 0.5;
-
-		color.setRGB( vx, vy, vz );
+		color.setRGB( p.n.x, p.n.y, p.n.z );
 
 		colors[ i ]     = color.r;
 		colors[ i + 1 ] = color.g;
