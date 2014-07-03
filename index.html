@@ -1,7 +1,9 @@
 <html>
 	<head>
 		<title>Voxel</title>
-		<style>* { margin:0; padding:0; } canvas { width: 100%; height: 100% }</style>
+		<style>* { margin:0; padding:0; } canvas { width: 100%; height: 100% }
+			#interface { text-shadow: 1px 1px #cccccc; position:absolute; }
+		</style>
 	</head>
 	<body>
 		<div id="interface" align="left">
@@ -31,8 +33,8 @@
 									<br>
 									</td></tr>
 				<tr><td>ERASE MODE :</td> <td><input type="checkbox" name="erase_mode" id="erase_mode"><br></td></tr>
+				<tr><td>FPS : <span id="fps"></span></td></tr>
 			</table>
-			<div>FPS : <span id="fps"></span></div>
 		</div>
 		<script>
 			window.requestAnimFrame = (function(){
