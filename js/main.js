@@ -181,7 +181,7 @@ function init()
 				for (var i = 0; i < 4; i++) {
 					var gameObject = new GameObject();
 					gameObject.initWithMesh(child);
-					gameObject.moveTo({x:i * 100, y:0, z:0});
+					gameObject.moveTo({x:(i+1) * 100, y:0, z:-100});
 					gameObjects.push(gameObject);
 				}
 			}
@@ -191,6 +191,13 @@ function init()
 // Debug
 
 	debug = CreateCubeWired(new THREE.Vector3());
+
+	var axisX = CreateCubeWired(new THREE.Vector3());
+	axisX.scale.set(1000, 1, 1);
+	var axisY = CreateCubeWired(new THREE.Vector3());
+	axisY.scale.set(1, 1000, 1);
+	var axisZ = CreateCubeWired(new THREE.Vector3());
+	axisZ.scale.set(1, 1, 1000);
 }
 
 function render()
@@ -211,8 +218,6 @@ function update()
 	if (lastIteration + delayIteration < clock.getElapsedTime())
 	{
 		lastIteration = clock.getElapsedTime();
-
-		var oscillo = (Math.cos(clock.getElapsedTime()) + 1) * 0.8;
 		//monkey.moveTo({x:0, y:0, z:oscillo * 100});
 		//monkey.rotateTo({x:oscillo * 3.14, y:0, z:0});
 		//monkey.updateParticleSystem(oscillo);
@@ -234,6 +239,13 @@ function update()
 	for (var i = 0; i < gameObjects.length; i++) {
 		var gameObject = gameObjects[i];
 		gameObject.updateParticleSystem(camera.position);
+		if (i == 2) {
+			gameObject.rotateTo({x:0, y:clock.getElapsedTime() % 6.28, z:0});
+		} else if (i == 3) {
+			gameObject.rotateTo({x:clock.getElapsedTime() % 6.28, y:clock.getElapsedTime() % 6.28, z:0});
+			var oscillo = Math.cos(clock.getElapsedTime()) * 10;
+			gameObject.moveTo({x:gameObject.position.x, y:oscillo, z:0});
+		}
 	}
 /*
 */

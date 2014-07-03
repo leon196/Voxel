@@ -1,6 +1,6 @@
 GameObject = function () 
 {
-	this.scale = 2;
+	this.scale = 8;
 
 	this.voxels = [];
 	this.mesh;
@@ -9,8 +9,8 @@ GameObject = function ()
 	this.rotation = new THREE.Vector3();
 	this.position = new THREE.Vector3();
 
-	this.areaNear = 50;
-	this.areaFar = 200;
+	this.areaNear = 100;
+	this.areaFar = 300;
 
 	this.freeze = false;
 
@@ -52,14 +52,15 @@ GameObject = function ()
 	this.updateScaleFromPosition = function (position)
 	{
 		var dist = distance(this.position, position);
-		return Math.max(0.01, ((this.areaFar - dist) - this.areaNear) / (this.areaFar - this.areaNear));
+		var areaRatio = Math.min(Math.max(0.01, ((this.areaFar - dist) - this.areaNear) / (this.areaFar - this.areaNear)), 1);
+		return areaRatio * this.scale;
 	}
 
 	this.updateParticleSystem = function (position)
 	{
 		if (!this.freeze && this.particleSystem != undefined) {
 
-			this.scale = this.updateScaleFromPosition(position);
+			var scale = this.updateScaleFromPosition(position);
 
 			var positions = this.particleSystem.geometry.attributes.position.array;
 			var colors = this.particleSystem.geometry.attributes.color.array;
@@ -74,10 +75,12 @@ GameObject = function ()
 				var p = new THREE.Vector3(v.x, v.y, v.z);
 
 				p.applyAxisAngle(new THREE.Vector3(1, 0, 0), this.rotation.x);
+				p.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.rotation.y);
+				p.applyAxisAngle(new THREE.Vector3(0, 0, 1), this.rotation.z);
 
-				positions[ i ]     = Math.floor(p.x * this.scale);
-				positions[ i + 1 ] = Math.floor(p.y * this.scale);
-				positions[ i + 2 ] = Math.floor(p.z * this.scale);
+				positions[ i ]     = Math.floor(p.x * scale);
+				positions[ i + 1 ] = Math.floor(p.y * scale);
+				positions[ i + 2 ] = Math.floor(p.z * scale);
 
 				// colors from normal voxel
 				var light = (v.n.x + v.n.y + v.n.z) * 0.333;

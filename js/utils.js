@@ -8,9 +8,9 @@ function drawLine (p0, p1, normal, scale)
 	var s = {x:d.x/N, y:d.y/N, z:d.z/N};
 	points.push(p);
 	for (var i = 1; i < N; i++) {
-		p = { 	x: Math.floor(p.x + s.x) * scale,
-				y: Math.floor(p.y + s.y) * scale,
-				z: Math.floor(p.z + s.z) * scale,
+		p = { 	x: p.x + s.x,
+				y: p.y + s.y,
+				z: p.z + s.z,
 				n: normal }; // normal from triangle
 		points.push(p);
 	}
