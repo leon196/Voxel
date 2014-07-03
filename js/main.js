@@ -30,8 +30,8 @@ var lastIteration = -delayIteration;
 // Consts
 var distMax = VOXEL_SIZE * 2;
 var distMin = VOXEL_SIZE * 0.75;
-var moveSpeed = 40;
-var lookSpeed = 20;
+var moveSpeed = 80;
+var lookSpeed = 30;
 var textureCameraDistance = 400;
 
 // Debug cube
@@ -134,7 +134,7 @@ function init()
 	scene.add( light2 );
 
 	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-	camera.position = new THREE.Vector3(0, 10, 110);
+	camera.position = new THREE.Vector3(10, 10, 10);
 	scene.add(camera);
 
 	// Control Camera 1
@@ -181,15 +181,28 @@ function init()
 				for (var i = 0; i < 4; i++) {
 					var gameObject = new GameObject();
 					gameObject.initWithMesh(child);
-					gameObject.moveTo({x:(i+1) * 100, y:0, z:-100});
+					gameObject.moveTo({x:i * 100, y:0, z:-100});
 					gameObjects.push(gameObject);
 				}
+
+				//
+				gameObjects[1].scale = 4;
+				gameObjects[1].areaNear = 190;
+				gameObjects[1].areaFar = 200;
+
+				//
+				gameObjects[2].scale = 2;
+				gameObjects[2].areaNear = 160;
+				gameObjects[2].areaFar = 200;
+
+				//
+				gameObjects[3].areaNear = 160;
+				gameObjects[3].areaFar = 200;
 			}
 		});
 	});
 
-// Debug
-
+	// Debug
 	debug = CreateCubeWired(new THREE.Vector3());
 
 	var axisX = CreateCubeWired(new THREE.Vector3());
@@ -229,21 +242,21 @@ function update()
 		}
 		*/
 	}
-/*
+
 	if (mouseDown && ERASE_MODE) {
 		paint();
 	}
-*/
+
 	//var distancePlayer = distance(monkey.position, camera.position);//monkey.nearestVoxelFrom(camera.position);
 	//var scale = Math.max(0, (100 - distancePlayer) / 10);
 	for (var i = 0; i < gameObjects.length; i++) {
 		var gameObject = gameObjects[i];
 		gameObject.updateParticleSystem(camera.position);
 		if (i == 2) {
-			gameObject.rotateTo({x:0, y:clock.getElapsedTime() % 6.28, z:0});
+			gameObject.rotateTo({x:0, y:clock.getElapsedTime() * 0.2 % 6.28, z:Math.cos(clock.getElapsedTime() * 2) * 0.1});
 		} else if (i == 3) {
 			gameObject.rotateTo({x:clock.getElapsedTime() % 6.28, y:clock.getElapsedTime() % 6.28, z:0});
-			var oscillo = Math.cos(clock.getElapsedTime()) * 10;
+			var oscillo = Math.cos(clock.getElapsedTime()) * 100;
 			gameObject.moveTo({x:gameObject.position.x, y:oscillo, z:0});
 		}
 	}
@@ -277,15 +290,19 @@ function paint ()
 	var cursor = { 	x: camera.position.x + ray.direction.x * dist,
 					y: camera.position.y + ray.direction.y * dist,
 					z: camera.position.z + ray.direction.z * dist }
+	
 	debug.position.set(cursor.x, cursor.y, cursor.z);
 	debug.position.matrixNeedsUpdate = true;
-	//for (var i = 0; i < dist; i++) {
-	var indexes = monkey.isVoxelHere(cursor, brushThickness);
-	if (indexes.length > 0) {
+	
+	for (var i = 0; i < gameObjects.length; i++) {
+		var gameObject = gameObjects[i];
+		var indexes = gameObject.isVoxelHere(cursor, brushThickness);
+		if (indexes.length > 0) {
 
-		if (ERASE_MODE) {
-			monkey.eraseVoxels(indexes);
+			if (ERASE_MODE) {
+				gameObject.eraseVoxels(indexes);
+				console.log("oui");
+			}
 		}
 	}
-	//}
 }

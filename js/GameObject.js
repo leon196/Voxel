@@ -9,8 +9,8 @@ GameObject = function ()
 	this.rotation = new THREE.Vector3();
 	this.position = new THREE.Vector3();
 
-	this.areaNear = 100;
-	this.areaFar = 300;
+	this.areaNear = 10;
+	this.areaFar = 200;
 
 	this.freeze = false;
 
@@ -20,12 +20,12 @@ GameObject = function ()
 		if (this.particleSystem != undefined) {
 			this.particleSystem.position = this.position;
 		}	
-	}
+	};
 
 	this.rotateTo = function (rotation) 
 	{
 		this.rotation.set(rotation.x, rotation.y, rotation.z)
-	}
+	};
 
 	this.nearestVoxelFrom = function (position)
 	{
@@ -45,16 +45,29 @@ GameObject = function ()
 		// Setup voxels
 		this.mesh = mesh;
 		this.voxels = getVoxelsFromMesh(this.mesh.geometry.vertices, this.mesh.geometry.faces, this.scale);
+		this.cleanVoxels();
 		// Setup particles
 		this.particleSystem = initParticleSystem(this.voxels, this.scale);
 	};
 
+	this.cleanVoxels = function ()
+	{
+		for (var i = 0; i < this.voxels.length; ++i) {
+			var voxel = this.voxels[i];
+			for (var j = i+1; j < this.voxels.length; ++j) {
+				var vox = this.voxels[j];
+				if (Math.floor(voxel.x) == Math.floor(vox.x) && Math.floor(voxel.y) == Math.floor(vox.y) && Math.floor(voxel.z) == Math.floor(vox.z))
+					this.voxels.splice(j, 1);
+			}
+		}
+	};
+
 	this.updateScaleFromPosition = function (position)
 	{
-		var dist = distance(this.position, position);
-		var areaRatio = Math.min(Math.max(0.01, ((this.areaFar - dist) - this.areaNear) / (this.areaFar - this.areaNear)), 1);
+		var dist = Math.max(0.01, (this.areaFar - distance(this.position, position)));
+		var areaRatio = Math.max(0.01, Math.min(dist / (this.areaFar - this.areaNear), 1));
 		return areaRatio * this.scale;
-	}
+	};
 
 	this.updateParticleSystem = function (position)
 	{
@@ -103,7 +116,7 @@ GameObject = function ()
 		return Math.floor((position.x
 						 + position.y * this.gridSize
 						 + position.z * this.gridSize * this.gridSize) / this.scale);
-	}
+	};
 
 	this.isVoxelHere = function (position, aproximation)
 	{
@@ -122,7 +135,7 @@ GameObject = function ()
 			}
 		}
 		return result;
-	}
+	};
 
 	this.eraseVoxels = function (indexes)
 	{
@@ -142,6 +155,6 @@ GameObject = function ()
 		this.particleSystem.geometry.buffersNeedUpdate=true;
 		this.freeze = false;
 		this.updateParticleSystem(this.scale);
-	}
+	};
 
 }

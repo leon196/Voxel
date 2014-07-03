@@ -1,18 +1,25 @@
 
-function drawLine (p0, p1, normal, scale)
+function drawLine (p0, p1, normal)
 {
 	var points = [];
 	var p = {x:p0.x, y:p0.y, z:p0.z, n: normal};
 	var d = {x:p1.x-p0.x, y:p1.y-p0.y, z:p1.z-p0.z};
 	var N = Math.max(Math.max(Math.abs(d.x), Math.abs(d.y)), Math.abs(d.z));
 	var s = {x:d.x/N, y:d.y/N, z:d.z/N};
-	points.push(p);
+	//var voxelIndex = getIndexPosition(p);
+	//if (voxelsIndexes.indexOf(voxelIndex) == -1) {
+		points.push(p);
+		//voxelsIndexes.push(voxelIndex);
+	//}
 	for (var i = 1; i < N; i++) {
 		p = { 	x: p.x + s.x,
 				y: p.y + s.y,
 				z: p.z + s.z,
-				n: normal }; // normal from triangle
-		points.push(p);
+				n: normal };
+		//if (voxelsIndexes.indexOf(voxelIndex) == -1) {
+			points.push(p);
+			//voxelsIndexes.push(voxelIndex);
+		//}
 	}
 	return points;
 }	
@@ -55,7 +62,8 @@ function getVoxelsFromMesh(vertices, faces, scale) {
 				x:pB.x * (1 - delta) + delta * pC.x,
 				y:pB.y * (1 - delta) + delta * pC.y,
 				z:pB.z * (1 - delta) + delta * pC.z};
-			var line = drawLine(p0, p1, {x:cb.x, y:cb.y, z:cb.z}, scale);
+
+			var line = drawLine(p0, p1, {x:cb.x, y:cb.y, z:cb.z});
 			voxels.push.apply(voxels, line);
 		}
 	}
@@ -85,6 +93,10 @@ function getGridPosition (index, lod)
 			vSize * ((Math.floor(index / (gSize*gSize)) % gSize)));
 }
 */
+function getIdPosition (position)
+{
+	return Math.floor(position.x) + "_" + Math.floor(position.y) + "_" + Math.floor(position.z);
+}
 function getIndexPosition (position)
 {
 	return Math.floor((position.x
