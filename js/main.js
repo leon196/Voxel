@@ -2,7 +2,6 @@
 // Elements
 var camera, scene, renderer;
 var textureCamera, planeScreen, finalRenderTarget, uniformsRender;
-var meshLoaded, geometry, material;
 var controls, clock, projector;
 var INTERSECTED;
 var mouse = { x:0, y:0 };
@@ -15,6 +14,9 @@ var VOXEL_SIZE = 1.0;
 var GRID_SIZE = 8;
 
 var lines = [];
+
+var gameObjects = [];
+var monkey;
 
 // Timing
 var delayIteration = 0.01;
@@ -48,6 +50,16 @@ function init()
 
 	// Setup Scene 
 	scene = new THREE.Scene();
+	scene.fog = new THREE.Fog( 0x050505, 2000, 3500 );
+
+	// Lights
+	scene.add( new THREE.AmbientLight( 0x444444 ) );
+	var light1 = new THREE.DirectionalLight( 0xffffff, 0.5 );
+	light1.position.set( 1, 1, 1 );
+	scene.add( light1 );
+	var light2 = new THREE.DirectionalLight( 0xffffff, 1.5 );
+	light2.position.set( 0, -1, 0 );
+	scene.add( light2 );
 
 	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
 	camera.position = new THREE.Vector3(0, 10, 30);
@@ -91,25 +103,13 @@ function init()
 	vertexShader = document.getElementById( 'vertexShader' ).textContent;
 	fragmentShader = document.getElementById( 'fragmentShader' ).textContent;
 	// Basic Voxel Shape
-	geometry = new THREE.BoxGeometry(VOXEL_SIZE,VOXEL_SIZE,VOXEL_SIZE);
-	material = new THREE.ShaderMaterial( { uniforms: {}, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader, transparent: true } );
+	var geometry = new THREE.BoxGeometry(VOXEL_SIZE,VOXEL_SIZE,VOXEL_SIZE);
+	var material = new THREE.ShaderMaterial( { uniforms: {}, attributes: {}, vertexShader: vertexShader, fragmentShader: fragmentShader, transparent: true } );
 	material.transparent = true;
 
-	// Voxelize loaded Mesh
-
-	var loader = new THREE.OBJLoader();
-	loader.load( 'obj/mesh.wavefront', function ( object ) {
-		object.traverse( function ( child ) {
-			if ( child instanceof THREE.Mesh ) {
-				meshLoaded = child;
-				voxelsMesh = getVoxelsFromMesh(child.geometry.vertices, child.geometry.faces, 4);
-				initParticleSystem(voxelsMesh, 4);
-			}
-		});
-	});
-
-	// Generate
-	//generateVoxels();
+	// 
+	monkey = new GameObject();
+	monkey.initWithMesh('obj/mesh.wavefront');
 }
 
 function render()
@@ -131,12 +131,15 @@ function update()
 	{
 		lastIteration = clock.getElapsedTime();
 
+		var oscillo = 0.1 + (Math.cos(clock.getElapsedTime()) + 1) * 2;
+		monkey.updateParticleSystem(oscillo);
+/*
 		if (meshLoaded != undefined) {
-			var oscillo = 0.1 + (Math.cos(clock.getElapsedTime()) + 1) * 2;
 			voxelsMesh = getVoxelsFromMesh(meshLoaded.geometry.vertices, meshLoaded.geometry.faces, oscillo);
-			scene.remove(particleSystem);
-			initParticleSystem(voxelsMesh, 4 - (Math.cos(clock.getElapsedTime()) + 1) * 2);
+			//scene.remove(particleSystem);
+			updateParticleSystem(4 - (Math.cos(clock.getElapsedTime()) + 1) * 2);
 		}
+		*/
 	}
 
 }
