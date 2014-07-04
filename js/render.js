@@ -1,4 +1,4 @@
-function initParticleSystem(vertices, scale)
+function initParticleSystem(vertices, size)
 {
 	var particles = vertices.length;
 
@@ -35,7 +35,7 @@ function initParticleSystem(vertices, scale)
 	geometryBuffer.computeBoundingSphere();
 
 	// Material
-	var materialParticle = new THREE.ParticleSystemMaterial( { size: scale, vertexColors: true } );
+	var materialParticle = new THREE.ParticleSystemMaterial( { size: size, vertexColors: true } );
 
 	// Particle System
 	var particleSystem = new THREE.ParticleSystem( geometryBuffer, materialParticle );

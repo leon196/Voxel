@@ -2,22 +2,21 @@
 function drawLine (p0, p1, normal)
 {
 	var points = [];
-	var p = {x:p0.x, y:p0.y, z:p0.z, n: normal};
+	var p = {x:p0.x, y:p0.y, z:p0.z};
 	var d = {x:p1.x-p0.x, y:p1.y-p0.y, z:p1.z-p0.z};
 	var N = Math.max(Math.max(Math.abs(d.x), Math.abs(d.y)), Math.abs(d.z));
 	var s = {x:d.x/N, y:d.y/N, z:d.z/N};
 	//var voxelIndex = getIndexPosition(p);
 	//if (voxelsIndexes.indexOf(voxelIndex) == -1) {
-		points.push(p);
+		points.push({x:Math.floor(p.x), y:Math.floor(p.y), z:Math.floor(p.z), n:normal});
 		//voxelsIndexes.push(voxelIndex);
 	//}
 	for (var i = 1; i < N; i++) {
 		p = { 	x: p.x + s.x,
 				y: p.y + s.y,
-				z: p.z + s.z,
-				n: normal };
+				z: p.z + s.z};
 		//if (voxelsIndexes.indexOf(voxelIndex) == -1) {
-			points.push(p);
+			points.push({x:Math.floor(p.x), y:Math.floor(p.y), z:Math.floor(p.z), n:normal});
 			//voxelsIndexes.push(voxelIndex);
 		//}
 	}
