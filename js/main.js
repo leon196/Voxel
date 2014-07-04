@@ -85,16 +85,18 @@ $( document ).ready(function() {
 	});*/
 	
 	$( "#pen_plus" ).click(function() {
-		if (document.getElementById("pen_size").value < 10) {
-			document.getElementById("pen_size").value++;
-			LOD_COUNT = document.getElementById("pen_size").value;
+		if (parseFloat(document.getElementById("pen_size").value) < 1.0) {
+			var val = parseFloat(document.getElementById("pen_size").value) + 0.05;
+			document.getElementById("pen_size").value = val.toFixed(2);
+			brushThickness = val.toFixed(2);
 		}
 	});
 	
 	$( "#pen_minus" ).click(function() {
-		if (document.getElementById("pen_size").value > 0) {
-			document.getElementById("pen_size").value--;
-			LOD_COUNT = document.getElementById("pen_size").value;
+		if (parseFloat(document.getElementById("pen_size").value) > 0.0) {
+			var val = parseFloat(document.getElementById("pen_size").value) - 0.05;
+			document.getElementById("pen_size").value = val.toFixed(2);
+			brushThickness = val.toFixed(2);
 		}
 	});
 	
