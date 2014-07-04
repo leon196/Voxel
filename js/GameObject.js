@@ -1,6 +1,9 @@
+
+
+
 GameObject = function () 
 {
-	this.scale = 1;
+	this.scale = 2;
 
 	this.voxels = [];
 	this.mesh;
@@ -9,15 +12,20 @@ GameObject = function ()
 	this.rotation = new THREE.Vector3();
 	this.position = new THREE.Vector3();
 
-	this.areaNear = 100;
+	this.areaNear = 60;
 	this.areaFar = 200;
 
 	this.freeze = false;
 
-	this.setScale = function (scale)
+	this.blackAndWhite = true;
+	this.sizeFactor = 2;
+
+	this.setSizeFactor = function (size)
 	{
-		this.scale = scale;
-		this.particleSystem.material.size = scale * 2;
+		this.sizeFactor = size;
+		if (this.particleSystem != undefined) {
+			this.particleSystem.material.size = this.scale * size;
+		}
 	}
 
 	this.moveTo = function (position)
@@ -46,24 +54,19 @@ GameObject = function ()
 		return nearest;
 	}
 
-	this.initWithVoxels = function (voxels) 
-	{
-		// Setup voxels
-		this.voxels = voxels;
-		// Setup particles
-		this.particleSystem = initParticleSystem(this.voxels, this.scale * 2);
-	};
-
-	this.initWithMesh = function (mesh) 
+	this.initWithMesh = function (mesh, scale, unit) 
 	{
 		// Setup voxels
 		this.mesh = mesh;
-		this.voxels = getVoxelsFromMesh(this.mesh.geometry.vertices, this.mesh.geometry.faces, 1);
+		if (unit == undefined) {
+			unit = 1;
+		}
+		this.voxels = getVoxelsFromMesh(this.mesh.geometry.vertices, this.mesh.geometry.faces, scale, unit);
 		this.cleanVoxels();
 		//this.fillVoxels();
 		//this.cleanVoxels();
 		// Setup particles
-		this.particleSystem = initParticleSystem(this.voxels, this.scale * 2);
+		this.particleSystem = initParticleSystem(this.voxels, this.scale, this.scale * this.sizeFactor);
 	};
 
 	this.cleanVoxels = function ()
@@ -80,21 +83,32 @@ GameObject = function ()
 
 	this.fillVoxels = function ()
 	{
+		this.freeze = true;
 		var lines = [];
 		for (var i = 0; i < this.voxels.length; ++i) {
 			var voxel = this.voxels[i];
 			for (var j = i+1; j < this.voxels.length; ++j) {
 				var vox = this.voxels[j];
 				if (voxel.x == vox.x && voxel.y == vox.y) {
-					if (voxel.z - vox.z > 4) {
-						var line = drawLine(voxel, vox, {x:-1, y:0, z:0});
+					if (voxel.z - vox.z > 2) {
+						var line = drawLine(voxel, vox, {x:Math.random(), y:Math.random(), z:Math.random()});
 						lines.push.apply(lines, line);
 					}
 				}
 			}
 		}
-						console.log(lines);
 		this.voxels.push.apply(this.voxels, lines);
+		if (this.particleSystem != undefined) {
+			this.particleSystem.geometry.attributes.position.array = new Float32Array(this.voxels.length * 3);
+			this.particleSystem.geometry.attributes.position.array.needsUpdate = true;
+			this.particleSystem.geometry.attributes.position.needsUpdate = true;
+			this.particleSystem.geometry.attributes.color.array = new Float32Array(this.voxels.length * 3);
+			this.particleSystem.geometry.attributes.color.array.needsUpdate = true;
+			this.particleSystem.geometry.attributes.color.needsUpdate = true;
+			this.particleSystem.geometry.buffersNeedUpdate=true;
+		}
+		this.freeze = false;
+		this.updateParticleSystem(camera.position);
 	}
 
 	this.updateScaleFromPosition = function (position)
@@ -108,14 +122,17 @@ GameObject = function ()
 	{
 		if (!this.freeze && this.particleSystem != undefined) {
 
-			var scale = this.updateScaleFromPosition(position);
+			var scale = this.scale;
+			if (position != undefined) {
+				scale = this.updateScaleFromPosition(position);
+			}
 
 			var positions = this.particleSystem.geometry.attributes.position.array;
 			var colors = this.particleSystem.geometry.attributes.color.array;
 
 			var iV = 0;
 			var color = new THREE.Color();
-			for ( var i = 0; i < positions.length; i += 3 ) {
+			for ( var i = 0; i < positions.length && iV < this.voxels.length; i += 3 ) {
 
 				var v = this.voxels[iV];
 				++iV;
@@ -131,8 +148,12 @@ GameObject = function ()
 				positions[ i + 2 ] = Math.floor(p.z * scale);
 
 				// colors from normal voxel
-				var light = (v.n.x + v.n.y + v.n.z) * 0.333;
-				color.setRGB(light , light, light);
+				if (this.blackAndWhite) {
+					var light = (v.n.x + v.n.y + v.n.z) * 0.333;
+					color.setRGB(light, light, light);
+				} else {	
+					color.setRGB(v.n.x, v.n.y, v.n.z);
+				}
 
 				colors[ i ]     = color.r;
 				colors[ i + 1 ] = color.g;
@@ -158,9 +179,9 @@ GameObject = function ()
 		var result = [];
 		var vX, vY, vZ, pX, pY, pZ;
 		for (var i = 0; i < this.voxels.length; i++) {
-			vX = Math.floor((this.position.x + this.voxels[i].x) * this.scale * aproximation);
-			vY = Math.floor((this.position.x + this.voxels[i].y) * this.scale * aproximation);
-			vZ = Math.floor((this.position.z + this.voxels[i].z) * this.scale * aproximation);
+			vX = Math.floor((this.position.x + this.voxels[i].x * this.scale) * aproximation);
+			vY = Math.floor((this.position.y + this.voxels[i].y * this.scale) * aproximation);
+			vZ = Math.floor((this.position.z + this.voxels[i].z * this.scale) * aproximation);
 			pX = Math.floor(position.x * aproximation);
 			pY = Math.floor(position.y * aproximation);
 			pZ = Math.floor(position.z * aproximation);
@@ -189,7 +210,7 @@ GameObject = function ()
 		this.particleSystem.geometry.attributes.color.needsUpdate = true;
 		this.particleSystem.geometry.buffersNeedUpdate=true;
 		this.freeze = false;
-		this.updateParticleSystem(this.scale);
+		this.updateParticleSystem(camera.position);
 	};
 
 }

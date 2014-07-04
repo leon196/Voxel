@@ -2,38 +2,21 @@
 	<head>
 		<title>Voxel</title>
 		<style>* { margin:0; padding:0; } canvas { width: 100%; height: 100% }
-			#interface { text-shadow: 1px 1px #cccccc; position:absolute; }
+			#interface {font:15px arial,sans-serif; text-shadow: 1px 1px #cccccc; position:absolute; }
+			#interface td {width: 200px; }
 		</style>
 	</head>
 	<body>
 		<div id="interface" align="left">
 			<table>
-				<!--tr><td>GRID SIZE :</td><td>
-										<input type="button" name="grid_size_minus" id="grid_size_minus" value="-">
-										<input type="text" name="grid_size" id="grid_size" value="0" size="5">
-										<input type="button" name="grid_size_plus" id="grid_size_plus" value="+">
-										<br>
-									</td></tr>
-				<tr><td>VOXEL SIZE :</td><td>
-										<input type="button" name="voxel_size_minus" id="voxel_size_minus" value="-">
-										<input type="text" name="voxel_size" id="voxel_size" value="0" size="5">
-										<input type="button" name="voxel_size_plus" id="voxel_size_plus" value="+">
+				<tr><td>Brush Thickness Ratio </td><td>
+										<input type="button" name="pen_minus" id="pen_minus" value=" - ">
+										<input type="text" name="pen_size" id="pen_size" value="0.2" size="1">
+										<input type="button" name="pen_plus" id="pen_plus" value=" + ">
 									<br>
 									</td></tr>
-				<tr><td>LOD :</td><td>
-										<input type="button" name="lod_minus" id="lod_minus" value="-">
-										<input type="text" name="lod_level" id="lod_level" value="0" size="5">
-										<input type="button" name="lod_plus" id="lod_plus" value="+">
-									<br>
-									</td></tr-->
-				<tr><td>PEN SIZE :</td><td>
-										<input type="button" name="pen_minus" id="pen_minus" value="-">
-										<input type="text" name="pen_size" id="pen_size" value="0.2" size="5">
-										<input type="button" name="pen_plus" id="pen_plus" value="+">
-									<br>
-									</td></tr>
-				<tr><td>ERASE MODE :</td> <td><input type="checkbox" name="erase_mode" id="erase_mode"><br></td></tr>
-				<tr><td>FPS : <span id="fps"></span></td></tr>
+				<tr><td>Erase Mode </td> <td><input type="checkbox" name="erase_mode" id="erase_mode"><br></td></tr>
+				<tr><td>FPS</td> <td><span id="fps"></span></td></tr>
 			</table>
 		</div>
 		<script>
@@ -95,9 +78,9 @@
 
 			void main() {
 
-				float value = step(0.9, vUv.x) + step(0.9, 1.0 - vUv.x) + step(0.9, vUv.y) + step(0.9, 1.0 - vUv.y);
+				float value = step(mod(gl_FragCoord.x + gl_FragCoord.y, 20.0), 10.0);//step(0.9, vUv.x) + step(0.9, 1.0 - vUv.x) + step(0.9, vUv.y) + step(0.9, 1.0 - vUv.y);
 				gl_FragColor.rgb = vec3(0, value, 0);
-				gl_FragColor.a = value;
+				gl_FragColor.a = value * 0.2;
 			}
 
 		</script>

@@ -24,7 +24,7 @@ var monkey;
 var brushThickness = 0.2; // [0.01 ... 1.0]
 
 // Timing
-var delayIteration = 0.01;
+var delayIteration = 0.1;
 var lastIteration = -delayIteration;
 
 // Consts
@@ -42,51 +42,9 @@ render();
 
 $( document ).ready(function() {
 	
-	/*$( "#grid_size_plus" ).click(function() {
-		if (document.getElementById("grid_size").value < 20) {
-			document.getElementById("grid_size").value++;
-			GRID_SIZE = document.getElementById("grid_size").value;
-		}
-	});
-	
-	$( "#grid_size_minus" ).click(function() {
-		if (document.getElementById("grid_size").value > 0) {
-			document.getElementById("grid_size").value--;
-			GRID_SIZE = document.getElementById("grid_size").value;
-		}
-	});
-	
-	$( "#voxel_size_plus" ).click(function() {
-		if (document.getElementById("voxel_size").value < 20) {
-			document.getElementById("voxel_size").value++;
-			VOXEL_SIZE = document.getElementById("voxel_size").value;
-		}
-	});
-	
-	$( "#voxel_size_minus" ).click(function() {
-		if (document.getElementById("voxel_size").value > 0) {
-			document.getElementById("voxel_size").value--;
-			VOXEL_SIZE = document.getElementById("voxel_size").value;
-		}
-	});
-	
-	$( "#lod_plus" ).click(function() {
-		if (document.getElementById("lod_level").value < 5) {
-			document.getElementById("lod_level").value++;
-			LOD_COUNT = document.getElementById("lod_level").value;
-		}
-	});
-	
-	$( "#lod_minus" ).click(function() {
-		if (document.getElementById("lod_level").value > 0) {
-			document.getElementById("lod_level").value--;
-			LOD_COUNT = document.getElementById("lod_level").value;
-		}
-	});*/
-	
 	$( "#pen_plus" ).click(function() {
 		if (parseFloat(document.getElementById("pen_size").value) < 1.0) {
-			var val = parseFloat(document.getElementById("pen_size").value) + 0.05;
+			var val = parseFloat(document.getElementById("pen_size").value) + 0.02;
 			document.getElementById("pen_size").value = val.toFixed(2);
 			brushThickness = val.toFixed(2);
 		}
@@ -94,7 +52,7 @@ $( document ).ready(function() {
 	
 	$( "#pen_minus" ).click(function() {
 		if (parseFloat(document.getElementById("pen_size").value) > 0.0) {
-			var val = parseFloat(document.getElementById("pen_size").value) - 0.05;
+			var val = parseFloat(document.getElementById("pen_size").value) - 0.02;
 			document.getElementById("pen_size").value = val.toFixed(2);
 			brushThickness = val.toFixed(2);
 		}
@@ -180,27 +138,69 @@ function init()
 			// Find mesh in object
 			if ( child instanceof THREE.Mesh ) {
 
+				var filled = new GameObject();
+				filled.initWithMesh(child, 0.5);
+				filled.moveTo({x:-120, y:0, z:120});
+				filled.rotateTo({x:0, y:2.4, z:0})
+				filled.scale = 4;
+				filled.fillVoxels();
+				filled.cleanVoxels();
+				filled.updateParticleSystem();
+
 				// 
 				for (var i = 0; i < 4; i++) {
 					var obj = new GameObject();
-					obj.initWithMesh(child);
-					obj.moveTo({x:i * 100, y:0, z:-100});
+					obj.initWithMesh(child, 1);
+					obj.moveTo({x:i * 100, y:30, z:-100});
 					gameObjects.push(obj);
 				}
 
 				//
-				gameObjects[1].setScale(4);
-				gameObjects[1].areaNear = 90;
-				gameObjects[1].areaFar = 100;
+				gameObjects[0].setSizeFactor(1);
+				gameObjects[0].scale = 1;
+				gameObjects[0].areaNear = 100;
+				gameObjects[0].areaFar = 200;
 
 				//
-				gameObjects[2].setScale(2);
-				gameObjects[2].areaNear = 10;
-				gameObjects[2].areaFar = 100;
+				gameObjects[1].setSizeFactor(4);
+				gameObjects[1].scale = 8;
+				gameObjects[1].areaNear = 60;
+				gameObjects[1].areaFar = 120;
+				gameObjects[1].blackAndWhite = false;
+
+				//
+				gameObjects[2].setSizeFactor(2);
+				gameObjects[2].scale = 2;
+				gameObjects[2].areaNear = 80;
+				gameObjects[2].areaFar = 160;
 
 				//
 				gameObjects[3].areaNear = 150;
 				gameObjects[3].areaFar = 200;
+				gameObjects[3].blackAndWhite = false;
+
+				var high = new GameObject();
+				high.initWithMesh(child, 2, 1);
+				high.moveTo({x:-100, y:0, z:-100});
+				high.rotateTo({x:0, y:0.8, z:0})
+				high.updateParticleSystem();
+				high.areaNear = 200;
+				high.areaFar = 210;
+				gameObjects.push(high);
+			}
+		});
+	});
+
+	// Ground
+	var loader = new THREE.OBJLoader();
+	loader.load( 'obj/ground.wavefront', function ( object ) {
+		object.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				var obj = new GameObject();
+				obj.sizeFactor = 3;
+				obj.scale = 10;
+				obj.initWithMesh(child, 0.25);
+				obj.moveTo({x:0, y:-100, z:0});
 			}
 		});
 	});
@@ -237,6 +237,10 @@ function update()
 		//monkey.moveTo({x:0, y:0, z:oscillo * 100});
 		//monkey.rotateTo({x:oscillo * 3.14, y:0, z:0});
 		//monkey.updateParticleSystem(oscillo);
+
+		if (mouseDown && ERASE_MODE) {
+			paint();
+		}
 /*
 		if (meshLoaded != undefined) {
 			voxelsMesh = getVoxelsFromMesh(meshLoaded.geometry.vertices, meshLoaded.geometry.faces, oscillo);
@@ -246,21 +250,17 @@ function update()
 		*/
 	}
 
-	if (mouseDown && ERASE_MODE) {
-		paint();
-	}
-
 	//var distancePlayer = distance(monkey.position, camera.position);//monkey.nearestVoxelFrom(camera.position);
 	//var scale = Math.max(0, (100 - distancePlayer) / 10);
 	for (var i = 0; i < gameObjects.length; i++) {
 		var gameObject = gameObjects[i];
 		gameObject.updateParticleSystem(camera.position);
 		if (i == 2) {
-			gameObject.rotateTo({x:0, y:clock.getElapsedTime() * 0.2 % 6.28, z:Math.cos(clock.getElapsedTime() * 2) * 0.1});
+			gameObject.rotateTo({x:0, y:clock.getElapsedTime()  % 6.28, z:Math.cos(clock.getElapsedTime() * 2) * 0.1});
 		} else if (i == 3) {
 			gameObject.rotateTo({x:clock.getElapsedTime() % 6.28, y:clock.getElapsedTime() % 6.28, z:0});
 			var oscillo = Math.cos(clock.getElapsedTime()) * 100;
-			gameObject.moveTo({x:gameObject.position.x, y:oscillo, z:0});
+			gameObject.moveTo({x:gameObject.position.x, y:0, z:oscillo});
 		}
 	}
 /*
@@ -297,15 +297,14 @@ function paint ()
 	debug.position.set(cursor.x, cursor.y, cursor.z);
 	debug.position.matrixNeedsUpdate = true;
 	
-	for (var i = 0; i < gameObjects.length; i++) {
-		var gameObject = gameObjects[i];
-		var indexes = gameObject.isVoxelHere(cursor, 0.2);
-		if (indexes.length > 0) {
+	//for (var i = 0; i < gameObjects.length; i++) {
+		var gameObject = gameObjects[0];
 
+		var indexes = gameObject.isVoxelHere(cursor, brushThickness);
+		if (indexes.length > 0) {
 			if (ERASE_MODE) {
 				gameObject.eraseVoxels(indexes);
-				console.log("oui");
 			}
 		}
-	}
+	//}
 }

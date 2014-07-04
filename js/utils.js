@@ -23,7 +23,7 @@ function drawLine (p0, p1, normal)
 	return points;
 }	
 
-function getVoxelsFromMesh(vertices, faces, scale) {
+function getVoxelsFromMesh(vertices, faces, scale, unit) {
 	var voxels = [];
 	var cb = new THREE.Vector3();
 	var ab = new THREE.Vector3();
@@ -43,7 +43,7 @@ function getVoxelsFromMesh(vertices, faces, scale) {
 			z:vertices[face.c].z * scale};
 
 		// Distance from A to C
-		var dAC =  Math.floor(distance(pA, pC));
+		var dAC =  Math.floor(distance(pA, pC) / unit);
 
 		// Normal
 		cb.subVectors( pC, pB );

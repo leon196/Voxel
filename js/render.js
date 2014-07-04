@@ -1,4 +1,4 @@
-function initParticleSystem(vertices, size)
+function initParticleSystem(vertices, scale, size)
 {
 	var particles = vertices.length;
 
@@ -19,9 +19,9 @@ function initParticleSystem(vertices, size)
 		var p = vertices[iV];
 		iV++;
 
-		positions[ i ]     = p.x;
-		positions[ i + 1 ] = p.y;
-		positions[ i + 2 ] = p.z;
+		positions[ i ]     = p.x * scale;
+		positions[ i + 1 ] = p.y * scale;
+		positions[ i + 2 ] = p.z * scale;
 
 		// colors
 		var light = (p.n.x + p.n.y + p.n.z) * 0.333;
