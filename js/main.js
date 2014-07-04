@@ -177,26 +177,27 @@ function init()
 		object.traverse( function ( child ) {
 			// Find mesh in object
 			if ( child instanceof THREE.Mesh ) {
+
 				// 
 				for (var i = 0; i < 4; i++) {
-					var gameObject = new GameObject();
-					gameObject.initWithMesh(child);
-					gameObject.moveTo({x:i * 100, y:0, z:-100});
-					gameObjects.push(gameObject);
+					var obj = new GameObject();
+					obj.initWithMesh(child);
+					obj.moveTo({x:i * 100, y:0, z:-100});
+					gameObjects.push(obj);
 				}
 
 				//
-				gameObjects[1].scale = 4;
-				gameObjects[1].areaNear = 190;
-				gameObjects[1].areaFar = 200;
+				gameObjects[1].setScale(4);
+				gameObjects[1].areaNear = 90;
+				gameObjects[1].areaFar = 100;
 
 				//
-				gameObjects[2].scale = 2;
-				gameObjects[2].areaNear = 160;
-				gameObjects[2].areaFar = 200;
+				gameObjects[2].setScale(2);
+				gameObjects[2].areaNear = 10;
+				gameObjects[2].areaFar = 100;
 
 				//
-				gameObjects[3].areaNear = 160;
+				gameObjects[3].areaNear = 150;
 				gameObjects[3].areaFar = 200;
 			}
 		});
@@ -296,7 +297,7 @@ function paint ()
 	
 	for (var i = 0; i < gameObjects.length; i++) {
 		var gameObject = gameObjects[i];
-		var indexes = gameObject.isVoxelHere(cursor, brushThickness);
+		var indexes = gameObject.isVoxelHere(cursor, 0.2);
 		if (indexes.length > 0) {
 
 			if (ERASE_MODE) {

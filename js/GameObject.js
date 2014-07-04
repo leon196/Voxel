@@ -1,6 +1,6 @@
 GameObject = function () 
 {
-	this.scale = 8;
+	this.scale = 1;
 
 	this.voxels = [];
 	this.mesh;
@@ -9,10 +9,16 @@ GameObject = function ()
 	this.rotation = new THREE.Vector3();
 	this.position = new THREE.Vector3();
 
-	this.areaNear = 10;
+	this.areaNear = 100;
 	this.areaFar = 200;
 
 	this.freeze = false;
+
+	this.setScale = function (scale)
+	{
+		this.scale = scale;
+		this.particleSystem.material.size = scale * 2;
+	}
 
 	this.moveTo = function (position)
 	{
@@ -40,14 +46,24 @@ GameObject = function ()
 		return nearest;
 	}
 
+	this.initWithVoxels = function (voxels) 
+	{
+		// Setup voxels
+		this.voxels = voxels;
+		// Setup particles
+		this.particleSystem = initParticleSystem(this.voxels, this.scale * 2);
+	};
+
 	this.initWithMesh = function (mesh) 
 	{
 		// Setup voxels
 		this.mesh = mesh;
-		this.voxels = getVoxelsFromMesh(this.mesh.geometry.vertices, this.mesh.geometry.faces, this.scale);
+		this.voxels = getVoxelsFromMesh(this.mesh.geometry.vertices, this.mesh.geometry.faces, 1);
 		this.cleanVoxels();
+		//this.fillVoxels();
+		//this.cleanVoxels();
 		// Setup particles
-		this.particleSystem = initParticleSystem(this.voxels, this.scale);
+		this.particleSystem = initParticleSystem(this.voxels, this.scale * 2);
 	};
 
 	this.cleanVoxels = function ()
@@ -56,11 +72,30 @@ GameObject = function ()
 			var voxel = this.voxels[i];
 			for (var j = i+1; j < this.voxels.length; ++j) {
 				var vox = this.voxels[j];
-				if (Math.floor(voxel.x) == Math.floor(vox.x) && Math.floor(voxel.y) == Math.floor(vox.y) && Math.floor(voxel.z) == Math.floor(vox.z))
+				if (voxel.x == vox.x && voxel.y == vox.y && voxel.z == vox.z)
 					this.voxels.splice(j, 1);
 			}
 		}
 	};
+
+	this.fillVoxels = function ()
+	{
+		var lines = [];
+		for (var i = 0; i < this.voxels.length; ++i) {
+			var voxel = this.voxels[i];
+			for (var j = i+1; j < this.voxels.length; ++j) {
+				var vox = this.voxels[j];
+				if (voxel.x == vox.x && voxel.y == vox.y) {
+					if (voxel.z - vox.z > 4) {
+						var line = drawLine(voxel, vox, {x:-1, y:0, z:0});
+						lines.push.apply(lines, line);
+					}
+				}
+			}
+		}
+						console.log(lines);
+		this.voxels.push.apply(this.voxels, lines);
+	}
 
 	this.updateScaleFromPosition = function (position)
 	{
@@ -123,9 +158,9 @@ GameObject = function ()
 		var result = [];
 		var vX, vY, vZ, pX, pY, pZ;
 		for (var i = 0; i < this.voxels.length; i++) {
-			vX = Math.floor(this.voxels[i].x * this.scale * aproximation);
-			vY = Math.floor(this.voxels[i].y * this.scale * aproximation);
-			vZ = Math.floor(this.voxels[i].z * this.scale * aproximation);
+			vX = Math.floor((this.position.x + this.voxels[i].x) * this.scale * aproximation);
+			vY = Math.floor((this.position.x + this.voxels[i].y) * this.scale * aproximation);
+			vZ = Math.floor((this.position.z + this.voxels[i].z) * this.scale * aproximation);
 			pX = Math.floor(position.x * aproximation);
 			pY = Math.floor(position.y * aproximation);
 			pZ = Math.floor(position.z * aproximation);
@@ -142,8 +177,8 @@ GameObject = function ()
 		this.freeze = true;
 		for (var i = 0; i < indexes.length; i++) {
 			var index = indexes[i];
-			if (index - i >= 0 && index - i < this.voxels.length) {
-				this.voxels.splice(index - i, 1);
+			if (index >= 0 && index < this.voxels.length) {
+				this.voxels.splice(index, 1);
 			}
 		}
 		this.particleSystem.geometry.attributes.position.array = new Float32Array(this.voxels.length * 3);

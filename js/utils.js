@@ -30,17 +30,17 @@ function getVoxelsFromMesh(vertices, faces, scale) {
 	for (var f = 0; f < faces.length; f++) {
 		var face = faces[f];
 		var pA = {
-			x:vertices[face.a].x ,
-			y:vertices[face.a].y ,
-			z:vertices[face.a].z };
+			x:vertices[face.a].x * scale,
+			y:vertices[face.a].y * scale,
+			z:vertices[face.a].z * scale};
 		var pB = {
-			x:vertices[face.b].x ,
-			y:vertices[face.b].y ,
-			z:vertices[face.b].z };
+			x:vertices[face.b].x * scale,
+			y:vertices[face.b].y * scale,
+			z:vertices[face.b].z * scale};
 		var pC = {
-			x:vertices[face.c].x ,
-			y:vertices[face.c].y ,
-			z:vertices[face.c].z };
+			x:vertices[face.c].x * scale,
+			y:vertices[face.c].y * scale,
+			z:vertices[face.c].z * scale};
 
 		// Distance from A to C
 		var dAC =  Math.floor(distance(pA, pC));
