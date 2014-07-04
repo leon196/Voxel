@@ -170,9 +170,10 @@ function init()
 
 				//
 				gameObjects[2].setSizeFactor(2);
-				gameObjects[2].scale = 2;
+				gameObjects[2].scale = 4;
 				gameObjects[2].areaNear = 80;
 				gameObjects[2].areaFar = 160;
+				gameObjects[2].color = new THREE.Color(0.15, 0.6, 0.3);
 
 				//
 				gameObjects[3].areaNear = 150;
@@ -180,6 +181,7 @@ function init()
 				gameObjects[3].blackAndWhite = false;
 
 				var high = new GameObject();
+				high.color = new THREE.Color(0.5, 0, 0.5);
 				high.initWithMesh(child, 2, 1);
 				high.moveTo({x:-100, y:0, z:-100});
 				high.rotateTo({x:0, y:0.8, z:0})
@@ -187,6 +189,52 @@ function init()
 				high.areaNear = 200;
 				high.areaFar = 210;
 				gameObjects.push(high);
+			}
+		});
+	});
+
+	// WC
+	var loader = new THREE.OBJLoader();
+	loader.load( 'obj/wc.wavefront', function ( object ) {
+		object.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				var obj = new GameObject();
+				obj.sizeFactor = 2;
+				obj.scale = 4;
+				obj.color = new THREE.Color(0, 0.5, 0.5);
+				obj.initWithMesh(child, 1);
+				obj.moveTo({x:0, y:0, z:100});
+				obj.rotateTo({x:0, y:3.14, z:0})
+			}
+		});
+	});
+
+	// Head
+	var loader = new THREE.OBJLoader();
+	loader.load( 'obj/head.wavefront', function ( object ) {
+		object.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+
+				var obj = new GameObject();
+				obj.sizeFactor = 3;
+				obj.scale = 4;
+				obj.initWithMesh(child, 4);
+				obj.moveTo({x:0, y:100, z:-400});
+
+
+				var obj = new GameObject();
+				obj.sizeFactor = 2;
+				obj.scale = 4;
+				obj.initWithMesh(child, 2);
+				obj.moveTo({x:150, y:100, z:-400});
+				//obj.rotateTo({x:0, y:3.14, z:0})
+
+
+				var obj = new GameObject();
+				obj.sizeFactor = 2;
+				obj.scale = 4;
+				obj.initWithMesh(child, 1);
+				obj.moveTo({x:300, y:100, z:-400});
 			}
 		});
 	});

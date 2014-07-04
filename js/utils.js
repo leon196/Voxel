@@ -81,6 +81,12 @@ function getGridPosition (index)
 			VOXEL_SIZE * ((Math.floor(index / GRID_SIZE) % GRID_SIZE)),
 			VOXEL_SIZE * ((Math.floor(index / (GRID_SIZE*GRID_SIZE)) % GRID_SIZE)));
 }
+function getIndexPosition (position)
+{
+	return Math.floor((position.x
+					 + position.y * GRID_SIZE
+					 + position.z * GRID_SIZE * GRID_SIZE) / VOXEL_SIZE);
+}
 /*
 function getGridPosition (index, lod)
 {
@@ -95,12 +101,6 @@ function getGridPosition (index, lod)
 function getIdPosition (position)
 {
 	return Math.floor(position.x) + "_" + Math.floor(position.y) + "_" + Math.floor(position.z);
-}
-function getIndexPosition (position)
-{
-	return Math.floor((position.x
-					 + position.y * GRID_SIZE
-					 + position.z * GRID_SIZE * GRID_SIZE) / VOXEL_SIZE);
 }
 
 function dotProduct(p1, p2) {

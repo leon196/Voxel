@@ -20,6 +20,8 @@ GameObject = function ()
 	this.blackAndWhite = true;
 	this.sizeFactor = 2;
 
+	this.color;
+
 	this.setSizeFactor = function (size)
 	{
 		this.sizeFactor = size;
@@ -66,7 +68,7 @@ GameObject = function ()
 		//this.fillVoxels();
 		//this.cleanVoxels();
 		// Setup particles
-		this.particleSystem = initParticleSystem(this.voxels, this.scale, this.scale * this.sizeFactor);
+		this.particleSystem = initParticleSystem(this.voxels, this.scale, this.scale * this.sizeFactor, this.color);
 	};
 
 	this.cleanVoxels = function ()
@@ -147,9 +149,10 @@ GameObject = function ()
 				positions[ i + 1 ] = Math.floor(p.y * scale);
 				positions[ i + 2 ] = Math.floor(p.z * scale);
 
-				// colors from normal voxel
-				if (this.blackAndWhite) {
-					var light = (v.n.x + v.n.y + v.n.z) * 0.333;
+				var light = (v.n.x + v.n.y + v.n.z) * 0.333;
+				if (this.color != undefined) {
+					color.setRGB(light + this.color.r, light + this.color.g, light + this.color.b);
+				} else if (this.blackAndWhite) {
 					color.setRGB(light, light, light);
 				} else {	
 					color.setRGB(v.n.x, v.n.y, v.n.z);

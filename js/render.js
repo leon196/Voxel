@@ -1,4 +1,4 @@
-function initParticleSystem(vertices, scale, size)
+function initParticleSystem(vertices, scale, size, col)
 {
 	var particles = vertices.length;
 
@@ -25,7 +25,11 @@ function initParticleSystem(vertices, scale, size)
 
 		// colors
 		var light = (p.n.x + p.n.y + p.n.z) * 0.333;
-		color.setRGB(light , light, light);
+		if (col != undefined) {
+			color.setRGB(light + col.r, light + col.g, light + col.b);
+		} else {
+			color.setRGB(light , light, light);
+		}
 
 		colors[ i ]     = color.r;
 		colors[ i + 1 ] = color.g;
