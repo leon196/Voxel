@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Voxel" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Voxel" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Voxel" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-lglew32" />
+			<Add directory="C:/Program Files (x86)/CodeBlocks/MinGW/SDL-2.0/include/SDL2" />
+			<Add directory="C:/Program Files (x86)/CodeBlocks/MinGW/SDL-2.0/include" />
+		</Compiler>
+		<Linker>
+			<Add library="mingw32" />
+			<Add library="glew32s" />
+			<Add library="SDL2main" />
+			<Add library="SDL2.dll" />
+			<Add library="opengl32" />
+			<Add library="glu32" />
+			<Add library="gdi32" />
+			<Add directory="C:/Program Files (x86)/CodeBlocks/MinGW/SDL-2.0/lib" />
+		</Linker>
+		<Unit filename="controller.cpp" />
+		<Unit filename="controller.hpp" />
+		<Unit filename="drawer.cpp" />
+		<Unit filename="drawer.hpp" />
+		<Unit filename="engine.cpp" />
+		<Unit filename="engine.hpp" />
+		<Unit filename="main.cpp" />
+		<Unit filename="model.cpp" />
+		<Unit filename="model.hpp" />
+		<Unit filename="shader.cpp" />
+		<Unit filename="shader.hpp" />
+		<Unit filename="shader/simple.frag" />
+		<Unit filename="shader/simple.vert" />
+		<Unit filename="utils.cpp" />
+		<Unit filename="utils.hpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
