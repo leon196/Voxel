@@ -5,6 +5,10 @@ using System;
 
 public class Utils {
 	
+	/**********************/
+	/* 		Don't Work    */
+	/* 		(enough)	  */
+	/**********************/
 	// Triangle / Bounding Box (AABB) Intersection Test
 	public bool IsIntersecting(AABox box, Triangle triangle) {
 	    float triangleMin, triangleMax;
@@ -51,60 +55,6 @@ public class Utils {
 	        if (val > max) max = val;
 	    }
 	}
-/*
-	public void DrawLine (Vector3 p0, Vector3 p1)
-	{
-		Vector3 vec = (p1 - p0);
-		Vector3 dir = vec.normalized;
-		Vector3 p = new Vector3();
-		int dist = (int)Mathd.Ceil(vec.magnitude);
-		for (int i = 0; i < dist; ++i) {
-			p = p0 + i * dir;
-			p.x = Mathd.Floor(p.x);
-			p.y = Mathd.Floor(p.y);
-			p.z = Mathd.Floor(p.z);
-			AddCube(p);
-		}
-	}	
-*/
-	//public void 
-
-	/*
-	// Shell surface
-	Vector3[] meshVertices = new Vector3[countVertices * 2];
-	int[] meshTriangles = new int[countTri * 2];
-	for (int v = 0; v < countVertices; v++) {
-		meshVertices[v] = new Vector3(mesh.vertices[v]);
-	}
-	for (int v = 0; v < countVertices; v++) {
-		meshVertices[countVertices + v] = new Vector3(mesh.vertices[v] * 1.5f);
-	}
-	for (int t = 0; t < countTri; t++) {
-		meshTriangles[t] = mesh.triangles[t];
-	}
-	for (int t = 0; t < countTri; t++) {
-		meshTriangles[countTri + t] = mesh.triangles[t] + countVertices;
-	}
-	*/
-
-
-
-	//for (int v = 0; v < voxels.Count; v++) {
-	//	voxels[v].renderer.material.color = Color.Lerp(Color.red, Color.green, v / (float)cubeCount);
-	//}
-
-
-
-	//GameObject cube = AddCube(center);
-	//cube.transform.localScale = tri.Normal;
-
-
-	/*
-	Vector3 pos = new Vector3((float)box.start.x, (float)box.start.y, (float)box.start.z);
-	TextMesh tm = GameObject.Instantiate( tmPrefab, pos, Quaternion.identity ) as TextMesh;
-	tm.text = indexVoxel.ToString();
-	tm.transform.parent = transform;
-	*/
 
 	/********************************************************/
 	/* AABB-triangle overlap test code                      */
@@ -241,3 +191,58 @@ public class Utils {
 		return 1;   /* box and triangle overlaps */
 	}
 }
+
+/*
+	public void DrawLine (Vector3 p0, Vector3 p1)
+	{
+		Vector3 vec = (p1 - p0);
+		Vector3 dir = vec.normalized;
+		Vector3 p = new Vector3();
+		int dist = (int)Mathd.Ceil(vec.magnitude);
+		for (int i = 0; i < dist; ++i) {
+			p = p0 + i * dir;
+			p.x = Mathd.Floor(p.x);
+			p.y = Mathd.Floor(p.y);
+			p.z = Mathd.Floor(p.z);
+			AddCube(p);
+		}
+	}	
+*/
+	//public void 
+
+	/*
+	// Shell surface
+	Vector3[] meshVertices = new Vector3[countVertices * 2];
+	int[] meshTriangles = new int[countTri * 2];
+	for (int v = 0; v < countVertices; v++) {
+		meshVertices[v] = new Vector3(mesh.vertices[v]);
+	}
+	for (int v = 0; v < countVertices; v++) {
+		meshVertices[countVertices + v] = new Vector3(mesh.vertices[v] * 1.5f);
+	}
+	for (int t = 0; t < countTri; t++) {
+		meshTriangles[t] = mesh.triangles[t];
+	}
+	for (int t = 0; t < countTri; t++) {
+		meshTriangles[countTri + t] = mesh.triangles[t] + countVertices;
+	}
+	*/
+
+
+
+	//for (int v = 0; v < voxels.Count; v++) {
+	//	voxels[v].renderer.material.color = Color.Lerp(Color.red, Color.green, v / (float)cubeCount);
+	//}
+
+
+
+	//GameObject cube = AddCube(center);
+	//cube.transform.localScale = tri.Normal;
+
+
+	/*
+	Vector3 pos = new Vector3((float)box.start.x, (float)box.start.y, (float)box.start.z);
+	TextMesh tm = GameObject.Instantiate( tmPrefab, pos, Quaternion.identity ) as TextMesh;
+	tm.text = indexVoxel.ToString();
+	tm.transform.parent = transform;
+	*/

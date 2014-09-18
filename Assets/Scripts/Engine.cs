@@ -6,7 +6,7 @@ using System;
 public class Engine : MonoBehaviour {
 
 	private Utils tools;
-	private uint[] voxels;
+	private Voxel[] voxels;
 
 	public GameObject prefab;
 	public Mesh mesh;
@@ -18,7 +18,7 @@ public class Engine : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		tools = new Utils();
-		voxels = new uint[0];
+		voxels = new Voxel[0];
 
 		rootCubes = new GameObject();
 		rootCubes.name = "rootCubes";
@@ -33,7 +33,7 @@ public class Engine : MonoBehaviour {
 			uint dimensionMax = (uint)(Mathf.Ceil(Mathf.Max(meshSize.x, Mathf.Max(meshSize.y, meshSize.z))));
 			uint voxelCount = (uint)Mathf.Ceil(dimensionMax * dimensionMax * dimensionMax);
 			Debug.Log("voxelCount:" + voxelCount);
-			voxels = new uint[voxelCount];
+			voxels = new Voxel[voxelCount];
 
 			// Tris
 			Vector3 min = new Vector3();
@@ -98,60 +98,84 @@ public class Engine : MonoBehaviour {
 				center = min + new Vector3(Mathf.Floor(size.x / 2), Mathf.Floor(size.y / 2), Mathf.Floor(size.z / 2));
 				//Bounds triBounds = new Bounds(center, size);
 
-				//
-				//Vector3 pos = new Vector3((float)center.x, (float)center.y, (float)center.z);
-				//TextMesh tm = GameObject.Instantiate( tmPrefab, pos, Quaternion.identity ) as TextMesh;
-				//tm.text = String.Format("{0:0.##}", tri.normal.x) + "\n" + String.Format("{0:0.##}", tri.normal.y) + "\n" + String.Format("{0:0.##}", tri.normal.z);
-				//tm.transform.parent = transform;
-/*
-				GameObject cubeDebug = AddCube(new Vector3((float)tri.centroid.x, (float)tri.centroid.y, (float)tri.centroid.z));
-				cubeDebug.transform.localScale = new Vector3(1, 1, 8);
-				cubeDebug.transform.LookAt(cubeDebug.transform.position - new Vector3((float)tri.Normal.x, (float)tri.Normal.y, (float)tri.Normal.z));
-*/
-				//if (t == 0) {
-					// For each voxel in bounds
-					int gridCount = (int)(size.x * size.y * size.z);
-					for (int v = 0; v < gridCount; ++v) {
+				// For each voxel in bounds
+				int gridCount = (int)(size.x * size.y * size.z);
+				for (int v = 0; v < gridCount; ++v) {
 
-						// Position in grid
-						float x = v % size.x;
-						float y = Mathf.Floor( v / (size.x * size.z )) % size.y;
-						float z = Mathf.Floor( v / size.x ) % size.z;
+					// Position in grid
+					float x = v % size.x;
+					float y = Mathf.Floor( v / (size.x * size.z )) % size.y;
+					float z = Mathf.Floor( v / size.x ) % size.z;
 
-						// voxel bound
-						box.start.x = min.x + x;
-						box.start.y = min.y + y;
-						box.start.z = min.z + z;
-						box.end.x = min.x + x + 1;
-						box.end.y = min.y + y + 1;
-						box.end.z = min.z + z + 1;
-						Vector3[] boxVertices = { box.start, box.end };
-						box.vertices = boxVertices;
+					// voxel bound
+					box.start.x = min.x + x;
+					box.start.y = min.y + y;
+					box.start.z = min.z + z;
+					box.end.x = min.x + x + 1;
+					box.end.y = min.y + y + 1;
+					box.end.z = min.z + z + 1;
+					Vector3[] boxVertices = { box.start, box.end };
+					box.vertices = boxVertices;
 
-						// Voxel stuff
-						//uint indexVoxel = (uint)(min.x + x + (min.y * (meshSize.x * meshSize.z) + y * (size.x * size.z))  + (min.z * meshSize.x + z * size.x));
-						uint indexVoxel = (uint)(min.x + x + (min.z + z) * meshSize.x + (min.y + y) * (meshSize.x * meshSize.y));
-						//Debug.Log(indexVoxel);
-
-						//Debug.Log(indexVoxel);
-						if (indexVoxel >= voxels.Length) {
-							//Debug.Log(indexVoxel);
+					// Unique ID by position
+					int indexVoxel = (int)(min.x + x + (min.z + z) * meshSize.x + (min.y + y) * (meshSize.x * meshSize.z));
+					Voxel voxel = voxels[indexVoxel];
+					if (voxel == null) {
+						// Intersection test
+						if (0 != tools.triBoxOverlap(box.start + new Vector3(0.5f, 0.5f, 0.5f), new Vector3(0.5f, 0.5f, 0.5f), tri)) {
+							GameObject cube = AddCube(new Vector3((float)(min.x + x + 0.5f), (float)(min.y + y + 0.5f), (float)(min.z + z + 0.5f)));
+							cube.renderer.material.color = new Color((float)(tri.normal.x + 1.0f)/2.0f, (float)(tri.normal.y + 1.0f)/2.0f, (float)(tri.normal.z + 1.0f)/2.0f);
+							//cube.renderer.material.color = tri.normal.y > 0.0f ? Color.red : Color.blue;
+							// Voxel taken
+							voxels[indexVoxel] = new Voxel(indexVoxel, box.start, tri.normal, cube);
 						}
-						else if (voxels[indexVoxel] == 0) {
-							// Intersection test
-							//if (tools.IsIntersecting(box, tri)) {
-							if (0 != tools.triBoxOverlap(box.start + new Vector3(0.5f, 0.5f, 0.5f), new Vector3(0.5f, 0.5f, 0.5f), tri)) {
-								//voxels.Add(AddCube(new Vector3(min.x + x + 0.5f, min.y + y + 0.5f, min.z + z + 0.5f)));
-								GameObject cube = AddCube(new Vector3((float)(min.x + x + 0.5f), (float)(min.y + y + 0.5f), (float)(min.z + z + 0.5f)));
-								cube.renderer.material.color = new Color((float)(tri.normal.x + 1.0f)/2.0f, (float)(tri.normal.y + 1.0f)/2.0f, (float)(tri.normal.z + 1.0f)/2.0f);
-								
-								// Voxel taken
-								voxels[indexVoxel] = 1;
-							}
-						}
-					//}
+					} 
 				}
 			}
+
+			// Fill Surfaces
+			int current = -1;
+			List<Voxel> columns = new List<Voxel>();
+			//uint[] intersections = new uint[(int)meshSize.y];
+			// The first slice of the grid
+			int sliceCount = (int)(meshSize.x * meshSize.y);
+			for (int s = 0; s < sliceCount; ++s) {
+				float x = s % meshSize.x;
+				float z = Mathf.Floor(s / meshSize.x) % meshSize.z;
+				current = -1;
+				columns.Clear();
+				// For each colum of the voxel picked from slice
+				for (int c = 0; c < meshSize.y; ++c) {
+					int indexVoxel = (int)(s + c * meshSize.x * meshSize.z);
+					Voxel voxel = voxels[indexVoxel];
+					// If voxel
+					if (voxel != null) {
+						// Grab it
+						columns.Add(voxel);
+					}
+				}
+				if (columns.Count > 1) {
+					for (int c = 0; c < columns.Count; ++c) {
+						Voxel voxel = columns[c];
+						if (voxel.normal.y <= 0) {
+							current = voxel.index;
+						} else if (voxel.normal.y > 0) {
+							if (current != -1) {
+								Voxel currentVoxel = voxels[current];
+								for (int v = (int)currentVoxel.y + 1; v < (int)voxel.y; ++v) {
+									GameObject cube = AddCube(new Vector3(x + 0.5f, v + 0.5f, z + 0.5f));
+									cube.renderer.material.color = Color.black;
+									int indexVoxelColumn = (int)(s + v * meshSize.x * meshSize.z);
+									// Voxel taken
+									voxels[indexVoxelColumn] = new Voxel(indexVoxelColumn, new Vector3(x, v, z), Vector3.zero, cube);
+								}
+								//current = -1;
+							}
+						}
+					}
+				}
+			}
+			
 		}
 
 		Debug.Log("cubeCount:" + cubeCount);
@@ -164,5 +188,57 @@ public class Engine : MonoBehaviour {
 		return cube;
 	}
 
+	void Update() {
+		/*
+		if (Input.GetButtonDown("Fire1")) {
+			int count = voxels.Length;
+			for (int v = 0; v < count; v++) {
+				Voxel voxel = voxels[v];
+				if (voxel != null) {
+					voxel.cube.rigidbody.isKinematic = false;
+					voxel.cube.rigidbody.WakeUp();
+					voxel.cube.rigidbody.AddExplosionForce(50.0f, mesh.bounds.extents * scale, mesh.bounds.extents.x, 0.0f, ForceMode.Impulse);
+				}
+			}
+		}
+		*/
+	}
+
 
 }
+
+						/*
+					if (voxel.normal.y < 0.0f) {
+						current = indexVoxel;
+					} else {
+						current = -1;
+						Voxel currentVoxel = voxels[current];
+						if (currentVoxel.normal.y < 0.0f && voxel.normal.y > 0.0f) {
+							int differenceY = (int)(voxel.y - currentVoxel.y);
+							if (differenceY > 1) {
+								//
+								for (int y = (int)currentVoxel.y + 1; y < c; ++y) {
+									GameObject cube = AddCube(new Vector3(x + 0.5f, y + 0.5f, z + 0.5f));
+									cube.renderer.material.color = Color.black;
+									//Debug.Log("yo?");
+									int indexVoxelColumn = (int)(s + y * meshSize.x * meshSize.z);
+									// Voxel taken
+									voxels[indexVoxelColumn] = new Voxel((uint)indexVoxelColumn, new Vector3(x, y, z), Vector3.zero, cube);
+								}
+								current = -1;
+							} else {
+								current = (int)indexVoxel;
+							}
+						} else { 
+							current = (int)indexVoxel;
+						}
+						}
+					} else {
+						if (current != -1) {
+							GameObject cube = AddCube(new Vector3(x + 0.5f, c + 0.5f, z + 0.5f));
+							cube.renderer.material.color = Color.black;
+							// Voxel taken
+							voxels[indexVoxel] = new Voxel((uint)indexVoxel, new Vector3(x, c, z), Vector3.zero, cube);
+						}
+					}
+						*/

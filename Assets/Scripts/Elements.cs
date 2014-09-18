@@ -38,6 +38,9 @@ public class AABox : Shape
 		double coords = end.x;switch (index) { case 1 : coords = end.y; break; case 2 : coords = end.z; break; } return coords;}
 }
 
+// Brandon Pelfrey's Octree class
+// Translated to C# by Leon & Naima
+
 // Octree Point
 public class OctreePoint {
 	public Vector3 position; 
