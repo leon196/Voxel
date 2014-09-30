@@ -21,6 +21,8 @@ loader.load( 'models/mesh.obj', function ( object ) {
 			// Init Mesh
 			child.material = materialBasic;
 			scene.add( child );
+
+			console.log(child.geometry);
 		}
 	});
 });
