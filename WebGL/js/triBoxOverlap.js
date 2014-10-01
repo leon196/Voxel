@@ -2,16 +2,18 @@
 // int planeBoxOverlap({x,y,z}, {x,y,z}, {x,y,z})
 function planeBoxOverlap(normal, vert, maxbox)
 {
-	var vmin = {x:0, y:0, z:0};
-	var vmax = {x:0, y:0, z:0};
+	var vmin = new THREE.Vector3(0,0,0);
+	var vmax = new THREE.Vector3(0,0,0);
 	if(normal.x > 0) { vmin.x = -maxbox.x - vert.x; vmax.x = maxbox.x - vert.x;	}
 	else { vmin.x = maxbox.x - vert.x; vmax.x = -maxbox.x - vert.x; }
 	if(normal.y > 0) { vmin.y = -maxbox.y - vert.y; vmax.y = maxbox.y - vert.y;	}
 	else { vmin.y = maxbox.y - vert.y; vmax.y = -maxbox.y - vert.y; }
 	if(normal.z > 0) { vmin.z = -maxbox.z - vert.z; vmax.z = maxbox.z - vert.z;	}
 	else { vmin.z = maxbox.z - vert.z; vmax.z = -maxbox.z - vert.z; }
-	if (dot(normal, vmin) > 0) return 0;	
-	if (dot(normal, vmax) >= 0) return 1;	
+	var min = new THREE.Vector3(normal.x, normal.y, normal.z);
+	var max = new THREE.Vector3(normal.x, normal.y, normal.z);
+	if (min.dot(vmin) > 0) return 0;	
+	if (max.dot(vmax) >= 0) return 1;	
 	return 0;
 }
 
@@ -22,10 +24,10 @@ function triBoxOverlap(boxcenter, boxhalfsize, triangle)
 	var v1 = {x:0, y:0, z:0};
 	var v2 = {x:0, y:0, z:0};
 	var min, max, p0, p1, p2, rad, fex, fey, fez;
-	var normal = {x:0, y:0, z:0};
-	var e0 = {x:0, y:0, z:0};
-	var e1 = {x:0, y:0, z:0};
-	var e2 = {x:0, y:0, z:0};
+	var normal = new THREE.Vector3(0,0,0);
+	var e0 = new THREE.Vector3(0,0,0);
+	var e1 = new THREE.Vector3(0,0,0);
+	var e2 = new THREE.Vector3(0,0,0);
 
 	/* This is the fastest branch on Sun */
 	/* move everything so that the boxcenter is in (0,0,0) */
@@ -39,9 +41,9 @@ function triBoxOverlap(boxcenter, boxhalfsize, triangle)
 
 	/* Bullet 3:  */
 	/*  test the 9 tests first (this was faster) */
-	fex = abs(e0.x);
-	fey = abs(e0.y);
-	fez = abs(e0.z);
+	fex = Math.abs(e0.x);
+	fey = Math.abs(e0.y);
+	fez = Math.abs(e0.z);
 	//
 	p0 = e0.z * v0.y - e0.y * v0.z;
 	p2 = e0.z * v2.y - e0.y * v2.z;
@@ -61,9 +63,9 @@ function triBoxOverlap(boxcenter, boxhalfsize, triangle)
 	rad = fey * boxhalfsize.x + fex * boxhalfsize.y;
 	if (min > rad || max < -rad) return 0;
 	//
-	fex = abs(e1.x);
-	fey = abs(e1.y);
-	fez = abs(e1.z);
+	fex = Math.abs(e1.x);
+	fey = Math.abs(e1.y);
+	fez = Math.abs(e1.z);
 	//
 	p0 = e1.z * v0.y - e1.y * v0.z;
 	p2 = e1.z * v2.y - e1.y * v2.z;
@@ -83,9 +85,9 @@ function triBoxOverlap(boxcenter, boxhalfsize, triangle)
 	rad = fey * boxhalfsize.x + fex * boxhalfsize.y;
 	if (min > rad || max < -rad) return 0;
 	//
-	fex = abs(e2.x);
-	fey = abs(e2.y);
-	fez = abs(e2.z);
+	fex = Math.abs(e2.x);
+	fey = Math.abs(e2.y);
+	fez = Math.abs(e2.z);
 	//
 	p0 = e2.z * v0.y - e2.y * v0.z;
 	p1 = e2.z * v1.y - e2.y * v1.z;
@@ -111,21 +113,21 @@ function triBoxOverlap(boxcenter, boxhalfsize, triangle)
 	/*  that direction -- this is equivalent to testing a minimal AABB around */
 	/*  the triangle against the AABB */
 	/* test in X-direction */
-	min = min(v0.x, min(v1.x, v2.x));
-	max = max(v0.x, max(v1.x, v2.x));
+	min = Math.min(v0.x, Math.min(v1.x, v2.x));
+	max = Math.max(v0.x, Math.max(v1.x, v2.x));
 	if (min > boxhalfsize.x || max < -boxhalfsize.x) return 0;
 	/* test in Y-direction */
-	min = min(v0.y, min(v1.y, v2.y));
-	max = max(v0.y, max(v1.y, v2.y));
+	min = Math.min(v0.y, Math.min(v1.y, v2.y));
+	max = Math.max(v0.y, Math.max(v1.y, v2.y));
 	if (min > boxhalfsize.y || max < -boxhalfsize.y) return 0;
 	/* test in Z-direction */
-	min = min(v0.z, min(v1.z, v2.z));
-	max = max(v0.z, max(v1.z, v2.z));
+	min = Math.min(v0.z, Math.min(v1.z, v2.z));
+	max = Math.max(v0.z, Math.max(v1.z, v2.z));
 	if (min > boxhalfsize.z || max < -boxhalfsize.z) return 0;
 	/* Bullet 2: */
 	/*  test if the box intersects the plane of the triangle */
 	/*  compute plane equation of triangle: normal*x+d=0 */
-	normal = cross(e0, e1);
+	normal.crossVectors(e0, e1);
 	if ( 0 == planeBoxOverlap(normal, v0, boxhalfsize)) return 0;	
 	return 1;   /* box and triangle overlaps */
 }
