@@ -1,15 +1,20 @@
 
-function parseVoxel(geometry, scene)
-{
+function parseVoxel(geometry, scale) {
+
+	var bounds = geometry.boundingBox; // { min: new THREE.Vector3(), max: new THREE.Vector3() }
+	var vertices = geometry.vertices; // [ new THREE.Vector3(), ... ]
+	var triangles = geometry.faces;	// [ new THREE.Face3(), ... ]
+	var trianglesCount = triangles.Length;
+	var tri = new THREE.Face3();
+
 	// For each triangles
-	countTri = meshTriangles.Length;
-	console.log("countTri:" + (countTri/3));
-	for (int t = 0; t+2 < countTri; t += 3) {
+	for (int t = 0; t < trianglesCount; t++) {
 
 		// Triangle
-		tri.a = meshVertices[meshTriangles[t]] * scale + meshHalfSize;
-		tri.b = meshVertices[meshTriangles[t+1]] * scale + meshHalfSize;
-		tri.c = meshVertices[meshTriangles[t+2]] * scale + meshHalfSize;
+		var triangle = triangles[t];
+		tri.a = vertices[triangle.a] * scale + meshHalfSize;
+		tri.b = vertices[triangle.b] * scale + meshHalfSize;
+		tri.c = vertices[triangle.c] * scale + meshHalfSize;
 	    tri.normal = Vector3.Normalize(Vector3.Cross(tri.b - tri.a, tri.c - tri.a));
 	    tri.centroid = (tri.a + tri.b + tri.c) / 3.0f;
 		Vector3[] vertices = { tri.a, tri.b, tri.c };
