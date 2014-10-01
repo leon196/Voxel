@@ -96,14 +96,15 @@ function parseVoxel(voxels, meshVertices, meshTriangles, meshBounds, scale)
 			var voxel = voxels[indexVoxel];
 			if (voxel == undefined) {
 				// voxels.push(indexVoxel);
+				var boxCenter = new THREE.Vector3(box.min.x + 0.5, box.min.y + 0.5, box.min.z + 0.5);
 				// Intersection test
-				if (0 != triBoxOverlap(box.min, new THREE.Vector3(0.5, 0.5, 0.5), tri)) {
+				if (0 != triBoxOverlap(boxCenter, new THREE.Vector3(0.5, 0.5, 0.5), tri)) {
 					var pos = new THREE.Vector3(min.x + x + 0.5 - meshHalfSize.x, min.y + y + 0.5 - meshHalfSize.y, min.z + z + 0.5 - meshHalfSize.z);
 					// Voxel taken
 					voxels[indexVoxel] = new Voxel(indexVoxel, box.min, tri.normal, null);
 
 					//
-					AddCube(pos);
+					AddCube(pos, new THREE.Color((tri.normal.x + 1) / 2, (tri.normal.y + 1) / 2, (tri.normal.z + 1) / 2));
 				}
 			}
 		}
