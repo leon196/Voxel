@@ -16,20 +16,20 @@ Voxel = function (voxelIndex, voxelPosition, voxelNormal, voxelMesh)
     this.mesh = voxelMesh;
 }
 
-function parseVoxel(voxels, meshVertices, meshTriangles, meshBounds, scale)
+function parseVoxel(meshVertices, meshTriangles, meshSize_, scale_)
 {
 	var vertices = meshVertices.clone(); // [ new THREE.Vector3(), ... ]
 	var triangles = meshTriangles.clone();	// [ new THREE.Face3(), ... ]
 	var trianglesCount = triangles.length;
-	var bounds = meshBounds; // { min: new THREE.Vector3(), max: new THREE.Vector3() }
-	var meshSize = new THREE.Vector3((bounds.max.x - bounds.min.x) * scale, (bounds.max.y - bounds.min.y) * scale, (bounds.max.z - bounds.min.z) * scale);
+	// var bounds = meshBounds; // { min: new THREE.Vector3(), max: new THREE.Vector3() }
+	var meshSize = meshSize_;//new THREE.Vector3((bounds.max.x - bounds.min.x) * scale_, (bounds.max.y - bounds.min.y) * scale_, (bounds.max.z - bounds.min.z) * scale_);
 	var meshHalfSize = new THREE.Vector3(meshSize.x / 2, meshSize.y / 2, meshSize.z / 2);
 	var min = new THREE.Vector3(0,0,0);
 	var max = new THREE.Vector3(0,0,0);
 
-	voxels = new Array(Math.ceil(meshSize.x * meshSize.y * meshSize.z));
+	var voxels = new Array(Math.ceil(meshSize.x * meshSize.y * meshSize.z));
 
-	console.log(meshHalfSize);
+	// console.log(meshHalfSize);
 
 	// For each triangles
 	for (var t = 0; t < trianglesCount; t++) {
@@ -39,11 +39,11 @@ function parseVoxel(voxels, meshVertices, meshTriangles, meshBounds, scale)
 		var triangle = triangles[t];
 		// console.log(vertices[triangle.a]);
 		tri.a = vertices[triangle.a].clone();
-		tri.a.multiplyScalar(scale).add(meshHalfSize);
+		tri.a.multiplyScalar(scale_).add(meshHalfSize);
 		tri.b = vertices[triangle.b].clone();
-		tri.b.multiplyScalar(scale).add(meshHalfSize);
+		tri.b.multiplyScalar(scale_).add(meshHalfSize);
 		tri.c = vertices[triangle.c].clone();
-		tri.c.multiplyScalar(scale).add(meshHalfSize);
+		tri.c.multiplyScalar(scale_).add(meshHalfSize);
 
 		// Normal
 		var nAB = new THREE.Vector3(0,0,0);
@@ -101,12 +101,20 @@ function parseVoxel(voxels, meshVertices, meshTriangles, meshBounds, scale)
 				if (0 != triBoxOverlap(boxCenter, new THREE.Vector3(0.5, 0.5, 0.5), tri)) {
 					var pos = new THREE.Vector3(min.x + x + 0.5 - meshHalfSize.x, min.y + y + 0.5 - meshHalfSize.y, min.z + z + 0.5 - meshHalfSize.z);
 					// Voxel taken
-					voxels[indexVoxel] = new Voxel(indexVoxel, box.min, tri.normal, null);
+					voxels[indexVoxel] = new Voxel(indexVoxel, box.min, tri.normal, undefined);
 
 					//
-					AddCube(pos, new THREE.Color((tri.normal.x + 1) / 2, (tri.normal.y + 1) / 2, (tri.normal.z + 1) / 2));
+					octree.insert(pos);
+
+					// console.log(indexVoxel);
+
+					//
+					// var scale = {x:1, y:1, z:1};
+					AddCube(pos, {x:1, y:1, z:1}, new THREE.Color((tri.normal.x + 1) / 2, (tri.normal.y + 1) / 2, (tri.normal.z + 1) / 2));
 				}
 			}
 		}
 	}
+
+	// return voxels;
 }
