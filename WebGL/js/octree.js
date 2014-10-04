@@ -35,6 +35,10 @@ Octree = function(origin_, halfDimension_) {
 		return this.children[0] == undefined;
 	}
 
+	this.hasChildren = function() {
+		return !this.isLeafNode();
+	}
+
 	this.insert = function(point) {
 		// If this node doesn't have a data point yet assigned 
 		// and it is a leaf, then we're done!

@@ -6,14 +6,23 @@ Triangle = function ()
 	this.normal = new THREE.Vector3(0,0,0);
 }
 
-Voxel = function (voxelIndex, voxelPosition, voxelNormal, voxelMesh)
+Voxel = function (voxelIndex_, voxelPosition_, voxelNormal_, voxelMesh_)
 {
-    this.index = voxelIndex;
-    this.x = voxelPosition.x;
-    this.y = voxelPosition.y;
-    this.z = voxelPosition.z;
-    this.normal = voxelNormal;
-    this.mesh = voxelMesh;
+    this.index = voxelIndex_;
+    this.x = voxelPosition_.x;
+    this.y = voxelPosition_.y;
+    this.z = voxelPosition_.z;
+    this.normal = voxelNormal_;
+    this.mesh = voxelMesh_;
+
+    this.updateDisplay = function() {
+    	this.mesh.visible = parameters.voxelVisible;
+    	var color;
+    	if (parameters.voxelColorNormal) { color = new THREE.Color((this.normal.x + 1) / 2, (this.normal.y + 1) / 2, (this.normal.z + 1) / 2); }
+    	else { color = new THREE.Color(parameters.voxelColor); }
+    	this.mesh.material.color = color;
+    	this.mesh.material.wireframe = parameters.voxelWire;
+    }
 }
 
 function parseVoxel(meshVertices, meshTriangles, meshSize_, scale_)
@@ -27,7 +36,7 @@ function parseVoxel(meshVertices, meshTriangles, meshSize_, scale_)
 	var min = new THREE.Vector3(0,0,0);
 	var max = new THREE.Vector3(0,0,0);
 
-	var voxels = new Array(Math.ceil(meshSize.x * meshSize.y * meshSize.z));
+	var gridBuffer = new Array(Math.ceil(meshSize.x * meshSize.y * meshSize.z));
 
 	// console.log(meshHalfSize);
 
@@ -92,29 +101,32 @@ function parseVoxel(meshVertices, meshTriangles, meshSize_, scale_)
 			box.max.z = min.z + z + 1;
 
 			// Unique ID by position
-			var indexVoxel = Math.floor(min.x + x + (min.z + z) * meshSize.x + (min.y + y) * (meshSize.x * meshSize.z));
-			var voxel = voxels[indexVoxel];
-			if (voxel == undefined) {
-				// voxels.push(indexVoxel);
-				var boxCenter = new THREE.Vector3(box.min.x + 0.5, box.min.y + 0.5, box.min.z + 0.5);
+			var gridIndex = Math.floor(min.x + x + (min.z + z) * meshSize.x + (min.y + y) * (meshSize.x * meshSize.z));
+			var gridBufferUnit = gridBuffer[gridIndex];
+			if (gridBufferUnit == undefined)
+			{
+				var boxCenter = { x:box.min.x + 0.5, y:box.min.y + 0.5, z:box.min.z + 0.5 };
 				// Intersection test
-				if (0 != triBoxOverlap(boxCenter, new THREE.Vector3(0.5, 0.5, 0.5), tri)) {
+				if (0 != triBoxOverlap(boxCenter, {x:0.5, y:0.5, z:0.5}, tri))
+				{
+					// Voxel position
 					var pos = new THREE.Vector3(min.x + x + 0.5 - meshHalfSize.x, min.y + y + 0.5 - meshHalfSize.y, min.z + z + 0.5 - meshHalfSize.z);
-					// Voxel taken
-					voxels[indexVoxel] = new Voxel(indexVoxel, box.min, tri.normal, undefined);
 
-					//
+					// Create mesh cube
+					var cube = AddCube(pos, {x:1, y:1, z:1}, new THREE.Color((tri.normal.x + 1) / 2, (tri.normal.y + 1) / 2, (tri.normal.z + 1) / 2));
+
+					// Define the position (no duplicate)
+					gridBuffer[gridIndex] = 1;
+
+					// Create voxel
+					voxels.push(new Voxel(gridIndex, box.min, tri.normal, cube));
+
+					// Octree insertion
 					octree.insert(pos);
-
-					// console.log(indexVoxel);
-
-					//
-					// var scale = {x:1, y:1, z:1};
-					AddCube(pos, {x:1, y:1, z:1}, new THREE.Color((tri.normal.x + 1) / 2, (tri.normal.y + 1) / 2, (tri.normal.z + 1) / 2));
 				}
 			}
 		}
 	}
 
-	// return voxels;
+	// return gridBuffer;
 }

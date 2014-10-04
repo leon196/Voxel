@@ -12,8 +12,14 @@ document.body.appendChild( renderer.domElement );
 // renderer.shadowMapEnabled = true;
 // renderer.shadowMapCullFace = THREE.CullFaceBack;
 
+// Setup Parameters
+var parameters = new Parameters();
+
+// Setup GUI
+initGUI();
+
 // Setup View
-camera.position.z = 100;
+camera.position.z = 30;
 
 // Setup Controls
 controls = new THREE.OrbitControls( camera );
@@ -53,12 +59,13 @@ dirLight.shadowDarkness = 0.35;*/
 // ground.receiveShadow = true;
 
 // Setup Assets
-var materialBasic = new THREE.MeshBasicMaterial( { color: 0x6600FF, wireframe: true } );
+var materialBasic = new THREE.MeshBasicMaterial( { color: 0xff8800 } );
 var materialBasicRed = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: 0xffdddd, specular: 0xff0066, shininess: 10, shading: THREE.FlatShading } );
 var geometryCube = new THREE.BoxGeometry(1,1,1);
 
-var octree;
+var model, octree;
 var cubes = [];
+var voxels = [];
 
 // Load Mesh
 var loader = new THREE.OBJLoader();
@@ -68,16 +75,21 @@ loader.load( 'models/mesh.obj', function ( object ) {
 
 	    if ( child.geometry !== undefined ) {
 
-	        child.geometry.computeBoundingBox();
-	        var bounds = child.geometry.boundingBox;
-	        var vertices = child.geometry.vertices.clone();
-	        var faces = child.geometry.faces.clone();
+	    	model = child;
 
-	        var scale = 4;
+	        model.geometry.computeBoundingBox();
+	        var bounds = model.geometry.boundingBox;
+	        var vertices = model.geometry.vertices.clone();
+	        var faces = model.geometry.faces.clone();
 
-	        child.scale.set(scale, scale, scale);
-			child.material = materialBasic;
-			scene.add( child );
+	        var scale = parameters.modelScale;
+
+	        model.scale.set(scale, scale, scale);
+			model.material = materialBasic;
+			// console.log(parameters.modelColor);
+			// model.material.color = parameters.modelColor;
+			scene.add( model );
+
 
 			var meshSize = new THREE.Vector3(
 				(bounds.max.x - bounds.min.x) * scale,
@@ -89,8 +101,8 @@ loader.load( 'models/mesh.obj', function ( object ) {
 			// 	y: meshSize.y / 2,
 			// 	z: meshSize.z / 2 }
 			// console.log(meshSize);
-
-			octree = new Octree({x:0, y:0, z:0}, {x:Math.ceil(meshSize.x), y:Math.ceil(meshSize.y), z:Math.ceil(meshSize.z)});
+			var dimensionMax = Math.max(Math.floor(meshSize.x), Math.max(Math.floor(meshSize.y), Math.floor(meshSize.z)));
+			octree = new Octree({x:0, y:0, z:0}, {x:dimensionMax, y:dimensionMax, z:dimensionMax});
 
 			parseVoxel(vertices, faces, meshSize, scale);
 
@@ -103,7 +115,7 @@ loader.load( 'models/mesh.obj', function ( object ) {
 			// for (var i = 0; i < voxelCount; ++i) {
 
 			// }
-			console.log(cubes.length);
+			// console.log(cubes.length);
 
 			// for (var i = 0; i < cubes.length; ++i) {
 			// 	scene.remove(cubes[i]);
@@ -111,7 +123,8 @@ loader.load( 'models/mesh.obj', function ( object ) {
 
 			// cubes = [];
 
-			// IterateOctree(octree, 16);
+			// var lod = 0;
+			// IterateOctree(octree, lod);
 
 			// console.log(cubes.length);
 	    }
@@ -119,50 +132,73 @@ loader.load( 'models/mesh.obj', function ( object ) {
 	} );
 });
 
+function updateDisplay()
+{
+	// Model
+	model.visible = parameters.modelVisible;
+	model.material.color = new THREE.Color(parameters.modelColor);
+	model.material.wireframe = parameters.modelWire;
+	model.scale.set(parameters.modelScale, parameters.modelScale, parameters.modelScale);
+	// Voxels
+	for (var v = 0; v < voxels.length; v++) { voxels[v].updateDisplay(); }
+}
+
 // AddCube({x,y,z})
 function AddCube(position, dimension, color) {
-	var mat = new THREE.MeshBasicMaterial( { color: color/*, wireframe:true*/ } );
+	var mat = new THREE.MeshBasicMaterial( { color: color, wireframe:parameters.voxelWire } );
 	var cube = new THREE.Mesh( geometryCube, mat );
 	cube.position.set(position.x, position.y, position.z);
 	cube.scale.set(dimension.x, dimension.y, dimension.z);
-	cube.castShadow = true;
 	cube.material.color = color;
-	cubes.push(cube);
+	// cube.castShadow = true;
+	// cubes.push(cube);
 	// cube.receiveShadow = true;
 	scene.add( cube );
+	return cube;
 }
 
 function IterateOctree(octreeRoot, count) {
-	// if (octreeRoot != undefined) {
-		if (!octreeRoot.isLeafNode()) {
-			for (var i = 0; i < 8; ++i) {
-				var octreeChild = octreeRoot.children[i];
-				if (count == 0) {
-					var newDimension = {
-						x: octreeChild.halfDimension.x * 2.0,
-						y: octreeChild.halfDimension.y * 2.0,
-						z: octreeChild.halfDimension.z * 2.0};
-					if (!octreeChild.isLeafNode()) {
-						AddCube(octreeChild.origin, newDimension, new THREE.Color(1,0,0));
-					} else {
-						if (octreeChild.data != undefined ) {
-							var point = octreeChild.data;
-							AddCube(point, newDimension, new THREE.Color(1,0,0));
-						}
-					}
-				} else {
-					IterateOctree(octreeChild, --count);
-				}
-			}
-		} else if (octreeRoot.data != undefined) {
+	var color = new THREE.Color(1,0,0);
+	if (octreeRoot.hasChildren()) {
+		for (var i = 0; i < 8; ++i) {
+			var octreeChild = octreeRoot.children[i];
 			var newDimension = {
-				x: octreeRoot.halfDimension.x * 2.0,
-				y: octreeRoot.halfDimension.y * 2.0,
-				z: octreeRoot.halfDimension.z * 2.0};
-			var point = octreeRoot.data;
-			AddCube(point, newDimension, new THREE.Color(1,0,0));
+				x: octreeChild.halfDimension.x * 2,
+				y: octreeChild.halfDimension.y * 2,
+				z: octreeChild.halfDimension.z * 2};
+			if (count == 0) {
+				if (octreeChild.hasChildren() || octreeChild.data != undefined) {
+					AddCube(octreeChild.origin, newDimension, new THREE.Color(1,0,0));
+				}
+			} else {
+				IterateOctree(octreeChild, count - 1);
+			}
 		}
-	// }
+	}
+	else if (octreeRoot.data != undefined) {
+		var dimension = {
+			x: octreeRoot.halfDimension.x * 2,
+			y: octreeRoot.halfDimension.y * 2,
+			z: octreeRoot.halfDimension.z * 2};
+		AddCube(octreeRoot.origin, dimension, new THREE.Color(1,0,0));
+	// 	// console.log("count : " + count);
+	// 	var point = octreeRoot.data;
+
+	// 	if (count == 0) {
+	// 		var newDimension = {
+	// 			x: octreeRoot.halfDimension.x * 2.0,
+	// 			y: octreeRoot.halfDimension.y * 2.0,
+	// 			z: octreeRoot.halfDimension.z * 2.0};
+
+	// 		AddCube(point, newDimension, color);
+	// 		// AddCube(octreeRoot.origin, newDimension, new THREE.Color(1,0,0));
+	// 	} else {
+	// 		var i = octreeRoot.getOctantContainingPoint(point);
+	// 		octreeRoot.split();
+	// 		IterateOctree(octreeChild, --count);
+	// 		// var octreeDepth = new Octree(octreeRoot.origin)
+	// 	}
+	}
 }
 
 // Render
