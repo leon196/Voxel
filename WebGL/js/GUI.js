@@ -2,32 +2,62 @@ var gui = new dat.GUI();
 	
 Parameters = function() {
 	// Display Parameters
+
+	// Model
 	this.modelVisible = true; 
-	this.modelWire = true;
+	this.modelWire = false;
+	this.modelSmooth = true;
 	this.modelColor = "#ff8800";
+	// Voxel
 	this.voxelVisible = true;
 	this.voxelWire = true;
 	this.voxelColorNormal = true;
 	this.voxelColor = "#88ff00";
+	// Octree
+	this.octreeVisible = true;
+	this.octreeWire = true;
+	this.octreeColor = "#0088ff";
 
 	// Global parameters
-	this.modelScale = 8;
+	this.modelScale = 16;
+	this.octreeLOD = 4;
+	this.voxelAutoUpdate = false;
 
 	// Buttons
-	// this.cleanVoxels = function() { cleanVoxels(); }
+	this.reparseVoxels = function() { reparseVoxels(); }
 	// this.parseVoxels = function() { parseVoxels(); }
 };
 
 function initGUI()
 {
+	// Display
 	var folderDisplay = gui.addFolder('Display Options');
-	folderDisplay.add( parameters, 'modelVisible' ).name('Show Model').onChange(updateDisplay);
-	folderDisplay.add( parameters, 'modelWire' ).name('Model Wireframe').onChange(updateDisplay);
-	folderDisplay.addColor( parameters, 'modelColor' ).name('Model Color').onChange(updateDisplay);
-	folderDisplay.add( parameters, 'voxelVisible' ).name('Show Voxel').onChange(updateDisplay);
-	folderDisplay.add( parameters, 'voxelWire' ).name('Voxel Wireframe').onChange(updateDisplay);
-	folderDisplay.add( parameters, 'voxelColorNormal' ).name('Voxel Normal Color').onChange(updateDisplay);
-	folderDisplay.addColor( parameters, 'voxelColor' ).name('Voxel Color').onChange(updateDisplay);
+	// Model
+	var folderDisplayModel = folderDisplay.addFolder('Model');
+	folderDisplayModel.add( parameters, 'modelVisible' ).name('Show').onChange(updateDisplay);
+	folderDisplayModel.add( parameters, 'modelWire' ).name('Wireframe').onChange(updateDisplay);
+	// folderDisplayModel.add( parameters, 'modelSmooth' ).name('Smooth Shading').onChange(updateDisplay);
+	folderDisplayModel.addColor( parameters, 'modelColor' ).name('Color').onChange(updateDisplay);
+	folderDisplayModel.open();
+	// Voxel
+	var folderDisplayVoxel = folderDisplay.addFolder('Voxel');
+	folderDisplayVoxel.add( parameters, 'voxelVisible' ).name('Show').onChange(updateDisplay);
+	folderDisplayVoxel.add( parameters, 'voxelWire' ).name('Wireframe').onChange(updateDisplay);
+	// folderDisplayVoxel.add( parameters, 'voxelColorNormal' ).name('Normal Color').onChange(updateDisplay);
+	folderDisplayVoxel.addColor( parameters, 'voxelColor' ).name('Color').onChange(updateDisplay);
+	folderDisplayVoxel.open();
+	// Octree
+	var folderDisplayOctree = folderDisplay.addFolder('Octree');
+	folderDisplayOctree.add( parameters, 'octreeVisible' ).name('Show').onChange(updateDisplay);
+	folderDisplayOctree.add( parameters, 'octreeWire' ).name('Wireframe').onChange(updateDisplay);
+	folderDisplayOctree.addColor( parameters, 'octreeColor' ).name('Color').onChange(updateDisplay);
+	folderDisplayOctree.open();
+
+	gui.add( parameters, 'modelScale').min(1).max(32).step(1).name('Model Scale').onChange(updateScale);
+	gui.add( parameters, 'octreeLOD').min(0).max(8).step(1).name('Level of Details').onChange(updateLOD);
+	gui.add( parameters, 'voxelAutoUpdate' ).name('Auto Update');
+	gui.add( parameters, 'reparseVoxels' ).name('Generate Voxels');
+	gui.open();
 	// folderDisplay.open();
 
 	// controller.onChange(function(value) {
@@ -41,9 +71,6 @@ function initGUI()
 
 	// var folderVoxel = gui.addFolder('Voxel Options');
 	// folderVoxel.open();
-	gui.add( parameters, 'modelScale').min(1).max(128).step(1).name('Model Scale').onChange(updateDisplay);
-	// gui.add( parameters, 'parseVoxel' ).name('Generate Voxel');
-	gui.open();
 }
 /*
 var folder1 = gui.addFolder('Coordinates');

@@ -15,14 +15,7 @@ Voxel = function (voxelIndex_, voxelPosition_, voxelNormal_, voxelMesh_)
     this.normal = voxelNormal_;
     this.mesh = voxelMesh_;
 
-    this.updateDisplay = function() {
-    	this.mesh.visible = parameters.voxelVisible;
-    	var color;
-    	if (parameters.voxelColorNormal) { color = new THREE.Color((this.normal.x + 1) / 2, (this.normal.y + 1) / 2, (this.normal.z + 1) / 2); }
-    	else { color = new THREE.Color(parameters.voxelColor); }
-    	this.mesh.material.color = color;
-    	this.mesh.material.wireframe = parameters.voxelWire;
-    }
+    //if (parameters.voxelColorNormal) { this.mesh.material.color = new THREE.Color((this.normal.x + 1) / 2, (this.normal.y + 1) / 2, (this.normal.z + 1) / 2); }
 }
 
 function parseVoxel(meshVertices, meshTriangles, meshSize_, scale_)
@@ -113,7 +106,7 @@ function parseVoxel(meshVertices, meshTriangles, meshSize_, scale_)
 					var pos = new THREE.Vector3(min.x + x + 0.5 - meshHalfSize.x, min.y + y + 0.5 - meshHalfSize.y, min.z + z + 0.5 - meshHalfSize.z);
 
 					// Create mesh cube
-					var cube = AddCube(pos, {x:1, y:1, z:1}, new THREE.Color((tri.normal.x + 1) / 2, (tri.normal.y + 1) / 2, (tri.normal.z + 1) / 2));
+					var cube = AddCubeVoxel(pos, {x:1, y:1, z:1});
 
 					// Define the position (no duplicate)
 					gridBuffer[gridIndex] = 1;

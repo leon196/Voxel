@@ -39,6 +39,16 @@ Octree = function(origin_, halfDimension_) {
 		return !this.isLeafNode();
 	}
 
+	this.hasAllChildren = function() {
+		for (var c = 0; c < 8; ++c) {
+			var octree = this.children[c];
+			if (!octree.isLeafNode() || (octree.isLeafNode && octree.data == undefined)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	this.insert = function(point) {
 		// If this node doesn't have a data point yet assigned 
 		// and it is a leaf, then we're done!
@@ -86,10 +96,38 @@ Octree = function(origin_, halfDimension_) {
 		}
 	}
 
+	this.split = function()
+	{
+		// Save this data point that was here for a later re-insert
+		var oldPoint = this.data;
+		this.data = undefined;
+
+		// Split the current node and create new empty trees for each
+		// child octant.
+		for(var i=0; i<8; ++i) {
+			// Compute new bounding box for this child
+			var newOrigin = {
+				x: this.origin.x + this.halfDimension.x * ((i&4) != 0 ? 0.5 : -0.5),
+				y: this.origin.y + this.halfDimension.y * ((i&2) != 0 ? 0.5 : -0.5),
+				z: this.origin.z + this.halfDimension.z * ((i&1) != 0 ? 0.5 : -0.5)};
+			var newDimension = { 
+				x: this.halfDimension.x * 0.5,
+				y: this.halfDimension.y * 0.5,
+				z: this.halfDimension.z * 0.5};
+			this.children[i] = new Octree(newOrigin, newDimension);
+		}
+
+		// Re-insert the old point, and insert this new point
+		// (We wouldn't need to insert from the root, because we already
+		// know it's guaranteed to be in this section of the tree)
+		this.children[this.getOctantContainingPoint(oldPoint)].insert(oldPoint);
+	}
+
+
 	// This is a really simple routine for querying the tree for points
 	// within a bounding box defined by min/max points (bmin, bmax)
 	// All results are pushed into 'results'
-	function getPointsInsideBox(bmin, bmax, results) {
+	this.getPointsInsideBox = function(bmin, bmax, results) {
 		// If we're at a leaf node, just see if the current data point is inside
 		// the query bounding box
 		if (this.isLeafNode()) {
