@@ -68,10 +68,11 @@ var materials = [
 		color:0x773300
 	})];
 var materialsOctree = [
-	new THREE.MeshBasicMaterial({
+	/*new THREE.MeshBasicMaterial({
 		color:parameters.octreeColor,
 		wire: parameters.octreeWire
-	}),
+	}),*/
+	new THREE.MeshNormalMaterial(),
 	new THREE.MeshBasicMaterial({
 		color:0xff6600,
 		wire: parameters.octreeWire
@@ -95,7 +96,8 @@ loader.load( 'models/mesh.obj', function ( object ) {
 			updateVoxel();
 
 			// Octree
-			IterateOctree(octree, parameters.octreeLOD);
+			// IterateOctree(octree, parameters.octreeLOD);
+			ExploreOctree(octree, camera.position);
 
 			UpdateRootGeometryVoxel();
 			UpdateRootGeometryOctree();

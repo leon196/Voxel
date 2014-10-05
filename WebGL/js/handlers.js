@@ -1,3 +1,6 @@
+//
+function distanceBetween(a, b) { return Math.sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y)+(a.z-b.z)*(a.z-b.z)); }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Display Handlers 
 
@@ -102,7 +105,8 @@ function UpdateRootGeometryVoxel()
 function updateLOD()
 {
 	ResetRootGeometryOctree();
-	IterateOctree(octree, parameters.octreeLOD);
+	// IterateOctree(octree, parameters.octreeLOD);
+	ExploreOctree(octree, camera.position);
 	UpdateRootGeometryOctree();
 }
 
@@ -185,5 +189,61 @@ function IterateOctree(octreeRoot, count) {
 		else if (parameters.octreeShowEmpty) {
 			AddCubeOctree(octreeRoot.origin, dimension, 1);
 		}
+	}
+}
+
+function ExploreOctree(octreeRoot, position) {
+	var color = new THREE.Color(1,0,0);
+	var dimension = {
+		x: octreeRoot.halfDimension.x * 2,
+		y: octreeRoot.halfDimension.y * 2,
+		z: octreeRoot.halfDimension.z * 2};
+	var distance = distanceBetween(position, octreeRoot.origin) * 0.01;
+
+	// Reached level of details or minimum size
+	if (distance > octreeRoot.halfDimension.x || octreeRoot.halfDimension.x <= 0.5) {
+		if (octreeRoot.hasChildren() || octreeRoot.data != undefined) {
+			AddCubeOctree(octreeRoot.origin, dimension, 0);
+		}
+	} else {
+		// Octree Node has children
+		if (octreeRoot.hasChildren()) {
+			// Octree Node has 8 children with data in each
+			if (octreeRoot.hasAllChildren()) {
+				AddCubeOctree(octreeRoot.origin, dimension, 0);
+			}
+			// Iterate each children
+			else {
+				for (var i = 0; i < 8; ++i) {
+					var octreeChild = octreeRoot.children[i];
+					dimension = {
+						x: octreeChild.halfDimension.x * 2,
+						y: octreeChild.halfDimension.y * 2,
+						z: octreeChild.halfDimension.z * 2};
+					distance = distanceBetween(position, octreeChild.origin) * 0.1;
+					// If we have reach level of details
+					if (distance > octreeChild.halfDimension.x) {
+						// If octree node has children or has data
+						if (octreeChild.hasChildren() || octreeChild.data != undefined) {
+							AddCubeOctree(octreeChild.origin, dimension, 0);
+						}
+					// Iterate more level of details
+					} else {
+						ExploreOctree(octreeChild, position);
+					}
+				}
+			}
+		}
+		// Octree Node is a leaf and got data
+		// else if (octreeRoot.data != undefined) {
+
+		// 	//
+		// 	// var i = octreeRoot.getOctantContainingPoint(point);
+		// 	octreeRoot.split();
+		// 	for (var i = 0; i < 8; ++i) {
+		// 		var octreeChild = octreeRoot.children[i];
+		// 		ExploreOctree(octreeChild, position);
+		// 	}
+		// }
 	}
 }

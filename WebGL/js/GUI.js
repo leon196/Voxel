@@ -9,13 +9,13 @@ Parameters = function() {
 	this.modelSmooth = true;
 	this.modelColor = "#ff8800";
 	// Voxel
-	this.voxelVisible = true;
+	this.voxelVisible = false;
 	this.voxelWire = true;
 	this.voxelColorNormal = true;
 	this.voxelColor = "#88ff00";
 	// Octree
 	this.octreeVisible = true;
-	this.octreeWire = true;
+	this.octreeWire = false;
 	this.octreeShowEmpty = false;
 	this.octreeColor = "#0088ff";
 
@@ -56,7 +56,7 @@ function initGUI()
 	folderDisplayOctree.open();
 
 	gui.add( parameters, 'modelScale').min(1).max(32).step(1).name('Model Scale').onChange(updateScale);
-	gui.add( parameters, 'octreeLOD').min(0).max(8).step(1).name('Level of Details').onChange(updateLOD);
+	gui.add( parameters, 'octreeLOD').min(0).max(6).step(1).name('Level of Details').onChange(updateLOD);
 	gui.add( parameters, 'voxelAutoUpdate' ).name('Auto Update');
 	gui.add( parameters, 'reparseVoxels' ).name('Generate Voxels');
 	gui.open();

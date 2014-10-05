@@ -370,6 +370,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 		if ( state === STATE.ROTATE ) {
 
 			if ( scope.noRotate === true ) return;
+		
+			updateLOD();
 
 			rotateEnd.set( event.clientX, event.clientY );
 			rotateDelta.subVectors( rotateEnd, rotateStart );
@@ -385,6 +387,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 		} else if ( state === STATE.DOLLY ) {
 
 			if ( scope.noZoom === true ) return;
+
+			updateLOD();
 
 			dollyEnd.set( event.clientX, event.clientY );
 			dollyDelta.subVectors( dollyEnd, dollyStart );
@@ -404,6 +408,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 		} else if ( state === STATE.PAN ) {
 
 			if ( scope.noPan === true ) return;
+			
+			updateLOD();
 
 			panEnd.set( event.clientX, event.clientY );
 			panDelta.subVectors( panEnd, panStart );
@@ -432,6 +438,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 	function onMouseWheel( event ) {
 
 		if ( scope.enabled === false || scope.noZoom === true ) return;
+		
+		updateLOD();
 
 		event.preventDefault();
 		event.stopPropagation();
