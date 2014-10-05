@@ -4,6 +4,12 @@ Octree = function(origin_, halfDimension_) {
 	// box of this node
 	this.origin = origin_;         //! The physical center of this node
 	this.halfDimension = halfDimension_;  //! Half the width/height/depth of this node
+	this.left = this.origin.x - this.halfDimension.x;
+	this.right = this.origin.x + this.halfDimension.x;
+	this.bottom = this.origin.y - this.halfDimension.x;
+	this.top = this.origin.y + this.halfDimension.x;
+	this.back = this.origin.z - this.halfDimension.x;
+	this.front = this.origin.z + this.halfDimension.x;
 
 	// The tree has up to eight children and can additionally store
 	// a point, though in many applications only, the leaves will store data.
@@ -121,6 +127,35 @@ Octree = function(origin_, halfDimension_) {
 		// (We wouldn't need to insert from the root, because we already
 		// know it's guaranteed to be in this section of the tree)
 		this.children[this.getOctantContainingPoint(oldPoint)].insert(oldPoint);
+	}
+
+	this.search = function(origin, direction, distance)
+	{
+		var directionPct = { x:1/direction, y:1/direction, z:1/direction };
+
+		var t1 = ( this.left - origin.x ) * directionPct.x,
+			t2 = ( this.right - origin.x ) * directionPct.x,
+			t3 = ( this.bottom - origin.y ) * directionPct.y,
+			t4 = ( this.top - origin.y ) * directionPct.y,
+			t5 = ( this.back - origin.z ) * directionPct.z,
+			t6 = ( this.front - origin.z ) * directionPct.z,
+			tmax = Math.min( Math.min( Math.max( t1, t2), Math.max( t3, t4) ), Math.max( t5, t6) ),
+			tmin;
+
+		// ray would intersect in reverse direction, i.e. this is behind ray
+		if (tmax < 0)
+		{
+			return false;
+		}
+		
+		tmin = Math.max( Math.max( Math.min( t1, t2), Math.min( t3, t4)), Math.min( t5, t6));
+		
+		// if tmin > tmax or tmin > ray distance, ray doesn't intersect AABB
+		if( tmin > tmax || tmin > distance ) {
+			return false;
+		}
+		
+		return true;
 	}
 
 

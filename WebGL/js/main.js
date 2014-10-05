@@ -33,12 +33,17 @@ dirLight.position.multiplyScalar( 50 );
 scene.add( dirLight );
 
 // Setup Assets
-var materialMesh = new THREE.MeshPhongMaterial({ ambient: 0x030303, color: parameters.modelColor, specular: 0x660066, shininess: 10 });
-// var materialVoxel = new THREE.MeshNormalMaterial();
-var materialVoxel = new THREE.MeshPhongMaterial({ ambient: 0x030303, color: parameters.voxelColor, specular: 0x660066, shininess: 10 });
-// var materialOctree = new THREE.MeshNormalMaterial();
-var materialOctree = new THREE.MeshPhongMaterial({ ambient: 0x030303, color: parameters.octreeColor, specular: 0x660066, shininess: 10 });
+// var textureBrick = THREE.ImageUtils.loadTexture( "textures/BrickOldRounded0134_2_S.jpg" );
+// var textureIvy = THREE.ImageUtils.loadTexture( "textures/Ivy0021_5_S.jpg" );
+// var textureWood = THREE.ImageUtils.loadTexture( "textures/WoodPlanksBare0171_7_S.jpg" );
+
+// 
+var materialMesh = new THREE.MeshPhongMaterial({ color: parameters.modelColor, ambient: 0x030303, specular: 0x660066, shininess: 10 });
+var materialVoxel = new THREE.MeshBasicMaterial({ color: parameters.voxelColor, ambient: 0x030303, specular: 0x660066, shininess: 10 });
+var materialColorNormal = new THREE.MeshNormalMaterial();
+// var materialOctree = new THREE.MeshBasicMaterial({ color: parameters.octreeColor, wire: parameters.octreeWire });
 var geometryCube = new THREE.BoxGeometry(1,1,1);
+for (var i = 0; i < geometryCube.faces.length; ++i) { geometryCube.faces[i].materialIndex = 0; }
 
 
 // Setup Content
@@ -51,6 +56,26 @@ var model, octree;
 // var cubes = [];
 var voxels = [];
 var octreeVoxels = [];
+var materials = [
+	new THREE.MeshNormalMaterial(),
+	new THREE.MeshBasicMaterial({
+		color:0xff3300
+	}),
+	new THREE.MeshBasicMaterial({
+		color:0xcc3300
+	}),
+	new THREE.MeshBasicMaterial({
+		color:0x773300
+	})];
+var materialsOctree = [
+	new THREE.MeshBasicMaterial({
+		color:parameters.octreeColor,
+		wire: parameters.octreeWire
+	}),
+	new THREE.MeshBasicMaterial({
+		color:0xff6600,
+		wire: parameters.octreeWire
+	})];
 
 // Load Mesh
 var loader = new THREE.OBJLoader();
@@ -83,52 +108,20 @@ loader.load( 'models/mesh.obj', function ( object ) {
 	} );
 });
 
-function ResetRootGeometryVoxel()
-{
-	rootGeometryVoxel.dispose();
-	rootGeometryVoxel = new THREE.Geometry();
-	scene.remove( rootMeshVoxel );	
-}
-
-function UpdateRootGeometryVoxel()
-{
-	rootGeometryVoxel.computeFaceNormals();
-	rootMeshVoxel = new THREE.Mesh( rootGeometryVoxel, materialVoxel );
-	rootMeshVoxel.matrixAutoUpdate = false;
-	rootMeshVoxel.updateMatrix();
-	scene.add( rootMeshVoxel );	
-}
-
-function ResetRootGeometryOctree()
-{
-	rootGeometryOctree.dispose();
-	rootGeometryOctree = new THREE.Geometry();
-	scene.remove( rootMeshOctree );	
-}
-
-function UpdateRootGeometryOctree()
-{
-	rootGeometryOctree.computeFaceNormals();
-	rootMeshOctree = new THREE.Mesh( rootGeometryOctree, materialOctree );
-	rootMeshOctree.matrixAutoUpdate = false;
-	rootMeshOctree.updateMatrix();
-	scene.add( rootMeshOctree );	
-}
-
-function AddCubeVoxel(position, dimension) {
-	var cube = new THREE.Mesh( geometryCube, materialVoxel );
+function AddCubeVoxel(position, dimension, materialIndex) {
+	var cube = new THREE.Mesh( geometryCube );
 	cube.position.set(position.x, position.y, position.z);
 	cube.scale.set(dimension.x, dimension.y, dimension.z);
 	cube.updateMatrix();
-	rootGeometryVoxel.merge(cube.geometry, cube.matrix);
+	rootGeometryVoxel.merge(cube.geometry, cube.matrix, materialIndex);
 	return cube;
 }
-function AddCubeOctree(position, dimension) {
-	var cube = new THREE.Mesh( geometryCube, materialVoxel );
+function AddCubeOctree(position, dimension, materialIndex) {
+	var cube = new THREE.Mesh( geometryCube );
 	cube.position.set(position.x, position.y, position.z);
 	cube.scale.set(dimension.x, dimension.y, dimension.z);
 	cube.updateMatrix();
-	rootGeometryOctree.merge(cube.geometry, cube.matrix);
+	rootGeometryOctree.merge(cube.geometry, cube.matrix, materialIndex);
 	return cube;
 }
 

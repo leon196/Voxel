@@ -106,7 +106,7 @@ function parseVoxel(meshVertices, meshTriangles, meshSize_, scale_)
 					var pos = new THREE.Vector3(min.x + x + 0.5 - meshHalfSize.x, min.y + y + 0.5 - meshHalfSize.y, min.z + z + 0.5 - meshHalfSize.z);
 
 					// Create mesh cube
-					var cube = AddCubeVoxel(pos, {x:1, y:1, z:1});
+					var cube = AddCubeVoxel(pos, {x:1, y:1, z:1}, 0);
 
 					// Define the position (no duplicate)
 					gridBuffer[gridIndex] = 1;

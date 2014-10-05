@@ -16,6 +16,7 @@ Parameters = function() {
 	// Octree
 	this.octreeVisible = true;
 	this.octreeWire = true;
+	this.octreeShowEmpty = false;
 	this.octreeColor = "#0088ff";
 
 	// Global parameters
@@ -43,13 +44,14 @@ function initGUI()
 	var folderDisplayVoxel = folderDisplay.addFolder('Voxel');
 	folderDisplayVoxel.add( parameters, 'voxelVisible' ).name('Show').onChange(updateDisplay);
 	folderDisplayVoxel.add( parameters, 'voxelWire' ).name('Wireframe').onChange(updateDisplay);
-	// folderDisplayVoxel.add( parameters, 'voxelColorNormal' ).name('Normal Color').onChange(updateDisplay);
+	folderDisplayVoxel.add( parameters, 'voxelColorNormal' ).name('Normal Color').onChange(updateDisplay);
 	folderDisplayVoxel.addColor( parameters, 'voxelColor' ).name('Color').onChange(updateDisplay);
 	folderDisplayVoxel.open();
 	// Octree
 	var folderDisplayOctree = folderDisplay.addFolder('Octree');
 	folderDisplayOctree.add( parameters, 'octreeVisible' ).name('Show').onChange(updateDisplay);
 	folderDisplayOctree.add( parameters, 'octreeWire' ).name('Wireframe').onChange(updateDisplay);
+	folderDisplayOctree.add( parameters, 'octreeShowEmpty' ).name('Show Empty').onChange(updateDisplay);
 	folderDisplayOctree.addColor( parameters, 'octreeColor' ).name('Color').onChange(updateDisplay);
 	folderDisplayOctree.open();
 
