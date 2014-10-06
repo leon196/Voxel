@@ -105,8 +105,11 @@ function UpdateRootGeometryVoxel()
 function updateLOD()
 {
 	ResetRootGeometryOctree();
-	// IterateOctree(octree, parameters.octreeLOD);
-	ExploreOctree(octree, camera.position);
+	if (parameters.exploreMode) {
+		ExploreOctree(octree, camera.position);
+	} else {
+		IterateOctree(octree, parameters.octreeLOD);
+	}
 	UpdateRootGeometryOctree();
 }
 
@@ -198,7 +201,9 @@ function ExploreOctree(octreeRoot, position) {
 		x: octreeRoot.halfDimension.x * 2,
 		y: octreeRoot.halfDimension.y * 2,
 		z: octreeRoot.halfDimension.z * 2};
-	var distance = distanceBetween(position, octreeRoot.origin) * 0.01;
+	var distance = distanceBetween(position, octreeRoot.origin) * parameters.distanceFactor;
+
+	if (distance < parameters.distanceVortex) return;
 
 	// Reached level of details or minimum size
 	if (distance > octreeRoot.halfDimension.x || octreeRoot.halfDimension.x <= 0.5) {

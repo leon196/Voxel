@@ -14,7 +14,7 @@ var parameters = new Parameters();
 initGUI();
 
 // Setup View
-camera.position.z = 30;
+camera.position.z = camera.position.x = camera.position.y = 30;
 
 // Setup Controls
 controls = new THREE.OrbitControls( camera );
@@ -96,8 +96,11 @@ loader.load( 'models/mesh.obj', function ( object ) {
 			updateVoxel();
 
 			// Octree
-			// IterateOctree(octree, parameters.octreeLOD);
-			ExploreOctree(octree, camera.position);
+			if (parameters.exploreMode) {
+				ExploreOctree(octree, camera.position);
+			} else {
+				IterateOctree(octree, parameters.octreeLOD);
+			}
 
 			UpdateRootGeometryVoxel();
 			UpdateRootGeometryOctree();

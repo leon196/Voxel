@@ -4,7 +4,7 @@ Parameters = function() {
 	// Display Parameters
 
 	// Model
-	this.modelVisible = true; 
+	this.modelVisible = false; 
 	this.modelWire = false;
 	this.modelSmooth = true;
 	this.modelColor = "#ff8800";
@@ -21,8 +21,17 @@ Parameters = function() {
 
 	// Global parameters
 	this.modelScale = 16;
-	this.octreeLOD = 4;
 	this.voxelAutoUpdate = false;
+
+	// Controls
+	this.orbitMode = true;
+	this.fpsMode = false;
+
+	// Level of details
+	this.exploreMode = true;
+	this.octreeLOD = 4;
+	this.distanceFactor = 0.1;
+	this.distanceVortex = 0.01;
 
 	// Buttons
 	this.reparseVoxels = function() { reparseVoxels(); }
@@ -54,9 +63,15 @@ function initGUI()
 	folderDisplayOctree.add( parameters, 'octreeShowEmpty' ).name('Show Empty').onChange(updateDisplay);
 	folderDisplayOctree.addColor( parameters, 'octreeColor' ).name('Color').onChange(updateDisplay);
 	folderDisplayOctree.open();
+	// Level of Details
+	var folderDisplayLOD = gui.addFolder('Level Of Details');
+	folderDisplayLOD.add( parameters, 'octreeLOD').min(0).max(6).step(1).name('Level of Details').onChange(updateLOD);
+	folderDisplayLOD.add( parameters, 'exploreMode' ).name('exploreMode').onChange(updateLOD);
+	folderDisplayLOD.add( parameters, 'distanceFactor' ).min(0.01).max(0.5).step(0.01).name('Scope Distance');
+	folderDisplayLOD.add( parameters, 'distanceVortex' ).min(0.01).max(2.0).step(0.1).name('Vortex Radius');
+	folderDisplayLOD.open();
 
 	gui.add( parameters, 'modelScale').min(1).max(32).step(1).name('Model Scale').onChange(updateScale);
-	gui.add( parameters, 'octreeLOD').min(0).max(6).step(1).name('Level of Details').onChange(updateLOD);
 	gui.add( parameters, 'voxelAutoUpdate' ).name('Auto Update');
 	gui.add( parameters, 'reparseVoxels' ).name('Generate Voxels');
 	gui.open();
