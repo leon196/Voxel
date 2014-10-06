@@ -41,7 +41,7 @@ scene.add( dirLight );
 var materialMesh = new THREE.MeshPhongMaterial({ color: parameters.modelColor, ambient: 0x030303, specular: 0x660066, shininess: 10 });
 var materialVoxel = new THREE.MeshBasicMaterial({ color: parameters.voxelColor, ambient: 0x030303, specular: 0x660066, shininess: 10 });
 var materialColorNormal = new THREE.MeshNormalMaterial();
-// var materialOctree = new THREE.MeshBasicMaterial({ color: parameters.octreeColor, wire: parameters.octreeWire });
+var materialOctree = new THREE.MeshBasicMaterial({ color: parameters.octreeColor, wire: parameters.octreeWire });
 var geometryCube = new THREE.BoxGeometry(1,1,1);
 for (var i = 0; i < geometryCube.faces.length; ++i) { geometryCube.faces[i].materialIndex = 0; }
 
@@ -78,6 +78,10 @@ var materialsOctree = [
 		wire: parameters.octreeWire
 	})];
 
+function init()
+{
+}
+
 // Load Mesh
 var loader = new THREE.OBJLoader();
 loader.load( 'models/mesh.obj', function ( object ) {
@@ -85,6 +89,9 @@ loader.load( 'models/mesh.obj', function ( object ) {
 	object.traverse( function ( child ) {
 
 	    if ( child.geometry !== undefined ) {
+
+
+			init();
 
 	    	// Model
 	    	model = child;
@@ -108,6 +115,8 @@ loader.load( 'models/mesh.obj', function ( object ) {
 			updateDisplay();
 
 			console.log("cubes.length : " + voxels.length);
+
+			render();
 	    }
 
 	} );
@@ -146,4 +155,3 @@ function render() {
 
 	renderer.render(scene, camera);
 }
-render();

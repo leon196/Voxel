@@ -201,9 +201,11 @@ function ExploreOctree(octreeRoot, position) {
 		x: octreeRoot.halfDimension.x * 2,
 		y: octreeRoot.halfDimension.y * 2,
 		z: octreeRoot.halfDimension.z * 2};
-	var distance = distanceBetween(position, octreeRoot.origin) * parameters.distanceFactor;
+	var distance = distanceBetween(position, octreeRoot.origin) / parameters.distanceFactor;
+	distance = distance*distance*distance*distance*distance*distance + parameters.distanceOffset;
+	distance = Math.min(distance, parameters.distanceMax);
 
-	if (distance < parameters.distanceVortex) return;
+	// if (distance < parameters.distanceVortex) return;
 
 	// Reached level of details or minimum size
 	if (distance > octreeRoot.halfDimension.x || octreeRoot.halfDimension.x <= 0.5) {
@@ -225,7 +227,9 @@ function ExploreOctree(octreeRoot, position) {
 						x: octreeChild.halfDimension.x * 2,
 						y: octreeChild.halfDimension.y * 2,
 						z: octreeChild.halfDimension.z * 2};
-					distance = distanceBetween(position, octreeChild.origin) * 0.1;
+					distance = distanceBetween(position, octreeChild.origin) / parameters.distanceFactor;
+					distance =  distance*distance*distance*distance*distance*distance + parameters.distanceOffset;
+					distance = Math.min(distance, parameters.distanceMax);
 					// If we have reach level of details
 					if (distance > octreeChild.halfDimension.x) {
 						// If octree node has children or has data

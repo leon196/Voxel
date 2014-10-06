@@ -16706,6 +16706,7 @@ THREE.CanvasRenderer = function ( parameters ) {
 			_normal.copy( element.normalModel ).applyMatrix3( _normalViewMatrix );
 
 			_color.setRGB( _normal.x, _normal.y, _normal.z ).multiplyScalar( 0.5 ).addScalar( 0.5 );
+			console.log(_color);
 
 			material.wireframe === true
 				 ? strokePath( _color, material.wireframeLinewidth, material.wireframeLinecap, material.wireframeLinejoin )
