@@ -11,8 +11,8 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 	this.domElement = ( domElement !== undefined ) ? domElement : document;
 
-	this.movementSpeed = 1.0;
-	this.lookSpeed = 0.005;
+	this.movementSpeed = 20.0;
+	this.lookSpeed = 20.0;
 
 	this.lookVertical = true;
 	this.autoForward = false;
@@ -85,8 +85,8 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 		}
 
-		event.preventDefault();
-		event.stopPropagation();
+		// event.preventDefault();
+		// event.stopPropagation();
 /*
 		if ( this.activeLook ) {
 
@@ -113,8 +113,8 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 	this.onMouseUp = function ( event ) {
 
-		event.preventDefault();
-		event.stopPropagation();
+		// event.preventDefault();
+		// event.stopPropagation();
 /*
 		if ( this.activeLook ) {
 

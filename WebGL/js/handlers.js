@@ -2,6 +2,15 @@
 function distanceBetween(a, b) { return Math.sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y)+(a.z-b.z)*(a.z-b.z)); }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+// Controls Handlers
+function updateControls()
+{
+	controlFPS.enabled = parameters.modeFPS;
+	controlOrbit.enabled = !parameters.modeFPS;
+	controlOrbit.update();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
 // Display Handlers 
 
 function updateDisplay()
@@ -104,13 +113,15 @@ function UpdateRootGeometryVoxel()
 
 function updateLOD()
 {
-	ResetRootGeometryOctree();
-	if (parameters.exploreMode) {
-		ExploreOctree(octree, camera.position);
-	} else {
-		IterateOctree(octree, parameters.octreeLOD);
+	if (parameters.octreeVisible) {
+		ResetRootGeometryOctree();
+		if (parameters.exploreMode) {
+			ExploreOctree(octree, camera.position);
+		} else {
+			IterateOctree(octree, parameters.octreeLOD);
+		}
+		UpdateRootGeometryOctree();
 	}
-	UpdateRootGeometryOctree();
 }
 
 function ResetRootGeometryOctree()
@@ -202,13 +213,13 @@ function ExploreOctree(octreeRoot, position) {
 		y: octreeRoot.halfDimension.y * 2,
 		z: octreeRoot.halfDimension.z * 2};
 	var distance = distanceBetween(position, octreeRoot.origin) / parameters.distanceFactor;
-	distance = distance*distance*distance*distance*distance*distance + parameters.distanceOffset;
+	distance = distance*distance*distance*distance + parameters.distanceOffset;
 	distance = Math.min(distance, parameters.distanceMax);
 
 	// if (distance < parameters.distanceVortex) return;
 
 	// Reached level of details or minimum size
-	if (distance > octreeRoot.halfDimension.x || octreeRoot.halfDimension.x <= 0.5) {
+	if (distance > octreeRoot.halfDimension.x || octreeRoot.halfDimension.x <= 0.125) {
 		if (octreeRoot.hasChildren() || octreeRoot.data != undefined) {
 			AddCubeOctree(octreeRoot.origin, dimension, 0);
 		}
@@ -228,7 +239,7 @@ function ExploreOctree(octreeRoot, position) {
 						y: octreeChild.halfDimension.y * 2,
 						z: octreeChild.halfDimension.z * 2};
 					distance = distanceBetween(position, octreeChild.origin) / parameters.distanceFactor;
-					distance =  distance*distance*distance*distance*distance*distance + parameters.distanceOffset;
+					distance =  distance*distance*distance*distance + parameters.distanceOffset;
 					distance = Math.min(distance, parameters.distanceMax);
 					// If we have reach level of details
 					if (distance > octreeChild.halfDimension.x) {
@@ -244,15 +255,15 @@ function ExploreOctree(octreeRoot, position) {
 			}
 		}
 		// Octree Node is a leaf and got data
-		// else if (octreeRoot.data != undefined) {
+		else if (octreeRoot.data != undefined) {
 
-		// 	//
-		// 	// var i = octreeRoot.getOctantContainingPoint(point);
-		// 	octreeRoot.split();
-		// 	for (var i = 0; i < 8; ++i) {
-		// 		var octreeChild = octreeRoot.children[i];
-		// 		ExploreOctree(octreeChild, position);
-		// 	}
-		// }
+			//
+			// var i = octreeRoot.getOctantContainingPoint(point);
+			octreeRoot.splitRandom();
+			for (var i = 0; i < 8; ++i) {
+				var octreeChild = octreeRoot.children[i];
+				ExploreOctree(octreeChild, position);
+			}
+		}
 	}
 }

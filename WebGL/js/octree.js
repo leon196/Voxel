@@ -129,6 +129,35 @@ Octree = function(origin_, halfDimension_) {
 		this.children[this.getOctantContainingPoint(oldPoint)].insert(oldPoint);
 	}
 
+	this.splitRandom = function()
+	{
+		// Save this data point that was here for a later re-insert
+		// var oldPoint = this.data;
+		this.data = undefined;
+
+		// Split the current node and create new empty trees for each
+		// child octant.
+		for(var i=0; i<8; ++i) {
+			// Compute new bounding box for this child
+			var newOrigin = {
+				x: this.origin.x + this.halfDimension.x * ((i&4) != 0 ? 0.5 : -0.5),
+				y: this.origin.y + this.halfDimension.y * ((i&2) != 0 ? 0.5 : -0.5),
+				z: this.origin.z + this.halfDimension.z * ((i&1) != 0 ? 0.5 : -0.5)};
+			var newDimension = { 
+				x: this.halfDimension.x * 0.5,
+				y: this.halfDimension.y * 0.5,
+				z: this.halfDimension.z * 0.5};
+			this.children[i] = new Octree(newOrigin, newDimension);
+			this.children[i].data = Math.random() > 0.5 ? newOrigin : undefined;
+		}
+
+		// Re-insert the old point, and insert this new point
+		// (We wouldn't need to insert from the root, because we already
+		// know it's guaranteed to be in this section of the tree)
+		// this.children[this.getOctantContainingPoint(oldPoint)].insert(oldPoint);
+
+	}
+
 	this.search = function(origin, direction, distance)
 	{
 		var directionPct = { x:1/direction, y:1/direction, z:1/direction };

@@ -14,11 +14,18 @@ var parameters = new Parameters();
 initGUI();
 
 // Setup View
-camera.position.z = camera.position.x = camera.position.y = 30;
+var viewHalfX, viewHalfY;
+camera.position.z = camera.position.x = camera.position.y = -30;
+var cameraLastPosition = { x:camera.position.x, y:camera.position.y, z:camera.position.z };
 
 // Setup Controls
-controls = new THREE.OrbitControls( camera );
-controls.damping = 0.2;
+var clock;
+var mouseDown = false;
+controlOrbit = new THREE.OrbitControls( camera );
+controlOrbit.damping = 0.2;
+controlOrbit.enabled = !parameters.modeFPS;
+var controlFPS = new THREE.FirstPersonControls( camera );
+controlFPS.enabled = parameters.modeFPS;
 
 // Setup Lights
 var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
@@ -80,7 +87,12 @@ var materialsOctree = [
 
 function init()
 {
+	viewHalfX = window.innerWidth / 2;
+	viewHalfY = window.innerHeight / 2;
+	clock = new THREE.Clock();
 }
+
+init();
 
 // Load Mesh
 var loader = new THREE.OBJLoader();
@@ -91,7 +103,6 @@ loader.load( 'models/mesh.obj', function ( object ) {
 	    if ( child.geometry !== undefined ) {
 
 
-			init();
 
 	    	// Model
 	    	model = child;
@@ -139,9 +150,13 @@ function AddCubeOctree(position, dimension, materialIndex) {
 	return cube;
 }
 
+var lastTime = Date.now();
+
 // Render
 function render() {
 	requestAnimationFrame(render);
+
+	var delta = Date.now() - lastTime;
 
 	// var timer = 0.0005 * Date.now();
 
@@ -153,5 +168,31 @@ function render() {
 
 	// camera.lookAt( scene.position );
 
+	if (parameters.modeFPS) {
+		controlFPS.update(clock.getDelta());
+	}
+
+
+	if (Math.round(camera.position.x) != cameraLastPosition.x
+		|| Math.round(camera.position.y) != cameraLastPosition.y
+		|| Math.round(camera.position.z) != cameraLastPosition.z) {
+		updateLOD(camera.position);
+		cameraLastPosition.x = Math.round(camera.position.x);
+		cameraLastPosition.y = Math.round(camera.position.y);
+		cameraLastPosition.z = Math.round(camera.position.z);
+	}
+
 	renderer.render(scene, camera);
+
+	lastTime = Date.now();
+}
+
+function mousedown(event)
+{
+	mouseDown = true;
+}
+
+function mouseup(event)
+{
+	mouseDown = false;
 }
