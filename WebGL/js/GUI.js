@@ -29,9 +29,9 @@ Parameters = function() {
 	// Level of details
 	this.exploreMode = true;
 	this.octreeLOD = 4;
-	this.distanceFactor = 5.0;
+	this.distanceFactor = 25.0;
 	this.distanceOffset = 0.0;
-	this.distanceMax = 4.0;
+	this.distanceMax = 8.0;
 	this.distanceVortex = 0.01;
 
 	// Buttons
@@ -68,7 +68,7 @@ function initGUI()
 	var folderDisplayLOD = gui.addFolder('Level Of Details');
 	folderDisplayLOD.add( parameters, 'octreeLOD').min(0).max(6).step(1).name('Level of Details').onChange(updateLOD);
 	folderDisplayLOD.add( parameters, 'exploreMode' ).name('exploreMode').onChange(updateLOD);
-	folderDisplayLOD.add( parameters, 'distanceFactor' ).min(1).max(20).step(1).name('Scope Distance').onChange(updateLOD);
+	folderDisplayLOD.add( parameters, 'distanceFactor' ).min(1).max(50).step(1).name('Scope Distance').onChange(updateLOD);
 	folderDisplayLOD.add( parameters, 'distanceOffset' ).min(0).max(100).step(1).name('Offset Distance').onChange(updateLOD);
 	folderDisplayLOD.add( parameters, 'distanceMax' ).min(1).max(20).step(1).name('Min Distance').onChange(updateLOD);
 	folderDisplayLOD.add( parameters, 'distanceVortex' ).min(0.01).max(2.0).step(0.1).name('Vortex Radius').onChange(updateLOD);

@@ -96,7 +96,7 @@ init();
 
 // Load Mesh
 var loader = new THREE.OBJLoader();
-loader.load( 'models/mesh.obj', function ( object ) {
+loader.load( 'models/mesh.mesh', function ( object ) {
 
 	object.traverse( function ( child ) {
 

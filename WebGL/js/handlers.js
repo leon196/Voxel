@@ -219,7 +219,7 @@ function ExploreOctree(octreeRoot, position) {
 	// if (distance < parameters.distanceVortex) return;
 
 	// Reached level of details or minimum size
-	if (distance > octreeRoot.halfDimension.x || octreeRoot.halfDimension.x <= 0.125) {
+	if (distance > octreeRoot.halfDimension.x || octreeRoot.halfDimension.x <= 0.5) {
 		if (octreeRoot.hasChildren() || octreeRoot.data != undefined) {
 			AddCubeOctree(octreeRoot.origin, dimension, 0);
 		}
@@ -254,6 +254,7 @@ function ExploreOctree(octreeRoot, position) {
 				}
 			}
 		}
+		/*
 		// Octree Node is a leaf and got data
 		else if (octreeRoot.data != undefined) {
 
@@ -265,5 +266,6 @@ function ExploreOctree(octreeRoot, position) {
 				ExploreOctree(octreeChild, position);
 			}
 		}
+		*/
 	}
 }
