@@ -1,5 +1,7 @@
+// Thank to Tomas Akenine-Möller
+// For sharing his Triangle Box Overlaping algorithm
+// http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox3.txt
 
-// int planeBoxOverlap({x,y,z}, {x,y,z}, {x,y,z})
 function planeBoxOverlap(normal, vert, maxbox)
 {
 	var vmin = new THREE.Vector3(0,0,0);
@@ -17,7 +19,6 @@ function planeBoxOverlap(normal, vert, maxbox)
 	return 0;
 }
 
-// int triBoxOverlap({x,y,z}, {x,y,z}, Triangle)
 function triBoxOverlap(boxcenter, boxhalfsize, triangle)
 {
 	var v0 = {x:0, y:0, z:0};

@@ -1,3 +1,8 @@
+
+// Thank to David Rosen
+// For sharing his method on parsing meshes
+// http://blog.wolfire.com/2009/11/Triangle-mesh-voxelization
+
 Triangle = function () 
 {
 	this.a = new THREE.Vector3(0,0,0);
@@ -14,8 +19,6 @@ Voxel = function (voxelIndex_, voxelPosition_, voxelNormal_, voxelMesh_)
     this.z = voxelPosition_.z;
     this.normal = voxelNormal_;
     this.mesh = voxelMesh_;
-
-    //if (parameters.voxelColorNormal) { this.mesh.material.color = new THREE.Color((this.normal.x + 1) / 2, (this.normal.y + 1) / 2, (this.normal.z + 1) / 2); }
 }
 
 function parseVoxel(meshVertices, meshTriangles, meshSize_, scale_)

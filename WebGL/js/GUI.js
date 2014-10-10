@@ -29,10 +29,12 @@ Parameters = function() {
 	// Level of details
 	this.exploreMode = true;
 	this.octreeLOD = 4;
-	this.distanceFactor = 25.0;
+	this.distanceFactor = 8.0;
 	this.distanceOffset = 0.0;
 	this.distanceMax = 8.0;
 	this.distanceVortex = 0.01;
+	//
+	this.helperDistanceFromCenter = 10;
 
 	// Buttons
 	this.reparseVoxels = function() { reparseVoxels(); }
@@ -68,11 +70,15 @@ function initGUI()
 	var folderDisplayLOD = gui.addFolder('Level Of Details');
 	folderDisplayLOD.add( parameters, 'octreeLOD').min(0).max(6).step(1).name('Level of Details').onChange(updateLOD);
 	folderDisplayLOD.add( parameters, 'exploreMode' ).name('exploreMode').onChange(updateLOD);
-	folderDisplayLOD.add( parameters, 'distanceFactor' ).min(1).max(50).step(1).name('Scope Distance').onChange(updateLOD);
-	folderDisplayLOD.add( parameters, 'distanceOffset' ).min(0).max(100).step(1).name('Offset Distance').onChange(updateLOD);
-	folderDisplayLOD.add( parameters, 'distanceMax' ).min(1).max(20).step(1).name('Min Distance').onChange(updateLOD);
-	folderDisplayLOD.add( parameters, 'distanceVortex' ).min(0.01).max(2.0).step(0.1).name('Vortex Radius').onChange(updateLOD);
+	folderDisplayLOD.add( parameters, 'distanceFactor' ).min(1).max(20).step(1).name('Scope Distance').onChange(updateLOD);
+	// folderDisplayLOD.add( parameters, 'distanceOffset' ).min(0).max(100).step(1).name('Offset Distance').onChange(updateLOD);
+	// folderDisplayLOD.add( parameters, 'distanceMax' ).min(1).max(20).step(1).name('Min Distance').onChange(updateLOD);
+	// folderDisplayLOD.add( parameters, 'distanceVortex' ).min(0.01).max(2.0).step(0.1).name('Vortex Radius').onChange(updateLOD);
 	folderDisplayLOD.open();
+	//
+	var folderHelper = gui.addFolder('Helper Position');
+	folderHelper.add( parameters, 'helperDistanceFromCenter').min(0).max(20).name('Helder Distance').onChange(updateHelper);
+	folderHelper.open();
 
 	gui.add( parameters, 'modeFPS' ).name('Mode FPS').onChange(updateControls);
 	gui.add( parameters, 'modelScale').min(1).max(32).step(1).name('Model Scale').onChange(updateScale);

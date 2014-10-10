@@ -31,6 +31,8 @@ function updateDisplay()
 	rootMeshVoxel.material.materials[1].color = new THREE.Color(parameters.voxelColor);
 	// Octree
 	rootMeshOctree.visible = parameters.octreeVisible;
+	// console.log(rootMeshOctree.visible);
+	// rootMeshOctree.material.materials[0].visible = parameters.octreeVisible;
 	// Wireframe
 	for (var m = 0; m < rootMeshOctree.material.materials.length; m++) {
 		rootMeshOctree.material.materials[m].wireframe = parameters.octreeWire;
@@ -50,12 +52,19 @@ function updateScale()
 	}
 }
 
+function updateHelper()
+{
+	var p = parameters.helperDistanceFromCenter;
+	anchorExploration.x = anchorExploration.y = anchorExploration.z = p;
+	helperDistanceExploration.position.set(p, p, p);
+	// updateLOD();
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Voxel Handlers 
 
 function updateVoxel()
 {
-    model.geometry.computeBoundingBox();
     var bounds = model.geometry.boundingBox;
     var vertices = model.geometry.vertices.clone();
     var faces = model.geometry.faces.clone();
@@ -111,24 +120,28 @@ function UpdateRootGeometryVoxel()
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Octree Handlers 
 
-function updateLOD()
+function updateLOD(position)
 {
 	if (parameters.octreeVisible) {
 		ResetRootGeometryOctree();
 		if (parameters.exploreMode) {
-			ExploreOctree(octree, camera.position);
+			// ExploreOctree(octree, anchorExploration);
+			//ExploreOctree(octree, camera.position);
+			ExploreOctree(octree, position);
 		} else {
 			IterateOctree(octree, parameters.octreeLOD);
 		}
 		UpdateRootGeometryOctree();
 	}
+
+	helperDistanceExploration.scale.set(parameters.distanceFactor, parameters.distanceFactor, parameters.distanceFactor);
 }
 
 function ResetRootGeometryOctree()
 {
 	rootGeometryOctree.dispose();
 	rootGeometryOctree = new THREE.Geometry();
-	scene.remove( rootMeshOctree );	
+	scene.remove( rootMeshOctree );
 }
 
 function UpdateRootGeometryOctree()
@@ -212,14 +225,14 @@ function ExploreOctree(octreeRoot, position) {
 		x: octreeRoot.halfDimension.x * 2,
 		y: octreeRoot.halfDimension.y * 2,
 		z: octreeRoot.halfDimension.z * 2};
-	var distance = distanceBetween(position, octreeRoot.origin) / parameters.distanceFactor;
-	distance = distance*distance*distance*distance + parameters.distanceOffset;
-	distance = Math.min(distance, parameters.distanceMax);
+	var distance = distanceBetween(position, octreeRoot.origin) - parameters.distanceFactor;
+	distance = distance/**distance*distance*distance + parameters.distanceOffset*/;
+	//distance = Math.min(distance, parameters.distanceMax);
 
 	// if (distance < parameters.distanceVortex) return;
 
 	// Reached level of details or minimum size
-	if (distance > octreeRoot.halfDimension.x || octreeRoot.halfDimension.x <= 0.5) {
+	if (distance > octreeRoot.halfDimension.x * sqrt3 || octreeRoot.halfDimension.x <= 0.5) {
 		if (octreeRoot.hasChildren() || octreeRoot.data != undefined) {
 			AddCubeOctree(octreeRoot.origin, dimension, 0);
 		}
@@ -238,11 +251,11 @@ function ExploreOctree(octreeRoot, position) {
 						x: octreeChild.halfDimension.x * 2,
 						y: octreeChild.halfDimension.y * 2,
 						z: octreeChild.halfDimension.z * 2};
-					distance = distanceBetween(position, octreeChild.origin) / parameters.distanceFactor;
-					distance =  distance*distance*distance*distance + parameters.distanceOffset;
-					distance = Math.min(distance, parameters.distanceMax);
+					distance = distanceBetween(position, octreeChild.origin) - parameters.distanceFactor;
+					// distance =  distance*distance*distance*distance + parameters.distanceOffset;
+					// distance = Math.min(distance, parameters.distanceMax);
 					// If we have reach level of details
-					if (distance > octreeChild.halfDimension.x) {
+					if (distance > octreeChild.halfDimension.x * sqrt3) {
 						// If octree node has children or has data
 						if (octreeChild.hasChildren() || octreeChild.data != undefined) {
 							AddCubeOctree(octreeChild.origin, dimension, 0);

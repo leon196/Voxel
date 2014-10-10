@@ -1,3 +1,6 @@
+// Thank to Brandon Pelfrey
+// To share this simple octree Example
+// http://www.brandonpelfrey.com/blog/coding-a-simple-octree/
 
 Octree = function(origin_, halfDimension_) {
 	// Physical position/size. This implicitly defines the bounding 
