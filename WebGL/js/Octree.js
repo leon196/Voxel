@@ -13,20 +13,32 @@ Engine.OctreeManager = function()
         this.meshOctree = new THREE.Mesh(this.geometryOctree, Engine.Materials.octree);
     };
     
-    this.SetupModel = function(model)
+    // Create the octree from the voxels
+    this.UpdatePoints = function()
     {
         // Find max size from bounds
-        var dimension = Math.max(Math.ceil(model.meshSize.x), Math.max(Math.ceil(model.meshSize.y), Math.ceil(model.meshSize.z)));
+        var modelDimension = Engine.modelManager.GetModel().size;
+        var dimensionMax = Math.max(Math.ceil(modelDimension.x), Math.max(Math.ceil(modelDimension.y), Math.ceil(modelDimension.z)));
+        
         // Find closest power of two
-        dimension = Engine.ClosestPowerOfTwo(dimension);
+        dimensionMax = Engine.ClosestPowerOfTwo(dimensionMax);
+        var octreeDimension = { x: dimensionMax, y: dimensionMax, z: dimensionMax };
 
         // Position
         var position = {x:0, y:0, z:0};
 
         // Octree
-        this.octreeRoot = new Octree(position, dimension);
+        this.octreeRoot = new Engine.Octree(position, octreeDimension);
+        
+        // Insert Voxels
+        var voxels = Engine.voxelManager.voxels;
+        for (var v = 0; v < voxels.length; ++v) {
+            var voxel = voxels[v];
+            this.octreeRoot.insert(voxel.position);
+        }
     };
     
+    // Add geometry to scene
     this.AddCube = function(position, dimension, materialIndex)
     {
         var cube = new THREE.Mesh( Engine.BoxGeometry );
@@ -34,6 +46,107 @@ Engine.OctreeManager = function()
         cube.scale.set(dimension.x, dimension.y, dimension.z);
         cube.updateMatrix();
         this.geometryOctree.merge(cube.geometry, cube.matrix, materialIndex);
+    };
+    
+    // Update Octree
+    this.Update = function()
+    {
+        // Clean Geometry
+        this.geometryOctree.dispose();
+        this.geometryOctree = new THREE.Geometry();
+        Engine.scene.remove( this.meshOctree );
+        
+        // Voxelize
+        this.Iterate(this.octreeRoot, Engine.Parameters.octreeLOD);
+        
+        // Update Geometry
+        this.geometryOctree.computeFaceNormals();
+        this.meshOctree = new THREE.Mesh( this.geometryOctree, Engine.Materials.octree);
+        this.meshOctree.matrixAutoUpdate = false;
+        this.meshOctree.updateMatrix();
+        
+        // Display
+        this.UpdateDisplay();
+        Engine.scene.add( this.meshOctree );	
+    };
+    
+    this.UpdateDisplay = function()
+    {
+        // Visibility
+        this.meshOctree.visible = Engine.Parameters.octreeVisible;
+        
+        // Color Normal
+        if (Engine.Parameters.octreeColorNormal) {
+            this.meshOctree.material = Engine.Materials.normal;
+        } 
+        // Color User
+        else {
+            this.meshOctree.material = Engine.Materials.octree;
+            this.meshOctree.material.color = new THREE.Color(Engine.Parameters.octreeColor);
+        }
+        
+        // Wireframe
+        this.meshOctree.material.wireframe = Engine.Parameters.octreeWire;
+    };
+    
+    // Octree Iteration
+    this.Iterate = function(octree, count)
+    {
+        var color = new THREE.Color(1,0,0);
+
+        // Reached level of details or minimum size
+        if (count == 0 || octree.dimensionHalf.x <= 0.5) {
+            if (octree.hasChildren() || octree.data != undefined) {
+                this.AddCube(octree.position, octree.dimension, 0);
+            }
+            // Show empty
+            else if (Engine.Parameters.octreeShowEmpty) {
+                this.AddCube(octree.position, octree.dimension, 1);
+            }
+        } else {
+            // Octree Node has children
+            if (octree.hasChildren()) {
+                // Octree Node has 8 children with data in each
+                if (octree.hasAllChildren()) {
+                    this.AddCube(octree.position, dimension, 0);
+                }
+                // Iterate each children
+                else {
+                    for (var i = 0; i < 8; ++i) {
+                        var octreeChild = octree.children[i];
+                        // If we have reach level of details
+                        if (count == 0) {
+                            // If octree node has children or has data
+                            if (octreeChild.hasChildren() || octreeChild.data != undefined) {
+                                this.AddCube(octreeChild.position, octreeChild.dimension, 0);
+                            }
+                            // Show empty
+                            else if (Engine.Parameters.octreeShowEmpty) {
+                                this.AddCube(octreeChild.position, octreeChild.dimension, 1);
+                            }
+                        // Iterate more level of details
+                        } else {
+                            this.Iterate(octreeChild, count - 1);
+                        }
+                    }
+                }
+            }
+            // Octree Node is a leaf and got data
+            else if (octree.data != undefined) {
+
+                //
+                // var i = octree.getOctantContainingPoint(point);
+                octree.split();
+                for (var i = 0; i < 8; ++i) {
+                    var octreeChild = octree.children[i];
+                    this.Iterate(octreeChild, count - 1);
+                }
+            }
+            // Show empty
+            else if (Engine.Parameters.octreeShowEmpty) {
+                this.AddCube(octree.position, octree.dimension, 1);
+            }
+        }
     };
 };
 
@@ -140,7 +253,7 @@ Engine.Octree = function(position_, dimension_) {
 						z: this.position.z + this.dimensionHalf.z * ((i&1) != 0 ? 0.5 : -0.5)};
                     
                     // Create child
-					this.children[i] = new Octree(newPosition, this.dimensionHalf);
+					this.children[i] = new Engine.Octree(newPosition, this.dimensionHalf);
 				}
 
 				// Re-insert the old point, and insert this new point
@@ -173,7 +286,7 @@ Engine.Octree = function(position_, dimension_) {
 				z: this.position.z + this.dimensionHalf.z * ((i&1) != 0 ? 0.5 : -0.5)};
 			
             // Create child
-			this.children[i] = new Octree(newposition, this.dimensionHalf);
+			this.children[i] = new Engine.Octree(newposition, this.dimensionHalf);
 		}
 
 		// Re-insert the old point, and insert this new point
@@ -198,7 +311,7 @@ Engine.Octree = function(position_, dimension_) {
 				z: this.position.z + this.dimensionHalf.z * ((i&1) != 0 ? 0.5 : -0.5)};
             
             // Generate child
-			this.children[i] = new Octree(newposition, this.dimensionHalf);
+			this.children[i] = new Engine.Octree(newposition, this.dimensionHalf);
 			this.children[i].data = Math.random() > 0.5 ? newposition : undefined;
 		}
 

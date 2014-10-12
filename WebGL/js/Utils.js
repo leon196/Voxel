@@ -31,7 +31,7 @@ Engine.ClosestPowerOfTwo = function(number) {
     n|=n>>8;
     n|=n>>16;
     n++;
-    return number;
+    return n;
 }
 
 // Add clone to array

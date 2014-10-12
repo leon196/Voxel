@@ -124,6 +124,11 @@ Engine.ModelManager = function()
         }
         
     };
+    
+    this.Update = function()
+    {   
+        this.UpdateModel(this.modelsNames[this.modelSelected]);
+    };
 
     this.UpdateModel = function(value)
     {
@@ -134,7 +139,7 @@ Engine.ModelManager = function()
         }
         this.UpdateScale(Engine.Parameters.modelScale);
         this.UpdateDisplay();
-    }
+    };
     
     this.UpdateDisplay = function()
     {

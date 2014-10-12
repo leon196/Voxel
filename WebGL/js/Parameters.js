@@ -19,6 +19,7 @@ Engine.Parameters =
 	// Octree Display
 	octreeVisible: true,
 	octreeWire: true,
+    octreeColorNormal: false,
 	octreeShowEmpty: false,
 	octreeColor: "#0088ff",
     octreeColorEmpty: "#ff8800",
@@ -30,7 +31,7 @@ Engine.Parameters =
 
 	// Octree options
 	exploreMode: false,
-	octreeLOD: 4,
+	octreeLOD: 2,
 	distanceFactor: 8.0,
 	distanceOffset: 0.0,
 	distanceMax: 8.0,

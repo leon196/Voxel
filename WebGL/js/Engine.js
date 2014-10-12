@@ -29,6 +29,9 @@ Engine.Init = function()
     Engine.voxelManager = new Engine.VoxelManager();
     Engine.voxelManager.Init();
     
+    Engine.octreeManager = new Engine.OctreeManager();
+    Engine.octreeManager.Init();
+    
     Engine.controls = new Engine.Controls();
     Engine.controls.Init(Engine.camera);
     
@@ -38,7 +41,10 @@ Engine.Init = function()
 Engine.OnLoadedMesh = function()
 {
     Engine.modelManager.UpdateModel("Cube");
-    Engine.voxelManager.UpdateWithModel(Engine.modelManager.GetModel());
+    Engine.voxelManager.Update();
+    Engine.octreeManager.UpdatePoints();
+    
+    Engine.octreeManager.Update();
     
 //    console.log(Engine);
 //    modelManager

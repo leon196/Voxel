@@ -2,9 +2,7 @@
 Engine.Voxel = function (voxelIndex_, voxelPosition_, voxelNormal_) 
 {
     this.index = voxelIndex_;
-    this.x = voxelPosition_.x;
-    this.y = voxelPosition_.y;
-    this.z = voxelPosition_.z;
+    this.position = voxelPosition_;
     this.normal = voxelNormal_;
 };
 
@@ -14,12 +12,14 @@ Engine.VoxelManager = function()
     this.voxels;
     this.meshVoxel;
     this.geometryVoxel;
+    this.dimension;
     
     this.Init = function()
     {
         this.voxels = [];  
         this.geometryVoxel = new THREE.Geometry();
         this.meshVoxel = new THREE.Mesh(this.geometryVoxel, Engine.Materials.voxelMultiMaterials);
+        this.dimension = new Engine.Vector3();
     };
     
     // Shortcut
@@ -82,6 +82,9 @@ Engine.VoxelManager = function()
     // Parse Voxel
     this.VoxelizeModel = function(model)
     {
+        // Reset voxels
+        this.voxels = [];
+        
         // Lists of vertices and triangles
         var vertices = model.mesh.geometry.vertices.clone();
         var triangles = model.mesh.geometry.faces.clone();
@@ -147,10 +150,10 @@ Engine.VoxelManager = function()
                         var cube = this.AddVoxel(pos, 0);
 
                         // Define the position (no duplicate)
-                        gridBuffer[gridIndex] = new Engine.Voxel(gridIndex, pos, triangle.normal);
+                        gridBuffer[gridIndex] = 1;
 
                         // Create voxel
-    //					voxels.push(new Voxel(gridIndex, pos, triangle.normal));
+    					this.voxels.push(new Engine.Voxel(gridIndex, pos, triangle.normal));
 
                         // Octree insertion
     //					octree.insert(pos);

@@ -17,7 +17,7 @@ function onChangeModelScale(value)
 // OCTREE
 function onChangeOptionOctree(value)
 {
-    Engine.octreeManager.UpdateLevelOfDetails();
+    Engine.octreeManager.Update();
 }
 
 // SELECT MODEL
@@ -27,6 +27,9 @@ function onChangeModel(value)
     Engine.modelManager.UpdateModel(value);
     // Voxel
     Engine.voxelManager.Update();
+    // Octree
+    Engine.octreeManager.UpdatePoints();
+    Engine.octreeManager.Update();
 }
 
 // SELECT CONTROL
@@ -71,6 +74,7 @@ Engine.Interface = function()
 	folderDisplayOctree.add( parameters, 'octreeVisible' ).name('Show').onChange(onChangeOctreeDisplay);
 	folderDisplayOctree.add( parameters, 'octreeWire' ).name('Wireframe').onChange(onChangeOctreeDisplay);
 	folderDisplayOctree.add( parameters, 'octreeShowEmpty' ).name('Show Empty').onChange(onChangeOctreeDisplay);
+    folderDisplayOctree.add( parameters, 'octreeColorNormal' ).name('Normal Color').onChange(onChangeOctreeDisplay);
 	folderDisplayOctree.addColor( parameters, 'octreeColor' ).name('Color').onChange(onChangeOctreeDisplay);
 	folderDisplayOctree.open();
 	
