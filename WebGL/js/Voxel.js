@@ -22,6 +22,13 @@ Engine.VoxelManager = function()
         this.meshVoxel = new THREE.Mesh(this.geometryVoxel, Engine.Materials.voxelMultiMaterials);
     };
     
+    // Shortcut
+    this.Update = function()
+    {
+        this.UpdateWithModel(Engine.modelManager.GetModel());
+    };
+    
+    // Voxel Construction Process
     this.UpdateWithModel = function(model_)
     {
         // Clean Geometry
@@ -37,15 +44,39 @@ Engine.VoxelManager = function()
         this.meshVoxel = new THREE.Mesh( this.geometryVoxel, Engine.Materials.normal);
         this.meshVoxel.matrixAutoUpdate = false;
         this.meshVoxel.updateMatrix();
+        
+        // Display
+        this.UpdateDisplay();
         Engine.scene.add( this.meshVoxel );	
     };
     
+    // Add geometry
     this.AddVoxel = function(position, materialIndex)
     {
         var cube = new THREE.Mesh( Engine.BoxGeometry );
         cube.position.set(position.x, position.y, position.z);
         cube.updateMatrix();
         this.geometryVoxel.merge(cube.geometry, cube.matrix, materialIndex);
+    };
+    
+    // Material
+    this.UpdateDisplay = function()
+    {
+        // Visibility
+        this.meshVoxel.visible = Engine.Parameters.voxelVisible;
+        
+        // Color Normal
+        if (Engine.Parameters.voxelColorNormal) {
+            this.meshVoxel.material = Engine.Materials.normal;
+        } 
+        // Color User
+        else {
+            this.meshVoxel.material = Engine.Materials.voxel;
+            this.meshVoxel.material.color = new THREE.Color(Engine.Parameters.voxelColor);
+        }
+        
+        // Wireframe
+        this.meshVoxel.material.wireframe = Engine.Parameters.voxelWire;
     };
 
     // Parse Voxel
@@ -75,35 +106,42 @@ Engine.VoxelManager = function()
             var gridCount = (triangle.size.x * triangle.size.y * triangle.size.z);
             for (var v = 0; v < gridCount; ++v)
             {
-                // Position in grid
+                // Position in triangle grid
                 var x = v % triangle.size.x;
                 var y = Math.floor( v / (triangle.size.x * triangle.size.z )) % triangle.size.y;
                 var z = Math.floor( v / triangle.size.x ) % triangle.size.z;
 
                 // 
-                var voxelBounds = { min: new THREE.Vector3(0, 0, 0), max: new THREE.Vector3(0, 0, 0) };
-                voxelBounds.min.x = triangle.min.x + x;
-                voxelBounds.min.y = triangle.min.y + y;
-                voxelBounds.min.z = triangle.min.z + z;
-                voxelBounds.max.x = triangle.min.x + x + 1;
-                voxelBounds.max.y = triangle.min.y + y + 1;
-                voxelBounds.max.z = triangle.min.z + z + 1;
+                var gridPosition = new Engine.Vector3();
+                gridPosition.x = triangle.min.x + x;
+                gridPosition.y = triangle.min.y + y;
+                gridPosition.z = triangle.min.z + z;
 
                 // Unique ID by position
-                var gridIndex = Math.floor(triangle.min.x + x + (triangle.min.z + z) * model.size.x + (triangle.min.y + y) * (model.size.x * model.size.z));
+                var gridIndex = Math.floor(
+                    gridPosition.x
+                    + gridPosition.z * model.size.x
+                    + gridPosition.y * (model.size.x * model.size.z));
+                /*if (gridIndex < 0) {
+                    console.log(gridIndex);
+                    console.log(gridPosition);
+                }*/
                 var gridBufferUnit = gridBuffer[gridIndex];
                 if (gridBufferUnit == undefined)
                 {
                     // Intersection test
-                    var voxelBoundsCenter = { x:voxelBounds.min.x + 0.5, y:voxelBounds.min.y + 0.5, z:voxelBounds.min.z + 0.5 };
+                    var voxelBoundsCenter = { 
+                        x:gridPosition.x + 0.5, 
+                        y:gridPosition.y + 0.5, 
+                        z:gridPosition.z + 0.5 };
                     var voxelBoundsDimension = { x:0.5, y:0.5, z:0.5 };
                     if (0 != triBoxOverlap(voxelBoundsCenter, voxelBoundsDimension, triangle))
                     {
                         // Voxel position
                         var pos = new THREE.Vector3(
-                            voxelBounds.min.x - model.sizeHalf.x + 0.5, 
-                            voxelBounds.min.y - model.sizeHalf.y + 0.5, 
-                            voxelBounds.min.z - model.sizeHalf.z + 0.5);
+                            gridPosition.x - model.sizeHalf.x + 0.5, 
+                            gridPosition.y - model.sizeHalf.y + 0.5, 
+                            gridPosition.z - model.sizeHalf.z + 0.5);
 
                         // Create mesh cube
                         var cube = this.AddVoxel(pos, 0);

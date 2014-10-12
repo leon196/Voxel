@@ -19,27 +19,26 @@ Engine.DirLight.position.set( -1, 10, 1 );
 Engine.DirLight.position.multiplyScalar( 50 );
 Engine.scene.add( Engine.DirLight );
 
-//
-var controls, model;
-
-// Managers
-var voxelManager, octreeManager;
 
 Engine.Init = function()
 {
-    controls = new Engine.Controls();
-    controls.Init(Engine.camera);
+    // Instances
+    Engine.modelManager = new Engine.ModelManager();
+    Engine.modelManager.Init();
     
-    model = new Engine.Model("models/mesh.mesh");
+    Engine.voxelManager = new Engine.VoxelManager();
+    Engine.voxelManager.Init();
     
-    voxelManager = new Engine.VoxelManager();
-    voxelManager.Init();
+    Engine.controls = new Engine.Controls();
+    Engine.controls.Init(Engine.camera);
     
+    Engine.interface = new Engine.Interface();
 };
 
 Engine.OnLoadedMesh = function()
 {
-    voxelManager.UpdateWithModel(model);
+    Engine.modelManager.UpdateModel("Cube");
+    Engine.voxelManager.UpdateWithModel(Engine.modelManager.GetModel());
     
 //    console.log(Engine);
 //    modelManager
