@@ -2,6 +2,8 @@ Array.prototype.clone = function() { return this.slice(0); };
 // utils
 var sqrt3 = Math.sqrt(3);
 
+var Engine = {};
+
 // Setup Three
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -117,7 +119,7 @@ init();
 
 // Load Mesh
 var loader = new THREE.OBJLoader();
-loader.load( 'models/mesh.mesh', function ( object ) {
+loader.load( 'models/cubeOriented.mesh', function ( object ) {
 
 	object.traverse( function ( child ) {
 

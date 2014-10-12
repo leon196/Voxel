@@ -1,6 +1,6 @@
 var gui = new dat.GUI();
 	
-Parameters = function() {
+Engine.Parameters = function() {
 	// Display Parameters
 
 	// Model
@@ -10,24 +10,26 @@ Parameters = function() {
 	this.modelColor = "#ff8800";
 	// Voxel
 	this.voxelVisible = false;
-	this.voxelWire = true;
+	this.voxelWire = false;
 	this.voxelColorNormal = true;
 	this.voxelColor = "#88ff00";
 	// Octree
 	this.octreeVisible = true;
-	this.octreeWire = false;
+	this.octreeWire = true;
 	this.octreeShowEmpty = false;
 	this.octreeColor = "#0088ff";
 
-	// Global parameters
-	this.modelScale = 16;
+	// Voxel parameters
+	this.modelScale = 4;
 	this.voxelAutoUpdate = false;
+	this.voxelSliceHeight = 4;
+	this.voxelSlicePosition = 0;
 
 	// Controls
 	this.modeFPS = false;
 
 	// Level of details
-	this.exploreMode = true;
+	this.exploreMode = false;
 	this.octreeLOD = 4;
 	this.distanceFactor = 8.0;
 	this.distanceOffset = 0.0;
@@ -45,45 +47,54 @@ function initGUI()
 {
 	// Display
 	var folderDisplay = gui.addFolder('Display Options');
-	// Model
+	
+	// Model Display
 	var folderDisplayModel = folderDisplay.addFolder('Model');
 	folderDisplayModel.add( parameters, 'modelVisible' ).name('Show').onChange(updateDisplay);
 	folderDisplayModel.add( parameters, 'modelWire' ).name('Wireframe').onChange(updateDisplay);
 	// folderDisplayModel.add( parameters, 'modelSmooth' ).name('Smooth Shading').onChange(updateDisplay);
 	folderDisplayModel.addColor( parameters, 'modelColor' ).name('Color').onChange(updateDisplay);
 	folderDisplayModel.open();
-	// Voxel
+
+	// Voxel Display
 	var folderDisplayVoxel = folderDisplay.addFolder('Voxel');
 	folderDisplayVoxel.add( parameters, 'voxelVisible' ).name('Show').onChange(updateDisplay);
 	folderDisplayVoxel.add( parameters, 'voxelWire' ).name('Wireframe').onChange(updateDisplay);
 	folderDisplayVoxel.add( parameters, 'voxelColorNormal' ).name('Normal Color').onChange(updateDisplay);
 	folderDisplayVoxel.addColor( parameters, 'voxelColor' ).name('Color').onChange(updateDisplay);
 	folderDisplayVoxel.open();
-	// Octree
+
+	// Octree Display
 	var folderDisplayOctree = folderDisplay.addFolder('Octree');
 	folderDisplayOctree.add( parameters, 'octreeVisible' ).name('Show').onChange(updateDisplay);
 	folderDisplayOctree.add( parameters, 'octreeWire' ).name('Wireframe').onChange(updateDisplay);
 	folderDisplayOctree.add( parameters, 'octreeShowEmpty' ).name('Show Empty').onChange(updateDisplay);
 	folderDisplayOctree.addColor( parameters, 'octreeColor' ).name('Color').onChange(updateDisplay);
 	folderDisplayOctree.open();
+	
+	// Voxel Options
+	var folderVoxel = gui.addFolder('Voxel Options');
+	folderVoxel.add( parameters, 'modelScale').min(1).max(32).step(1).name('Model Scale').onChange(updateScale);
+	folderVoxel.add( parameters, 'voxelAutoUpdate' ).name('Auto Update');
+	folderVoxel.add( parameters, 'reparseVoxels' ).name('Generate Voxels');
+	folderVoxel.add( parameters, 'voxelSlicePosition').min(0).max(128).step(1).name('Voxel Slice Position');
+	folderVoxel.add( parameters, 'voxelSliceHeight').min(1).max(128).step(1).name('Voxel Slice Height');
+	// folderVoxel.open();
+
 	// Level of Details
-	var folderDisplayLOD = gui.addFolder('Level Of Details');
-	folderDisplayLOD.add( parameters, 'octreeLOD').min(0).max(6).step(1).name('Level of Details').onChange(updateLOD);
-	folderDisplayLOD.add( parameters, 'exploreMode' ).name('exploreMode').onChange(updateLOD);
-	folderDisplayLOD.add( parameters, 'distanceFactor' ).min(1).max(20).step(1).name('Scope Distance').onChange(updateLOD);
-	// folderDisplayLOD.add( parameters, 'distanceOffset' ).min(0).max(100).step(1).name('Offset Distance').onChange(updateLOD);
-	// folderDisplayLOD.add( parameters, 'distanceMax' ).min(1).max(20).step(1).name('Min Distance').onChange(updateLOD);
-	// folderDisplayLOD.add( parameters, 'distanceVortex' ).min(0.01).max(2.0).step(0.1).name('Vortex Radius').onChange(updateLOD);
-	folderDisplayLOD.open();
+	var folderLOD = gui.addFolder('Octree Options');
+	folderLOD.add( parameters, 'octreeLOD').min(0).max(6).step(1).name('Level of Details').onChange(onChangeOptionOctree);
+	folderLOD.add( parameters, 'exploreMode' ).name('exploreMode').onChange(onChangeOptionOctree);
+	folderLOD.add( parameters, 'distanceFactor' ).min(1).max(20).step(1).name('Scope Distance').onChange(onChangeOptionOctree);
+	// folderLOD.add( parameters, '' )
+	folderLOD.add( parameters, 'helperDistanceFromCenter').min(0).max(20).name('Helder Distance').onChange(onChangeOptionOctree);
+	// folderLOD.add( parameters, 'distanceOffset' ).min(0).max(100).step(1).name('Offset Distance').onChange(onChangeOptionOctree);
+	// folderLOD.add( parameters, 'distanceMax' ).min(1).max(20).step(1).name('Min Distance').onChange(onChangeOptionOctree);
+	// folderLOD.add( parameters, 'distanceVortex' ).min(0.01).max(2.0).step(0.1).name('Vortex Radius').onChange(onChangeOptionOctree);
+	// folderLOD.open();
 	//
-	var folderHelper = gui.addFolder('Helper Position');
-	folderHelper.add( parameters, 'helperDistanceFromCenter').min(0).max(20).name('Helder Distance').onChange(updateHelper);
-	folderHelper.open();
 
 	gui.add( parameters, 'modeFPS' ).name('Mode FPS').onChange(updateControls);
-	gui.add( parameters, 'modelScale').min(1).max(32).step(1).name('Model Scale').onChange(updateScale);
-	gui.add( parameters, 'voxelAutoUpdate' ).name('Auto Update');
-	gui.add( parameters, 'reparseVoxels' ).name('Generate Voxels');
 	gui.open();
 	// folderDisplay.open();
 
@@ -99,37 +110,8 @@ function initGUI()
 	// var folderVoxel = gui.addFolder('Voxel Options');
 	// folderVoxel.open();
 }
-/*
-var folder1 = gui.addFolder('Coordinates');
-folder1.add( parameters, 'x' );
-folder1.add( parameters, 'y' );
-folder1.close();
-*/
-/*
-var parameters = 
+
+function onChangeOptionOctree(value)
 {
-	a: 200, // numeric
-	b: 200, // numeric slider
-	c: "Hello, GUI!", // string
-	d: false, // boolean (checkbox)
-	e: "#ff8800", // color (hex)
-	f: function() { alert("Hello!") },
-	g: function() { alert( parameters.c ) },
-	v : 0,    // dummy value, only type is important
-	w: "...", // dummy value, only type is important
-	x: 0, y: 0, z: 0
-};
-// gui.add( parameters )
-gui.add( parameters, 'a' ).name('Number');
-gui.add( parameters, 'b' ).min(128).max(256).step(16).name('Slider');
-gui.add( parameters, 'c' ).name('String');
-gui.add( parameters, 'd' ).name('Boolean');
 
-gui.addColor( parameters, 'e' ).name('Color');
-
-var numberList = [1, 2, 3];
-gui.add( parameters, 'v', numberList ).name('List');
-
-var stringList = ["One", "Two", "Three"];
-gui.add( parameters, 'w', stringList ).name('List');
-*/
+}

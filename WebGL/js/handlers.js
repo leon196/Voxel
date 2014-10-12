@@ -34,13 +34,15 @@ function updateDisplay()
 	// console.log(rootMeshOctree.visible);
 	// rootMeshOctree.material.materials[0].visible = parameters.octreeVisible;
 	// Wireframe
-	for (var m = 0; m < rootMeshOctree.material.materials.length; m++) {
-		rootMeshOctree.material.materials[m].wireframe = parameters.octreeWire;
+	if (rootMeshOctree.material != undefined) {
+		for (var m = 0; m < rootMeshOctree.material.materials.length; m++) {
+			rootMeshOctree.material.materials[m].wireframe = parameters.octreeWire;
+		}
+		// User color
+		rootMeshOctree.material.materials[0].color = new THREE.Color(parameters.octreeColor);
+		// Material of Empty octree
+		rootMeshOctree.material.materials[1].visible = parameters.octreeShowEmpty;
 	}
-	// User color
-	rootMeshOctree.material.materials[0].color = new THREE.Color(parameters.octreeColor);
-	// Material of Empty octree
-	rootMeshOctree.material.materials[1].visible = parameters.octreeShowEmpty;
 }
 
 function updateScale()
@@ -85,7 +87,7 @@ function updateVoxel()
 	n++;
 	dimensionMax = n;
 
-	var position = { x:0, y:0, z:0 };
+	var position = {x:0, y:0, z:0};//{ x:meshSize.x/2, y:meshSize.y/2, z:meshSize.z/2 };
 	
 	// Octree
 	octree = new Octree(position, {x:dimensionMax, y:dimensionMax, z:dimensionMax});

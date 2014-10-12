@@ -1,5 +1,5 @@
 // Thank to Brandon Pelfrey
-// To share this simple octree Example
+// To share his knownledge by giving this simple octree code
 // http://www.brandonpelfrey.com/blog/coding-a-simple-octree/
 
 Octree = function(origin_, halfDimension_) {
@@ -48,14 +48,24 @@ Octree = function(origin_, halfDimension_) {
 		return !this.isLeafNode();
 	}
 
-	this.hasAllChildren = function() {
+	this.hasAllChildren = function()
+	{/*
+		if (this.hasChildren() == false) {
+			return false;
+		}
+
 		for (var c = 0; c < 8; ++c) {
-			var octree = this.children[c];
-			if (!octree.isLeafNode() || (octree.isLeafNode && octree.data == undefined)) {
+			var child = this.children[c];
+			if (!child.isLeafNode() && child.data != undefined) {
 				return false;
 			}
-		}
-		return true;
+			/*
+			if (child.hasChildren() == false) {
+				return false;
+			}*/
+		// }
+		// */
+		return false;
 	}
 
 	this.insert = function(point) {

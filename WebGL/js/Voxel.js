@@ -1,73 +1,47 @@
 
-// Thank to David Rosen
-// For sharing his method on parsing meshes
-// http://blog.wolfire.com/2009/11/Triangle-mesh-voxelization
-
-Triangle = function () 
-{
-	this.a = new THREE.Vector3(0,0,0);
-	this.b = new THREE.Vector3(0,0,0);
-	this.c = new THREE.Vector3(0,0,0);
-	this.normal = new THREE.Vector3(0,0,0);
-}
-
-Voxel = function (voxelIndex_, voxelPosition_, voxelNormal_, voxelMesh_)
+// Voxel Object
+Engine.Voxel = function (voxelIndex_, voxelPosition_, voxelNormal_) 
 {
     this.index = voxelIndex_;
     this.x = voxelPosition_.x;
     this.y = voxelPosition_.y;
     this.z = voxelPosition_.z;
     this.normal = voxelNormal_;
-    this.mesh = voxelMesh_;
-}
+};
 
-function parseVoxel(meshVertices, meshTriangles, meshSize_, scale_)
+Engine.VoxelizeMesh = function(mesh_)
 {
-	var vertices = meshVertices.clone(); // [ new THREE.Vector3(), ... ]
-	var triangles = meshTriangles.clone();	// [ new THREE.Face3(), ... ]
+	// Lists of vertices and triangles
+	var vertices = mesh_.vertices.clone();
+	var triangles = mesh_.triangles.clone();
 	var trianglesCount = triangles.length;
-	// var bounds = meshBounds; // { min: new THREE.Vector3(), max: new THREE.Vector3() }
-	var meshSize = meshSize_;//new THREE.Vector3((bounds.max.x - bounds.min.x) * scale_, (bounds.max.y - bounds.min.y) * scale_, (bounds.max.z - bounds.min.z) * scale_);
-	var meshHalfSize = new THREE.Vector3(Math.floor(meshSize.x / 2), Math.floor(meshSize.y / 2), Math.floor(meshSize.z / 2));
-	var min = new THREE.Vector3(0,0,0);
-	var max = new THREE.Vector3(0,0,0);
+	
+	// Sizes
+	var meshSize = new Engine.Vector3(
+		(bounds.max.x - bounds.min.x) * param.meshScale, 
+		(bounds.max.y - bounds.min.y) * param.meshScale, 
+		(bounds.max.z - bounds.min.z) * param.meshScale);
+	var meshHalfSize = new Engine.Vector3(
+		Math.floor(meshSize.x / 2), 
+		Math.floor(meshSize.y / 2), 
+		Math.floor(meshSize.z / 2));
+	var min = new Engine.Vector3();
+	var max = new Engine.Vector3();
 
+	// Array list representing the 3D grid
 	var gridBuffer = new Array(Math.ceil(meshSize.x * meshSize.y * meshSize.z));
-
-	// console.log(meshHalfSize);
 
 	// For each triangles
 	for (var t = 0; t < trianglesCount; t++) {
 
+		// Triangle's vertices position
+		var face3 = triangles[t];
+		var a = vertices[face3.a].clone().multiplyScalar(param.meshScale).add(meshHalfSize);
+		var b = vertices[face3.b].clone().multiplyScalar(param.meshScale).add(meshHalfSize);
+		var c = vertices[face3.c].clone().multiplyScalar(param.meshScale).add(meshHalfSize);
+		
 		// Triangle
-		var tri = new Triangle();
-		var triangle = triangles[t];
-		// console.log(vertices[triangle.a]);
-		tri.a = vertices[triangle.a].clone();
-		tri.a.multiplyScalar(scale_).add(meshHalfSize);
-		tri.b = vertices[triangle.b].clone();
-		tri.b.multiplyScalar(scale_).add(meshHalfSize);
-		tri.c = vertices[triangle.c].clone();
-		tri.c.multiplyScalar(scale_).add(meshHalfSize);
-
-		// Normal
-		var nAB = new THREE.Vector3(0,0,0);
-		nAB.subVectors(tri.b, tri.a);
-		var nAC = new THREE.Vector3(0,0,0);
-		nAC.subVectors(tri.c, tri.a);
-		tri.normal.crossVectors(nAB, nAC).normalize();
-	    // tri.centroid = (tri.a + tri.b + tri.c) / 3;
-
-		// Min & Max
-		min.x = Math.floor(Math.min(tri.a.x, Math.min(tri.b.x, tri.c.x)));
-		min.y = Math.floor(Math.min(tri.a.y, Math.min(tri.b.y, tri.c.y))); 
-		min.z = Math.floor(Math.min(tri.a.z, Math.min(tri.b.z, tri.c.z)));
-		max.x = Math.ceil(Math.max(tri.a.x, Math.max(tri.b.x, tri.c.x)));
-		max.y = Math.ceil(Math.max(tri.a.y, Math.max(tri.b.y, tri.c.y)));
-		max.z = Math.ceil(Math.max(tri.a.z, Math.max(tri.b.z, tri.c.z)));
-		if (Math.abs(max.x - min.x) < 1) { max.x += 1; }
-		else if (Math.abs(max.y - min.y) < 1) { max.y += 1; }
-		else if (Math.abs(max.z - min.z) < 1) { max.z += 1; }
+		var triangle = new Engine.Triangle(a, b, c);
 
 		// Bounds
 		var size = new THREE.Vector3(0, 0, 0);
@@ -103,7 +77,7 @@ function parseVoxel(meshVertices, meshTriangles, meshSize_, scale_)
 			{
 				var boxCenter = { x:box.min.x + 0.5, y:box.min.y + 0.5, z:box.min.z + 0.5 };
 				// Intersection test
-				if (0 != triBoxOverlap(boxCenter, {x:0.5, y:0.5, z:0.5}, tri))
+				if (0 != triBoxOverlap(boxCenter, {x:0.5, y:0.5, z:0.5}, triangle))
 				{
 					// Voxel position
 					var pos = new THREE.Vector3(
@@ -115,10 +89,10 @@ function parseVoxel(meshVertices, meshTriangles, meshSize_, scale_)
 					var cube = AddCubeVoxel(pos, {x:1, y:1, z:1}, 0);
 
 					// Define the position (no duplicate)
-					gridBuffer[gridIndex] = new Voxel(gridIndex, pos, tri.normal, cube);
+					gridBuffer[gridIndex] = new Voxel(gridIndex, pos, triangle.normal, cube);
 
 					// Create voxel
-					voxels.push(new Voxel(gridIndex, pos, tri.normal, cube));
+					voxels.push(new Voxel(gridIndex, pos, triangle.normal, cube));
 
 					// Octree insertion
 					octree.insert(pos);
@@ -188,12 +162,3 @@ function parseVoxel(meshVertices, meshTriangles, meshSize_, scale_)
 
 	// return gridBuffer;
 }
-/*
-function sliceVoxels()
-{
-	parameters.voxelSliceHeight
-	parameters.voxelSlicePosition
-	var gridCount = mesh
-	for (var v = 0; v < )
-}
-*/
