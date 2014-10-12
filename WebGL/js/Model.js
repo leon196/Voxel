@@ -2,47 +2,39 @@
 Engine.Model = function(filePath)
 {
 	this.mesh;
-	this.meshSize;
-	this.meshSizeHalf;
+    this.scale;
+	this.size;
+	this.sizeHalf;
+    this.bounds;
 
-	this.init = function()
+	this.Init = function()
 	{
-		// Scale
-		var scale = Engine.Parameters.modelScale;
-		this.mesh.scale.set(scale, scale, scale);
-
 		// Compute geometry
 		this.mesh.geometry.computeBoundingBox();
-		var bounds = this.mesh.geometry.boudingBox;
-
+		this.bounds = this.mesh.geometry.boundingBox;
+        
+		// Scale
+		this.scale = Engine.Parameters.modelScale;
+		this.mesh.scale.set(this.scale, this.scale, this.scale);
+        
 		// Size
-		this.meshSize = new Engine.Vector3(
-			Math.ceil((bounds.max.x - bounds.min.x) * scale), 
-			Math.ceil((bounds.max.y - bounds.min.y) * scale), 
-			Math.ceil((bounds.max.z - bounds.min.z) * scale));
+		this.size = new Engine.Vector3(
+			Math.ceil((this.bounds.max.x - this.bounds.min.x) * this.scale), 
+			Math.ceil((this.bounds.max.y - this.bounds.min.y) * this.scale), 
+			Math.ceil((this.bounds.max.z - this.bounds.min.z) * this.scale));
 
 		// Size Half
-		this.meshSizeHalf = new Engine.Vector3(
-			Math.floor(meshSize.x / 2), 
-			Math.floor(meshSize.y / 2), 
-			Math.floor(meshSize.z / 2));
+		this.sizeHalf = new Engine.Vector3(
+			Math.floor(this.size.x / 2), 
+			Math.floor(this.size.y / 2), 
+			Math.floor(this.size.z / 2));
 
 		// Add to scene
-		scene.add(this.mesh);
-	}
-
-	// Callback function for OBJLoader
-	this.onLoaded = function(object) {
-		object.traverse( function (child) {
-	    	if ( child instanceof THREE.Mesh ) {
-	    		this.mesh = child;
-	    		this.init();
-	    	}
-	    });
+		Engine.scene.add(this.mesh);
 	}
 
 	// Load mesh
 	if (filePath != undefined) {
-		Engine.LoadMesh(filePath, this.onLoaded);
+		Engine.LoadMesh(filePath, this);
 	}
 }

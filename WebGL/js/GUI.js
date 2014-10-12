@@ -1,50 +1,9 @@
-var gui = new dat.GUI();
-	
-Engine.Parameters = function() {
-	// Display Parameters
-
-	// Model
-	this.modelVisible = false; 
-	this.modelWire = false;
-	this.modelSmooth = true;
-	this.modelColor = "#ff8800";
-	// Voxel
-	this.voxelVisible = false;
-	this.voxelWire = false;
-	this.voxelColorNormal = true;
-	this.voxelColor = "#88ff00";
-	// Octree
-	this.octreeVisible = true;
-	this.octreeWire = true;
-	this.octreeShowEmpty = false;
-	this.octreeColor = "#0088ff";
-
-	// Voxel parameters
-	this.modelScale = 4;
-	this.voxelAutoUpdate = false;
-	this.voxelSliceHeight = 4;
-	this.voxelSlicePosition = 0;
-
-	// Controls
-	this.modeFPS = false;
-
-	// Level of details
-	this.exploreMode = false;
-	this.octreeLOD = 4;
-	this.distanceFactor = 8.0;
-	this.distanceOffset = 0.0;
-	this.distanceMax = 8.0;
-	this.distanceVortex = 0.01;
-	//
-	this.helperDistanceFromCenter = 10;
-
-	// Buttons
-	this.reparseVoxels = function() { reparseVoxels(); }
-	// this.parseVoxels = function() { parseVoxels(); }
-};
+initGUI();
 
 function initGUI()
 {
+    var gui = new dat.GUI();
+    
 	// Display
 	var folderDisplay = gui.addFolder('Display Options');
 	

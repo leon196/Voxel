@@ -104,8 +104,6 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 		// this.viewHalfX = event.pageX;
 		// this.viewHalfY = event.pageY;
 
-		mousedown(event);
-
 		this.freezeLook = false;
 		this.mouseDragOn = true;
 
@@ -131,8 +129,6 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 		/* HOHO */
 		// this.viewHalfX = event.pageX;
 		// this.viewHalfY = event.pageY;
-
-		mouseup(event);
 
 		this.freezeLook = true;
 		this.mouseDragOn = false;
