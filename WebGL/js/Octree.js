@@ -16,18 +16,19 @@ Engine.OctreeManager = function()
     // Create the octree from the voxels
     this.UpdatePoints = function()
     {
-        var modelPosition = Engine.modelManager.GetModel().mesh.position;
-        var modelDimension = Engine.modelManager.GetModel().size;
+        var position = Engine.voxelManager.GetPosition();
+//        var position = new Engine.Vector3();
+        var dimension = Engine.voxelManager.GetDimension();
         
         // Find max size from bounds
-        var dimensionMax = Math.max(Math.ceil(modelDimension.x), Math.max(Math.ceil(modelDimension.y), Math.ceil(modelDimension.z)));
+        var dimensionMax = Math.max(Math.ceil(dimension.x), Math.max(Math.ceil(dimension.y), Math.ceil(dimension.z)));
         
         // Find closest power of two
         dimensionMax = Engine.ClosestPowerOfTwo(dimensionMax);
         var octreeDimension = { x: dimensionMax, y: dimensionMax, z: dimensionMax };
 
         // Octree
-        this.octreeRoot = new Engine.Octree(modelPosition, octreeDimension);
+        this.octreeRoot = new Engine.Octree(position, octreeDimension);
         
         // Insert Voxels
         var voxels = Engine.voxelManager.voxels;

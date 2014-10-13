@@ -91,11 +91,17 @@ Engine.Controls = function()
                     if (event.button == 0) {
                         hitPoint.sub(hitNormal.multiplyScalar(0.5));
                         Engine.voxelManager.SubVoxelAt(hitPoint);
+                        if (Engine.Parameters.autoUpdate) {
+                            Engine.UpdateModel();
+                        }
                     } 
                     // Right click
                     else if (event.button == 2) {
                         hitPoint.add(hitNormal.multiplyScalar(0.5));
                         Engine.voxelManager.AddVoxelAt(hitPoint);
+                        if (Engine.Parameters.autoUpdate) {
+                            Engine.UpdateModel();
+                        }
                     }
                 }
             }

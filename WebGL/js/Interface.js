@@ -10,10 +10,12 @@ function onChangeModelScale(value)
     // Model
     Engine.modelManager.UpdateScale(value);
     if (Engine.Parameters.autoUpdate) {
-        Engine.voxelManager.Update();
+        Engine.voxelManager.UpdateModel();
         Engine.octreeManager.UpdatePoints();
         Engine.octreeManager.Update();
     }
+    
+    Engine.controls.UpdateTarget();
 }
 
 // OCTREE

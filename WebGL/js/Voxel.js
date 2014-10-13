@@ -19,10 +19,31 @@ Engine.VoxelManager = function()
     
     this.Init = function()
     {
-        this.voxels = [];  
+        this.voxels = [];
+        this.grids = [];
         this.geometryVoxel = new THREE.Geometry();
         this.meshVoxel = new THREE.Mesh(this.geometryVoxel, Engine.Materials.voxelMultiMaterials);
         this.dimension = new THREE.Vector3();
+
+        // Array list representing height grid 3D
+        // One for each octant
+        // Allows to use unique id from 3d position
+        for (var g = 0; g < 8; ++g) {
+            var grid = new Array(Math.ceil(Engine.MaxBounds.x * Engine.MaxBounds.y * Engine.MaxBounds.z));
+            this.grids.push(grid);
+        }
+    };
+    
+    this.GetPosition = function()
+    {
+        var bounds = this.geometryVoxel.boundingBox;
+        return bounds.min.clone().add(bounds.max).divideScalar(2);
+    };
+    
+    this.GetDimension = function()
+    {
+        var bounds = this.geometryVoxel.boundingBox;
+        return bounds.max.clone().sub(bounds.min);
     };
     
     this.GetGridFromPosition = function(position_)
@@ -139,6 +160,7 @@ Engine.VoxelManager = function()
 
         // Update Geometry
         this.geometryVoxel.computeFaceNormals();
+        this.geometryVoxel.computeBoundingBox();
         this.meshVoxel = new THREE.Mesh( this.geometryVoxel, Engine.Materials.voxel);
         this.meshVoxel.matrixAutoUpdate = false;
         this.meshVoxel.updateMatrix();
@@ -216,27 +238,11 @@ Engine.VoxelManager = function()
 
     // Parse Voxel
     this.VoxelizeModel = function(model)
-    {
-        // Reset voxels
-        this.voxels = [];
-        this.grids = [];
-        
+    {        
         // Lists of vertices and triangles
         var vertices = model.mesh.geometry.vertices.clone();
         var triangles = model.mesh.geometry.faces.clone();
         var trianglesCount = triangles.length;
-        
-        // Model origin
-        var modelPosition = Engine.modelManager.GetModel().mesh.position;
-
-        // Array list representing the 3D grid
-//        this.grid = new Array(Math.ceil(model.size.x * model.size.y * model.size.z));
-        
-        //
-        for (var g = 0; g < 8; ++g) {
-            var grid = new Array(Math.ceil(Engine.MaxBounds.x * Engine.MaxBounds.y * Engine.MaxBounds.z));
-            this.grids.push(grid);
-        }
 
         // For each triangles
         for (var t = 0; t < trianglesCount; t++) {
@@ -293,9 +299,6 @@ Engine.VoxelManager = function()
                             gridPosition.x,
                             gridPosition.y,
                             gridPosition.z);
-
-                        // Create mesh cube
-//                        var cube = this.AddVoxel(pos, 0);
 
                         // Create voxel
                         var voxel = new Engine.Voxel(voxelIndex, pos, triangle.normal);
