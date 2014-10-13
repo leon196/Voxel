@@ -47,8 +47,9 @@ Engine.UpdateModel = function()
 {
     // Update Data
     Engine.modelManager.Update();
-    Engine.voxelManager.Update();
+    Engine.voxelManager.UpdateModel();
     Engine.octreeManager.UpdatePoints();
+    Engine.controls.UpdateTarget();
     
     //
     Engine.Update();

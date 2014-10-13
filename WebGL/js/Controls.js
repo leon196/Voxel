@@ -51,10 +51,55 @@ Engine.Controls = function()
         this.camera.lookAt(Engine.scene);
         this.cameraLastPosition = this.camera.position;
     };    
+    
+    this.UpdateTarget = function()
+    {
+        this.controlsOrbit.target = Engine.modelManager.GetModel().mesh.position;
+    };
 
     this.onMouseDown = function(event)
     {
         this.mouseDown = true;
+        
+//        console.log(event);
+        
+        
+        // Left or right click
+        if (event.button != 1)
+        {
+            // var cameraDirection = new THREE.Vector3(0, 0, -1);
+         //    cameraDirection.applyEuler(camera.rotation, camera.rotation.order);
+            
+            // Calculate direction from mouse position
+            var vector = new THREE.Vector3(
+                ( event.clientX / window.innerWidth ) * 2 - 1,
+                - ( event.clientY / window.innerHeight ) * 2 + 1,
+                0.5 );
+            Engine.Projector.unprojectVector( vector, Engine.camera );
+            var dir = vector.sub( Engine.camera.position ).normalize();
+            rayCaster = new THREE.Raycaster(Engine.camera.position, dir);
+            
+            // Intersect Test
+            var results = rayCaster.intersectObject(Engine.voxelManager.meshVoxel);
+            if (results != undefined) {
+                if(results.length > 0)
+                {
+                    var hitPoint = results[0].point;
+                    var hitNormal = results[0].face.normal;
+                    
+                    // Left click
+                    if (event.button == 0) {
+                        hitPoint.sub(hitNormal.multiplyScalar(0.5));
+                        Engine.voxelManager.SubVoxelAt(hitPoint);
+                    } 
+                    // Right click
+                    else if (event.button == 2) {
+                        hitPoint.add(hitNormal.multiplyScalar(0.5));
+                        Engine.voxelManager.AddVoxelAt(hitPoint);
+                    }
+                }
+            }
+        }
     };
 
     this.onMouseUp = function(event)
@@ -68,26 +113,5 @@ Engine.Controls = function()
     
     this.onMouseMove = function(event)
     {
-        // var cameraDirection = new THREE.Vector3(0, 0, -1);
-     //    cameraDirection.applyEuler(camera.rotation, camera.rotation.order);
-        var vector = new THREE.Vector3(
-            ( event.clientX / window.innerWidth ) * 2 - 1,
-            - ( event.clientY / window.innerHeight ) * 2 + 1,
-            0.5 );
-        Engine.Projector.unprojectVector( vector, Engine.camera );
-        var dir = vector.sub( Engine.camera.position ).normalize();
-        rayCaster = new THREE.Raycaster(Engine.camera.position, dir);
-        var results = rayCaster.intersectObject(Engine.voxelManager.meshVoxel);
-        if (results != undefined) {
-            if(results.length > 0) {
-//                console.log(results);
-                var hitPoint = results[0].point;
-                var hitNormal = results[0].face.normal;
-                var testPoint = hitPoint.sub(hitNormal.multiplyScalar(0.5));
-//                var testPoint = hitPoint.add(dir.multiplyScalar(0.01));
-                Engine.helper.HitTest(hitPoint.ceil().sub({x:0.5, y:0.5, z:0.5}));
-//                Engine.voxelManager.ClickVoxelAt(hitPoint);
-            }
-        }
     };
 };

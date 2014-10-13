@@ -9,7 +9,7 @@ Engine.Helper = function()
     this.Init = function()
     {
         this.helperHitTest = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), Engine.Materials.wireframe);
-        Engine.scene.add(this.helperHitTest);
+//        Engine.scene.add(this.helperHitTest);
     };
     
     this.HitTest = function(testPoint)

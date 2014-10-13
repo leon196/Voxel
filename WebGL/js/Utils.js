@@ -10,6 +10,10 @@ Engine.Vector3 = function(x, y, z)
 	return { x: x, y: y, z: z };
 }
 
+Engine.MaxRange = 64;
+Engine.MaxBounds = new Engine.Vector3(Engine.MaxRange, Engine.MaxRange, Engine.MaxRange);
+Engine.MaxLength = Engine.MaxRange * Engine.MaxRange * Engine.MaxRange;
+
 // For elapsed time
 Engine.Clock = new THREE.Clock();
 

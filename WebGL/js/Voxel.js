@@ -12,6 +12,7 @@ Engine.VoxelManager = function()
 {
     this.voxels;
     this.grid;
+    this.grids;
     this.meshVoxel;
     this.geometryVoxel;
     this.dimension;
@@ -24,59 +25,131 @@ Engine.VoxelManager = function()
         this.dimension = new THREE.Vector3();
     };
     
-    // 
-    this.ClickVoxelAt = function(position)
-    {     
-        position.round();
-        var size = Engine.modelManager.GetModel().size;
-        var half = Engine.modelManager.GetModel().sizeHalf;
-        var index = Math.floor(
-            position.x + half.x
-            + (position.z + half.z) * size.x
-            + (position.y + half.y) * (size.x * size.z));
-        
-        //Math.ceil(model.size.x * model.size.y * model.size.z)
-        
-                Engine.helper.HitTest({
-                    x: index % size.x - half.x - 0.5,
-                    y: Math.floor(index / (size.x * size.z)) % size.y - half.y - 0.5,
-                    z: Math.floor(index / size.x) % size.z - half.z - 0.5});
-        
-        console.log(index);
-        
-        var voxel = this.grid[index];
-        if (voxel != undefined) {
-            
-            console.log(voxel);
-            
-            this.voxels.splice(voxel.index, 1);
-            this.grid[index] = undefined;
-            
-            // Clean Geometry
-            this.geometryVoxel.dispose();
-            this.geometryVoxel = new THREE.Geometry();
-            Engine.scene.remove( this.meshVoxel );
-
-            // Voxelize
-            this.BuildVoxels();
-            Engine.Parameters.voxelCount = "" + this.voxels.length;
-
-            // Update Geometry
-            this.geometryVoxel.computeFaceNormals();
-            this.meshVoxel = new THREE.Mesh( this.geometryVoxel, Engine.Materials.voxel);
-            this.meshVoxel.matrixAutoUpdate = false;
-            this.meshVoxel.updateMatrix();
-
-            // Display
-            this.UpdateDisplay();
-            Engine.scene.add( this.meshVoxel );	
-            
-        }
-        
+    this.GetGridFromPosition = function(position_)
+    {  
+        var oct = 0;
+		if(position_.x >= 0) oct |= 4;
+		if(position_.y >= 0) oct |= 2;
+		if(position_.z >= 0) oct |= 1;
+		return oct;
     };
     
-    // Shortcut
-    this.Update = function()
+    this.GridPosition = function(position_)
+    {
+        var position = position_.clone();
+        
+        return position.sub({x:0.5, y:0.5, z:0.5}).round();
+    };
+    
+    this.GetIndexFromPosition = function(position)
+    {   
+        // Get grid index from position
+        return Math.round(
+            Math.abs(position.x)
+            + Math.abs(position.z) * Engine.MaxBounds.x
+            + Math.abs(position.y) * (Engine.MaxBounds.x * Engine.MaxBounds.z));
+    };
+    
+    this.SubVoxelAt = function(position_)
+    {
+        var position = position_.clone().sub({x:0.5, y:0.5, z:0.5}).round();
+        var index = this.GetIndexFromPosition(position);
+        var gridIndex = this.GetGridFromPosition(position);
+        
+        if (gridIndex < Engine.MaxLength)
+        {
+            var voxel = this.grids[gridIndex][index];
+
+            if (voxel != undefined)
+            {
+                this.voxels[this.voxels.indexOf(this.grids[gridIndex][index])] = undefined;
+                this.grids[gridIndex][index] = undefined;
+
+                this.UpdateVoxels();
+            }
+        }
+    };
+    
+    // 
+    this.AddVoxelAt = function(position_)
+    {   
+        var position = position_.clone().sub({x:0.5, y:0.5, z:0.5}).round();
+        var index = this.GetIndexFromPosition(position);        
+        var gridIndex = this.GetGridFromPosition(position);
+        
+        if (gridIndex < Engine.MaxLength)
+        {
+            var voxel = this.grids[gridIndex][index];
+
+            if (voxel == undefined)
+            {
+                voxel = new Engine.Voxel(index, position, {x:0, y:0, z:0});
+                this.voxels.push(voxel);
+                this.grids[gridIndex][index] = voxel;
+
+                this.UpdateVoxels();
+            }
+        } else {
+            console.log("voxel out of domain");   
+        }
+    };
+    
+    // Dynamic Construction Process
+    this.BuildVoxels = function()
+    {
+        for (var v = 0; v < this.voxels.length; ++v) {
+            var voxel = this.voxels[v];
+            if (voxel != undefined) {
+                this.AddVoxel(voxel.position, voxel.materialIndex);
+            }
+        }
+        
+        /* TEST INDEX POSITION (Not optimal, use for debug) */
+        
+//        var size = Engine.MaxBounds;
+//        for (var g = 0; g < 8; ++g) {
+//            var grid = this.grids[g];
+//            for (var v = 0; v < grid.length; ++v) {
+//                var voxel = grid[v];
+//                if (voxel != undefined) {
+//                    var pos = {
+//                        x: v % size.x, 
+//                        y:Math.floor(v/(size.x*size.z))%size.y, 
+//                        z: Math.floor(v/size.x)%size.z};
+//                    //
+//                    if (g < 4) { pos.x *= -1; }
+//                    if (g < 2 || g == 4 || g == 5) { pos.y *= -1; }
+//                    if (g % 2 == 0) { pos.z *= -1; }
+//                    this.AddVoxel(pos, 0);
+//                }
+//            }
+//        }
+    };
+    
+    this.UpdateVoxels = function()
+    {
+        // Clean Geometry
+        this.geometryVoxel.dispose();
+        this.geometryVoxel = new THREE.Geometry();
+        Engine.scene.remove( this.meshVoxel );
+
+        // Voxelize
+        this.BuildVoxels();
+        Engine.Parameters.voxelCount = "" + this.voxels.length;
+
+        // Update Geometry
+        this.geometryVoxel.computeFaceNormals();
+        this.meshVoxel = new THREE.Mesh( this.geometryVoxel, Engine.Materials.voxel);
+        this.meshVoxel.matrixAutoUpdate = false;
+        this.meshVoxel.updateMatrix();
+
+        // Display
+        this.UpdateDisplay();
+        Engine.scene.add( this.meshVoxel );	
+    };
+    
+    // Update current model
+    this.UpdateModel = function()
     {
         this.UpdateWithModel(Engine.modelManager.GetModel());
     };
@@ -91,6 +164,7 @@ Engine.VoxelManager = function()
         
         // Voxelize
         this.VoxelizeModel(model_);
+        this.BuildVoxels();
         Engine.Parameters.voxelCount = "" + this.voxels.length;
         
         // Update Geometry
@@ -108,26 +182,14 @@ Engine.VoxelManager = function()
         Engine.scene.add( this.meshVoxel );	
     };
     
-    // Dynamic Construction Process
-    this.BuildVoxels = function()
-    {
-        for (var v = 0; v < this.voxels.length; ++v) {
-            var voxel = this.voxels[v];
-            this.AddVoxel(voxel.position, 0);
-        }
-//        for (var v = 0; v < this.grid.length; ++v) {
-//            var voxel = this.grid[v];
-//            if (voxel != undefined) {
-//                this.AddVoxel(voxel.position, voxel.materialIndex);
-//            }
-//        }
-    };
-    
     // Add geometry
     this.AddVoxel = function(position, materialIndex)
     {
         var cube = new THREE.Mesh( Engine.BoxGeometry );
-        cube.position.set(position.x, position.y, position.z);
+        cube.position.set(
+            position.x + 0.5,
+            position.y + 0.5,
+            position.z + 0.5);
         cube.updateMatrix();
         this.geometryVoxel.merge(cube.geometry, cube.matrix, materialIndex);
     };
@@ -157,23 +219,33 @@ Engine.VoxelManager = function()
     {
         // Reset voxels
         this.voxels = [];
+        this.grids = [];
         
         // Lists of vertices and triangles
         var vertices = model.mesh.geometry.vertices.clone();
         var triangles = model.mesh.geometry.faces.clone();
         var trianglesCount = triangles.length;
+        
+        // Model origin
+        var modelPosition = Engine.modelManager.GetModel().mesh.position;
 
         // Array list representing the 3D grid
-        this.grid = new Array(Math.ceil(model.size.x * model.size.y * model.size.z));
+//        this.grid = new Array(Math.ceil(model.size.x * model.size.y * model.size.z));
+        
+        //
+        for (var g = 0; g < 8; ++g) {
+            var grid = new Array(Math.ceil(Engine.MaxBounds.x * Engine.MaxBounds.y * Engine.MaxBounds.z));
+            this.grids.push(grid);
+        }
 
         // For each triangles
         for (var t = 0; t < trianglesCount; t++) {
 
             // Triangle's vertices position
             var face3 = triangles[t];
-            var a = vertices[face3.a].clone().multiplyScalar(Engine.Parameters.modelScale).add(model.sizeHalf);
-            var b = vertices[face3.b].clone().multiplyScalar(Engine.Parameters.modelScale).add(model.sizeHalf);
-            var c = vertices[face3.c].clone().multiplyScalar(Engine.Parameters.modelScale).add(model.sizeHalf);
+            var a = vertices[face3.a].clone().multiplyScalar(Engine.Parameters.modelScale);//.add(model.sizeHalf);
+            var b = vertices[face3.b].clone().multiplyScalar(Engine.Parameters.modelScale);//.add(model.sizeHalf);
+            var c = vertices[face3.c].clone().multiplyScalar(Engine.Parameters.modelScale);//.add(model.sizeHalf);
 
             // Triangle
             var triangle = new Engine.Triangle(a, b, c);
@@ -194,15 +266,18 @@ Engine.VoxelManager = function()
                 gridPosition.z = triangle.min.z + z;
 
                 // Unique ID by position
-                var gridIndex = Math.floor(
-                    gridPosition.x
-                    + gridPosition.z * model.size.x
-                    + gridPosition.y * (model.size.x * model.size.z));
+                var voxelIndex = Math.floor(
+                    Math.abs(gridPosition.x) % Engine.MaxBounds.x
+                    + Math.abs(gridPosition.z) * Engine.MaxBounds.x
+                    + Math.abs(gridPosition.y) * (Engine.MaxBounds.x * Engine.MaxBounds.z));
                 /*if (gridIndex < 0) {
                     console.log(gridIndex);
                     console.log(gridPosition);
                 }*/
-                var gridUnit = this.grid[gridIndex];
+                
+                var gridIndex = this.GetGridFromPosition(gridPosition);
+                
+                var gridUnit = this.grids[gridIndex][voxelIndex];
                 if (gridUnit == undefined)
                 {
                     // Intersection test
@@ -215,18 +290,18 @@ Engine.VoxelManager = function()
                     {
                         // Voxel position
                         var pos = new THREE.Vector3(
-                            gridPosition.x - model.sizeHalf.x + 0.5, 
-                            gridPosition.y - model.sizeHalf.y + 0.5, 
-                            gridPosition.z - model.sizeHalf.z + 0.5);
+                            gridPosition.x,
+                            gridPosition.y,
+                            gridPosition.z);
 
                         // Create mesh cube
-                        var cube = this.AddVoxel(pos, 0);
+//                        var cube = this.AddVoxel(pos, 0);
 
                         // Create voxel
-                        var voxel = new Engine.Voxel(this.voxels.length, pos, triangle.normal);
+                        var voxel = new Engine.Voxel(voxelIndex, pos, triangle.normal);
 
                         // Define the position (no duplicate)
-                        this.grid[gridIndex] = voxel;
+                        this.grids[gridIndex][voxelIndex] = voxel;
 
                         // For optimizing iterations
     					this.voxels.push(voxel);

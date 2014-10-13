@@ -31,6 +31,9 @@ Engine.Model = function(filePath)
         
         // Material
         this.mesh.material = Engine.Materials.model;
+        
+        //
+//        this.mesh.position.set(this.size.x, this.size.y, this.size.z);
 
 		// Add to scene
 		Engine.scene.add(this.mesh);
