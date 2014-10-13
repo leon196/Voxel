@@ -70,18 +70,24 @@ Engine.Controls = function()
     {
         // var cameraDirection = new THREE.Vector3(0, 0, -1);
      //    cameraDirection.applyEuler(camera.rotation, camera.rotation.order);
-//        var vector = new THREE.Vector3(
-//            ( event.clientX / window.innerWidth ) * 2 - 1,
-//            - ( event.clientY / window.innerHeight ) * 2 + 1,
-//            0.5 );
-//        Engine.Projector.unprojectVector( vector, camera );
-//        var dir = vector.sub( camera.position ).normalize();
-//        rayCaster = new THREE.Raycaster(camera.position, dir);
-//        var results = rayCaster.intersectObject(model);
-//        if (results != undefined) {
-//            if(results.length > 0) {
-//                updateLOD(results[0].point);
-//            }
-//        }
+        var vector = new THREE.Vector3(
+            ( event.clientX / window.innerWidth ) * 2 - 1,
+            - ( event.clientY / window.innerHeight ) * 2 + 1,
+            0.5 );
+        Engine.Projector.unprojectVector( vector, Engine.camera );
+        var dir = vector.sub( Engine.camera.position ).normalize();
+        rayCaster = new THREE.Raycaster(Engine.camera.position, dir);
+        var results = rayCaster.intersectObject(Engine.voxelManager.meshVoxel);
+        if (results != undefined) {
+            if(results.length > 0) {
+//                console.log(results);
+                var hitPoint = results[0].point;
+                var hitNormal = results[0].face.normal;
+                var testPoint = hitPoint.sub(hitNormal.multiplyScalar(0.5));
+//                var testPoint = hitPoint.add(dir.multiplyScalar(0.01));
+                Engine.helper.HitTest(hitPoint.ceil().sub({x:0.5, y:0.5, z:0.5}));
+//                Engine.voxelManager.ClickVoxelAt(hitPoint);
+            }
+        }
     };
 };

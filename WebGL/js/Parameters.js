@@ -5,19 +5,19 @@ Engine.Parameters =
     globalShininess: 10,
     
 	// Model Display
-	modelVisible: true, 
+	modelVisible: false, 
 	modelWire: false,
 	modelSmooth: true,
 	modelColor: "#ff8800",
     
 	// Voxel Display
 	voxelVisible: true,
-	voxelWire: true,
+	voxelWire: false,
 	voxelColorNormal: false,
 	voxelColor: "#88ff00",
     
 	// Octree Display
-	octreeVisible: true,
+	octreeVisible: false,
 	octreeWire: true,
     octreeColorNormal: false,
 	octreeShowEmpty: false,
@@ -39,13 +39,17 @@ Engine.Parameters =
     
 	// Helper
 	helperDistanceFromCenter: 10,
+    showHelper: false,
 
     //
-	autoUpdate: false,
+	autoUpdate: true,
     
 	// Controls
 	modeFPS: false,
     
     // Used to create list
-    txt: "..."
+    txt: "...",
+    
+    // Infos
+    voxelCount: "0"
 };

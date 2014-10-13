@@ -46,9 +46,14 @@ Engine.Materials =
             color: 0xffffff,
             wireframe: true }),
     
-    voxelMultiMaterials: THREE.MeshFaceMaterial([
+    voxelMultiMaterials: new THREE.MeshFaceMaterial([
         // Normal visualization
-        new THREE.MeshNormalMaterial(),
+        new THREE.MeshPhongMaterial({ 
+            color: Engine.Parameters.voxelColor,
+            wireframe:Engine.Parameters.voxelWire,
+            ambient: Engine.Parameters.globalColorAmbient, 
+            specular: Engine.Parameters.globalColorSpecular, 
+            shininess: Engine.Parameters.globalShininess }),
         // User color
         new THREE.MeshPhongMaterial({ 
             color: Engine.Parameters.voxelColor,
@@ -58,9 +63,14 @@ Engine.Materials =
             shininess: Engine.Parameters.globalShininess })
     ]),
     
-    octreeMultiMaterials: THREE.MeshFaceMaterial([
-        // Normal visualization
-        new THREE.MeshNormalMaterial(),
+    octreeMultiMaterials: new THREE.MeshFaceMaterial([
+        // User Color
+        new THREE.MeshPhongMaterial({ 
+            color: Engine.Parameters.octreeColor, 
+            wireframe: Engine.Parameters.octreeWire,
+            ambient: Engine.Parameters.globalColorAmbient, 
+            specular: Engine.Parameters.globalColorSpecular, 
+            shininess: Engine.Parameters.globalShininess }),
         // For empty cell
         new THREE.MeshBasicMaterial({
             color: Engine.Parameters.octreeColorEmpty,

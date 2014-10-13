@@ -72,21 +72,46 @@ Engine.OctreeManager = function()
     
     this.UpdateDisplay = function()
     {
-        // Visibility
-        this.meshOctree.visible = Engine.Parameters.octreeVisible;
+        if (Engine.Parameters.octreeVisible) {
         
-        // Color Normal
-        if (Engine.Parameters.octreeColorNormal) {
-            this.meshOctree.material = Engine.Materials.normal;
-        } 
-        // Color User
-        else {
-            this.meshOctree.material = Engine.Materials.octree;
-            this.meshOctree.material.color = new THREE.Color(Engine.Parameters.octreeColor);
+            // Color Normal
+            if (Engine.Parameters.octreeColorNormal) {
+                // Hot fix
+                Engine.scene.remove( this.meshOctree );
+                this.meshOctree = new THREE.Mesh( this.geometryOctree, Engine.Materials.normal);
+                this.meshOctree.matrixAutoUpdate = false;
+                this.meshOctree.updateMatrix();
+                Engine.scene.add( this.meshOctree );
+                //
+    //            this.meshOctree.material = Engine.Materials.normal;
+                // Wireframe
+                this.meshOctree.material.wireframe = Engine.Parameters.octreeWire;
+            } 
+            // Color User
+            else {
+                // Hot fix
+                Engine.scene.remove( this.meshOctree );
+                this.meshOctree = new THREE.Mesh( this.geometryOctree, Engine.Materials.octreeMultiMaterials);
+                this.meshOctree.matrixAutoUpdate = false;
+                this.meshOctree.updateMatrix();
+                Engine.scene.add( this.meshOctree );	
+
+                //
+                this.meshOctree.material.materials[0].color = new THREE.Color(Engine.Parameters.octreeColor);
+                // Wireframe
+                this.meshOctree.material.materials[0].wireframe = Engine.Parameters.octreeWire;
+
+                // Empty octree node
+                this.meshOctree.material.materials[1].visible = Engine.Parameters.octreeShowEmpty;
+                this.meshOctree.material.materials[1].wireframe = Engine.Parameters.octreeWire;
+            }
+            
+        } else {
+            // Visibility
+            this.meshOctree.visible = Engine.Parameters.octreeVisible;
         }
+            
         
-        // Wireframe
-        this.meshOctree.material.wireframe = Engine.Parameters.octreeWire;
     };
     
     // Octree Iteration

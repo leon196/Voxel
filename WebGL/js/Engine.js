@@ -21,7 +21,7 @@ Engine.scene.add( Engine.DirLight );
 
 
 Engine.Init = function()
-{
+{    
     // Instances
     Engine.modelManager = new Engine.ModelManager();
     Engine.modelManager.Init();
@@ -32,25 +32,37 @@ Engine.Init = function()
     Engine.octreeManager = new Engine.OctreeManager();
     Engine.octreeManager.Init();
     
+    Engine.lodManager = new Engine.LodManager();
+    
     Engine.controls = new Engine.Controls();
     Engine.controls.Init(Engine.camera);
     
     Engine.interface = new Engine.Interface();
+    
+    Engine.helper = new Engine.Helper();
+    Engine.helper.Init();
+};
+
+Engine.UpdateModel = function()
+{
+    // Update Data
+    Engine.modelManager.Update();
+    Engine.voxelManager.Update();
+    Engine.octreeManager.UpdatePoints();
+    
+    //
+    Engine.Update();
+};
+
+Engine.Update = function()
+{
+    // Update Visualization
+    Engine.octreeManager.Update();
 };
 
 Engine.OnLoadedMesh = function()
 {
-    Engine.modelManager.UpdateModel("Cube");
-    Engine.voxelManager.Update();
-    Engine.octreeManager.UpdatePoints();
-    
-    Engine.octreeManager.Update();
-    
-//    console.log(Engine);
-//    modelManager
-//    modelManager
-//    voxelManager
-//    octreeManager
+    Engine.UpdateModel();
 };
 
 Engine.Render = function()
