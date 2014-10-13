@@ -13,6 +13,17 @@ Engine.OctreeManager = function()
         this.meshOctree = new THREE.Mesh(this.geometryOctree, Engine.Materials.octree);
     };
     
+    this.Clear = function()
+    {
+        // Clear Geometry
+        this.geometryOctree.dispose();
+        this.geometryOctree = new THREE.Geometry();
+        Engine.scene.remove( this.meshOctree );
+        
+        // Clear Data
+        this.octreeRoot = undefined;
+    };
+    
     // Create the octree from the voxels
     this.UpdatePoints = function()
     {
@@ -34,7 +45,9 @@ Engine.OctreeManager = function()
         var voxels = Engine.voxelManager.voxels;
         for (var v = 0; v < voxels.length; ++v) {
             var voxel = voxels[v];
-            this.octreeRoot.insert(voxel.position);
+            if (voxel instanceof Engine.Voxel) {
+                this.octreeRoot.insert(voxel.position);
+            }
         }
     };
     

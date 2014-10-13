@@ -19,8 +19,11 @@ Engine.VoxelManager = function()
     
     this.Init = function()
     {
+        // Data
         this.voxels = [];
         this.grids = [];
+        
+        // Geometry
         this.geometryVoxel = new THREE.Geometry();
         this.meshVoxel = new THREE.Mesh(this.geometryVoxel, Engine.Materials.voxelMultiMaterials);
         this.dimension = new THREE.Vector3();
@@ -28,6 +31,22 @@ Engine.VoxelManager = function()
         // Array list representing height grid 3D
         // One for each octant
         // Allows to use unique id from 3d position
+        for (var g = 0; g < 8; ++g) {
+            var grid = new Array(Math.ceil(Engine.MaxBounds.x * Engine.MaxBounds.y * Engine.MaxBounds.z));
+            this.grids.push(grid);
+        }
+    };
+    
+    this.Clear = function()
+    {
+        // Clear Geometry
+        this.geometryVoxel.dispose();
+        this.geometryVoxel = new THREE.Geometry();
+        Engine.scene.remove( this.meshVoxel );
+        
+        // Clear Data
+        this.voxels = [];
+        this.grids = [];
         for (var g = 0; g < 8; ++g) {
             var grid = new Array(Math.ceil(Engine.MaxBounds.x * Engine.MaxBounds.y * Engine.MaxBounds.z));
             this.grids.push(grid);
@@ -81,10 +100,10 @@ Engine.VoxelManager = function()
         {
             var voxel = this.grids[gridIndex][index];
 
-            if (voxel != undefined)
+            if (voxel instanceof Engine.Voxel)
             {
-                this.voxels[this.voxels.indexOf(this.grids[gridIndex][index])] = undefined;
-                this.grids[gridIndex][index] = undefined;
+                this.voxels[this.voxels.indexOf(this.grids[gridIndex][index])] = {};
+                this.grids[gridIndex][index] = {};
 
                 this.UpdateVoxels();
             }
@@ -120,7 +139,7 @@ Engine.VoxelManager = function()
     {
         for (var v = 0; v < this.voxels.length; ++v) {
             var voxel = this.voxels[v];
-            if (voxel != undefined) {
+            if (voxel instanceof Engine.Voxel) {
                 this.AddVoxel(voxel.position, voxel.materialIndex);
             }
         }

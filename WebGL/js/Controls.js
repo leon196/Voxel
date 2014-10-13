@@ -52,10 +52,10 @@ Engine.Controls = function()
         this.cameraLastPosition = this.camera.position;
     };    
     
-    this.UpdateTarget = function()
-    {
-        this.controlsOrbit.target = Engine.modelManager.GetModel().mesh.position;
-    };
+//    this.UpdateTarget = function()
+//    {
+//        this.controlsOrbit.target = Engine.modelManager.GetModel().mesh.position;
+//    };
 
     this.onMouseDown = function(event)
     {
@@ -92,7 +92,7 @@ Engine.Controls = function()
                         hitPoint.sub(hitNormal.multiplyScalar(0.5));
                         Engine.voxelManager.SubVoxelAt(hitPoint);
                         if (Engine.Parameters.autoUpdate) {
-                            Engine.UpdateModel();
+                            Engine.Update();
                         }
                     } 
                     // Right click
@@ -100,7 +100,7 @@ Engine.Controls = function()
                         hitPoint.add(hitNormal.multiplyScalar(0.5));
                         Engine.voxelManager.AddVoxelAt(hitPoint);
                         if (Engine.Parameters.autoUpdate) {
-                            Engine.UpdateModel();
+                            Engine.Update();
                         }
                     }
                 }

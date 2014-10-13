@@ -43,7 +43,12 @@ Engine.Init = function()
     Engine.helper.Init();
 };
 
-Engine.UpdateModel = function()
+Engine.OnLoadedMesh = function()
+{
+    Engine.Update();
+};
+
+Engine.Update = function()
 {
     // Update Data
     Engine.modelManager.Update();
@@ -53,21 +58,13 @@ Engine.UpdateModel = function()
     Engine.octreeManager.UpdatePoints();
     Engine.octreeManager.Update();
     
-    Engine.controls.UpdateTarget();
-    
-    //
-//    Engine.Update();
+//    Engine.controls.UpdateTarget();
 };
 
-Engine.Update = function()
+Engine.Clear = function()
 {
-    // Update Visualization
-    Engine.octreeManager.Update();
-};
-
-Engine.OnLoadedMesh = function()
-{
-    Engine.UpdateModel();
+    Engine.voxelManager.Clear();
+    Engine.octreeManager.Clear();
 };
 
 Engine.Render = function()

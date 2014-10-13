@@ -14,8 +14,6 @@ function onChangeModelScale(value)
         Engine.octreeManager.UpdatePoints();
         Engine.octreeManager.Update();
     }
-    
-    Engine.controls.UpdateTarget();
 }
 
 // OCTREE
@@ -39,10 +37,10 @@ function onChangeControlsMode(value)
     
 }
 
-var buttons = {
-    
-    // Update Voxels Button
-    updateVoxels: function() { Engine.UpdateModel(); }
+var buttons =
+{    
+    updateVoxels: function() { Engine.Update(); },
+    clearVoxels: function() { Engine.Clear(); }
 };
 
 Engine.Interface = function()
@@ -91,6 +89,7 @@ Engine.Interface = function()
 	var folderVoxel = gui.addFolder('Voxel Options');
 	folderVoxel.add( parameters, 'autoUpdate' ).name('Auto Update');
 	folderVoxel.add( buttons, 'updateVoxels' ).name('Update');
+	folderVoxel.add( buttons, 'clearVoxels' ).name('Clear');
 //	folderVoxel.add( parameters, 'voxelSlicePosition').min(0).max(128).step(1).name('Voxel Slice Position');
 //	folderVoxel.add( parameters, 'voxelSliceHeight').min(1).max(128).step(1).name('Voxel Slice Height');
     folderVoxel.add( parameters, 'voxelCount' ).name('Voxels :').listen();
