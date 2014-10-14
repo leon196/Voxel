@@ -139,7 +139,7 @@ Engine.OctreeManager = function()
         var color = new THREE.Color(1,0,0);
 
         // Reached level of details or minimum size
-        if (count == 0 || octree.dimensionHalf.x <= 0.5) {
+        if (count == 0 || octree.dimensionHalf.x <= Engine.Parameters.minOctreeDimension) {
             if (octree.hasChildren() || octree.data != undefined) {
                 this.AddCube(octree.position, octree.dimension, 0);
             }
@@ -178,9 +178,18 @@ Engine.OctreeManager = function()
             // Octree Node is a leaf and got data
             else if (octree.data != undefined) {
 
-                //
-                // var i = octree.getOctantContainingPoint(point);
-                octree.split();
+                if (Engine.Parameters.generateMode)
+                {
+                    // Generate children data
+                    octree.splitRandom();
+                } 
+                else 
+                {
+                    // Split children and reinsert data
+                    octree.split();
+                }
+                
+                // Reiterate
                 for (var i = 0; i < 8; ++i) {
                     var octreeChild = octree.children[i];
                     this.Iterate(octreeChild, count - 1);
@@ -201,12 +210,12 @@ Engine.OctreeManager = function()
             z: octree.dimensionHalf.z * 2};
         var distance = distanceBetween(position, octree.position) - Engine.Parameters.distanceFactor;
         distance = distance/**distance*distance*distance + parameters.distanceOffset*/;
-        //distance = Math.min(distance, parameters.distanceMax);
+        distance = Math.min(distance, Engine.Parameters.distanceMax);
 
-        // if (distance < parameters.distanceVortex) return;
+//         if (distance < parameters.distanceVortex) return;
 
         // Reached level of details or minimum size
-        if (distance > octree.dimensionHalf.x * sqrt3 || octree.dimensionHalf.x <= Engine.Parameters.minVoxelScale) {
+        if (distance > octree.dimensionHalf.x * sqrt3 || octree.dimensionHalf.x <= Engine.Parameters.minOctreeDimension) {
             if (octree.hasChildren() || octree.data != undefined) {
                 this.AddCube(octree.position, octree.dimension, 0);
             }
@@ -223,7 +232,7 @@ Engine.OctreeManager = function()
                         var octreeChild = octree.children[i];
                         distance = distanceBetween(position, octreeChild.position) - Engine.Parameters.distanceFactor;
                         // distance =  distance*distance*distance*distance + parameters.distanceOffset;
-                        // distance = Math.min(distance, parameters.distanceMax);
+                         distance = Math.min(distance, Engine.Parameters.distanceMax);
                         // If we have reach level of details
                         if (distance > octreeChild.dimensionHalf.x * sqrt3) {
                             // If octree node has children or has data

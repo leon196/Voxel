@@ -93,7 +93,7 @@ Engine.Controls = function()
                         Engine.voxelManager.SubVoxelAt(hitPoint);
                         
                         if (Engine.Parameters.autoUpdate) {
-                            Engine.Update();
+                            Engine.octreeManager.Update();
                         }
                     }
                 }

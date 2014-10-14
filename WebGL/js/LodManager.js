@@ -4,7 +4,7 @@ Engine.LodManager = function()
     this.currentMode = 0;
     
     this.position = new Engine.Vector3();
-    this.positionLat = new Engine.Vector3();
+    this.positionLast = new Engine.Vector3();
     
     this.GetMode = function() { return this.modes[this.currentMode]; };
     
@@ -40,10 +40,18 @@ Engine.LodManager = function()
                 {
                     var hitPoint = results[0].point;
                                         
-                    this.position = hitPoint;
+                    this.position = hitPoint.round();
+                    if (this.position.x != this.positionLast.x
+                        || this.position.y != this.positionLast.y
+                        || this.position.z != this.positionLast.z) {
                     
-                    if (Engine.Parameters.autoUpdate) {
-                        Engine.Update();
+                        this.positionLast.x = this.position.x;
+                        this.positionLast.y = this.position.y;
+                        this.positionLast.z = this.position.z;
+                        
+                        if (Engine.Parameters.autoUpdate) {
+                            Engine.Update();
+                        }
                     }
                 }
             }

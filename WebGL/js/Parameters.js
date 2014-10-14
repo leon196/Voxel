@@ -11,7 +11,7 @@ Engine.Parameters =
 	modelColor: "#ff8800",
     
 	// Voxel Display
-	voxelVisible: false,
+	voxelVisible: true,
 	voxelWire: true,
 	voxelColorNormal: false,
 	voxelColor: "#88ff00",
@@ -25,7 +25,7 @@ Engine.Parameters =
     octreeColorEmpty: "#ff8800",
 
     // Model Options
-	modelScale: 4,
+	modelScale: 8,
     solidify: true,
     
 	// Voxel options
@@ -34,11 +34,13 @@ Engine.Parameters =
     minVoxelScale: 0.5,
 
 	// Octree options
+    generateMode: true,
 	exploreMode: false,
 	octreeLOD: 2,
-	distanceFactor: 8.0,
+	distanceFactor: 4.0,
 	distanceOffset: 0.0,
-	distanceMax: 8.0,
+    minOctreeDimension: 0.5,
+	distanceMax: 40.0,
 	distanceVortex: 0.01,
     
 	// Helper
@@ -46,6 +48,7 @@ Engine.Parameters =
     showHelper: false,
 
     //
+    autoClearOnChangeModel: true,
 	autoUpdate: true,
 	paintMode: true,
 	modeFPS: false,

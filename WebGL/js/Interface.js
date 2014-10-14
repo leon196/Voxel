@@ -38,7 +38,10 @@ function onChangeOptionOctree(value)
 function onChangeModel(value)
 {
     Engine.modelManager.UpdateModel(value);
-    Engine.voxelManager.Update();
+    if (Engine.Parameters.autoClearOnChangeModel) {
+        Engine.Clear();
+    }
+    Engine.voxelManager.UpdateModel();
     Engine.octreeManager.UpdatePoints();
     Engine.octreeManager.Update();
 }
@@ -93,6 +96,7 @@ Engine.Interface = function()
     
 	// Model Options
 	var folderModel = gui.addFolder('Model Options');
+    folderModel.add( parameters, 'autoClearOnChangeModel' ).name('Clear Auto');
     folderModel.add( parameters, 'txt', Engine.modelManager.modelsNames ).name('Mesh').onChange(onChangeModel);
 	folderModel.add( parameters, 'modelScale').min(1).max(20).step(1).name('Model Scale').onChange(onChangeModelScale);
 	folderModel.add( parameters, 'solidify').name('Solidify').onChange(onChangeSolidify);
@@ -106,12 +110,15 @@ Engine.Interface = function()
 	folderVoxel.add( buttons, 'clearVoxels' ).name('Clear');
 //	folderVoxel.add( parameters, 'voxelSlicePosition').min(0).max(128).step(1).name('Voxel Slice Position');
 //	folderVoxel.add( parameters, 'voxelSliceHeight').min(1).max(128).step(1).name('Voxel Slice Height');
+//    folderVoxel.add( parameters, 'minVoxelScale' ).min(0.125).max(8).step(0.1).name('Scale Minimum');
     folderVoxel.add( parameters, 'voxelCount' ).name('Voxels :').listen();
 	 folderVoxel.open();
 
 	// Level of Details
 	var folderOctree = gui.addFolder('Octree Options');
-	folderOctree.add( parameters, 'octreeLOD').min(0).max(6).step(1).name('Level of Details').onChange(onChangeOptionOctree);
+	folderOctree.add( parameters, 'octreeLOD').min(0).max(12).step(1).name('Level of Details').onChange(onChangeOptionOctree);
+    folderOctree.add( parameters, 'minOctreeDimension' ).min(0.125).max(0.5).step(0.1).name('Scale Minimum');
+    folderOctree.add( parameters, 'generateMode' ).name('Generate Depth');
     folderOctree.open();
     
 	var folderLOD = folderOctree.addFolder('Local Level of Details');
@@ -121,7 +128,7 @@ Engine.Interface = function()
 	folderLOD.add( parameters, 'distanceFactor' ).min(1).max(20).step(1).name('Scope Distance').onChange(onChangeOptionOctree);
 	// folderLOD.add( parameters, '' )
 	// folderLOD.add( parameters, 'distanceOffset' ).min(0).max(100).step(1).name('Offset Distance').onChange(onChangeOptionOctree);
-	 folderLOD.add( parameters, 'distanceMax' ).min(1).max(20).step(1).name('Max Distance').onChange(onChangeOptionOctree);
+	 folderLOD.add( parameters, 'distanceMax' ).min(1).max(100).step(1).name('Max Distance').onChange(onChangeOptionOctree);
 	 folderLOD.add( parameters, 'distanceVortex' ).min(0.01).max(2.0).step(0.1).name('Vortex Radius').onChange(onChangeOptionOctree);
 	 folderLOD.open();
 	//
