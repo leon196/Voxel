@@ -104,15 +104,15 @@ Engine.ModelManager = function()
         
         // Names
         this.modelsNames = [
-            "Monkey", 
+            "Cube", 
             "Sphere", 
-            "Cube"];
+            "Monkey"];
         
         // Paths
         this.modelsPaths = [
-            "models/mesh.mesh",
+            "models/cubeOriented.mesh",
             "models/sphere.mesh",
-            "models/cubeOriented.mesh"];
+            "models/mesh.mesh"];
     
         // Update mesh count
         this.meshLoaded = 0;

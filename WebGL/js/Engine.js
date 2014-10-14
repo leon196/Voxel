@@ -67,6 +67,39 @@ Engine.Clear = function()
     Engine.octreeManager.Clear();
 };
 
+Engine.RayIntersection = function()
+{
+    var position;
+    var direction;
+    var mesh;
+    // var cameraDirection = new THREE.Vector3(0, 0, -1);
+ //    cameraDirection.applyEuler(camera.rotation, camera.rotation.order);
+
+    if (Engine.lodManager.IsModeMouse())
+    {
+        // Calculate direction from mouse position
+        var vector = new THREE.Vector3(
+            ( Engine.controls.mousePosition.x / window.innerWidth ) * 2 - 1,
+            - ( Engine.controls.mousePosition.y / window.innerHeight ) * 2 + 1,
+            0.5 );
+        Engine.Projector.unprojectVector( vector, Engine.camera );
+        
+        // 
+        position = Engine.camera.position;
+        direction = vector.sub( Engine.camera.position ).normalize();
+        mesh = Engine.voxelManager.meshVoxel;
+    }
+    else if (Engine.lodManager.IsModeCamera()) 
+    {
+    }
+    // Helper
+    else
+    {
+    }
+    
+    return (new THREE.Raycaster(position, direction)).intersectObject(mesh);
+};
+
 Engine.Render = function()
 {
 	requestAnimationFrame(Engine.Render);

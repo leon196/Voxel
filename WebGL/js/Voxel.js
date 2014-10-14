@@ -56,7 +56,7 @@ Engine.VoxelManager = function()
     this.GetPosition = function()
     {
         var bounds = this.geometryVoxel.boundingBox;
-        return bounds.min.clone().add(bounds.max).divideScalar(2);
+        return bounds.min.clone().add(bounds.max).divideScalar(2).round();
     };
     
     this.GetDimension = function()
@@ -331,65 +331,65 @@ Engine.VoxelManager = function()
                 }
             }
         }
-    };
-    
-    this.Fill = function()
-    {
+        /*
         // Fill Surfaces
-        var current = -1;
-        var columns = [];
-        // The first slice of the grid
-        var sliceCount = (meshSize.x * meshSize.z);
-        for (var s = 0; s < sliceCount; ++s) {
-            var positionX = s % meshSize.x;
-            var positionZ = Math.floor(s / meshSize.x) % meshSize.z;
-            current = -1;
-            columns = [];
-            // For each colum of the voxel picked from slice
-            for (var c = 0; c < meshSize.y; ++c) {
-                var indexVoxel = Math.floor(s + c * meshSize.x * meshSize.z);
-                // var pos = {x:positionX - meshHalfSize.x, y:c - meshHalfSize.y, z:positionZ - meshHalfSize.z};
-                // var cube = AddCubeVoxel(pos, {x:1,y:1,z:1}, 0);
-                // 		octree.insert(pos);
-                var voxel = gridBuffer[indexVoxel];
-                // If voxel
-                if (voxel != undefined) {
-                    // Grab it
-                    columns.push(voxel);
+        if (Engine.Parameters.solidify)
+        {
+            var 
+            var current = -1;
+            var columns = [];
+            // The first slice of the grid
+            var sliceCount = (meshSize.x * meshSize.z);
+            for (var s = 0; s < sliceCount; ++s) {
+                var positionX = s % meshSize.x;
+                var positionZ = Math.floor(s / meshSize.x) % meshSize.z;
+                current = -1;
+                columns = [];
+                // For each colum of the voxel picked from slice
+                for (var c = 0; c < meshSize.y; ++c) {
+                    var indexVoxel = Math.floor(s + c * meshSize.x * meshSize.z);
+                    // var pos = {x:positionX - meshHalfSize.x, y:c - meshHalfSize.y, z:positionZ - meshHalfSize.z};
+                    // var cube = AddCubeVoxel(pos, {x:1,y:1,z:1}, 0);
+                    // 		octree.insert(pos);
+                    var voxel = gridBuffer[indexVoxel];
+                    // If voxel
+                    if (voxel != undefined) {
+                        // Grab it
+                        columns.push(voxel);
+                    }
                 }
-            }
-            if (columns.length > 1) {
-                for (var c = 0; c < columns.length; ++c) {
-                    var voxel = columns[c];
-                    // if (voxel.normal.y <= 0) {
-                    // 	current = voxel.index;
-                    // } else if (voxel.normal.y > 0) {
-                        if (current != -1) {
-                            var currentVoxel = voxels[current];
-                            if (currentVoxel != undefined) {
-                                
-                                for (var positionY = currentVoxel.y + 1; positionY < voxel.y; ++positionY)
-                                {
-                                    // Add Voxel Cube
-                                    var pos = { 
-                                        x: positionX - meshHalfSize.x, 
-                                        y: positionY, 
-                                        z: positionZ - meshHalfSize.z };
-                                    var cube = AddCubeVoxel(pos, {x:1,y:1,z:1}, 0);
+                if (columns.length > 1) {
+                    for (var c = 0; c < columns.length; ++c) {
+                        var voxel = columns[c];
+                        // if (voxel.normal.y <= 0) {
+                        // 	current = voxel.index;
+                        // } else if (voxel.normal.y > 0) {
+                            if (current != -1) {
+                                var currentVoxel = voxels[current];
+                                if (currentVoxel != undefined) {
 
-                                    // Voxel taken
-                                    var indexVoxelColumn = Math.floor(s + positionY * meshSize.x * meshSize.z);
-                                    gridBuffer[indexVoxelColumn] = new Voxel(indexVoxelColumn, {x:positionX, y:positionY, z:positionZ}, {x:0, y:0, z:0	}, cube);
+                                    for (var positionY = currentVoxel.y + 1; positionY < voxel.y; ++positionY)
+                                    {
+                                        // Add Voxel Cube
+                                        var pos = { 
+                                            x: positionX - meshHalfSize.x, 
+                                            y: positionY, 
+                                            z: positionZ - meshHalfSize.z };
+                                        var cube = AddCubeVoxel(pos, {x:1,y:1,z:1}, 0);
+
+                                        // Voxel taken
+                                        var indexVoxelColumn = Math.floor(s + positionY * meshSize.x * meshSize.z);
+                                        gridBuffer[indexVoxelColumn] = new Voxel(indexVoxelColumn, {x:positionX, y:positionY, z:positionZ}, {x:0, y:0, z:0	}, cube);
+                                    }
                                 }
+                                //current = -1;
+                            } else {
+                                current = voxel.index;
                             }
-                            //current = -1;
-                        } else {
-                            current = voxel.index;
-                        }
-                    // }
+                        // }
+                    }
                 }
             }
-        }
+        }*/
     };
-    
 };

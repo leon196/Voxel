@@ -16,6 +16,18 @@ function onChangeModelScale(value)
     }
 }
 
+// SOLIDIFY
+function onChangeSolidify(value)
+{
+
+}
+
+// CHANGE MODE
+function onChangeMode(value)
+{
+    Engine.lodManager.ChangeMode(value);
+}
+
 // OCTREE
 function onChangeOptionOctree(value)
 {
@@ -83,10 +95,12 @@ Engine.Interface = function()
 	var folderModel = gui.addFolder('Model Options');
     folderModel.add( parameters, 'txt', Engine.modelManager.modelsNames ).name('Mesh').onChange(onChangeModel);
 	folderModel.add( parameters, 'modelScale').min(1).max(20).step(1).name('Model Scale').onChange(onChangeModelScale);
+	folderModel.add( parameters, 'solidify').name('Solidify').onChange(onChangeSolidify);
     folderModel.open();
 	
 	// Voxel Options
 	var folderVoxel = gui.addFolder('Voxel Options');
+	folderVoxel.add( parameters, 'paintMode' ).name('Paint Mode');
 	folderVoxel.add( parameters, 'autoUpdate' ).name('Auto Update');
 	folderVoxel.add( buttons, 'updateVoxels' ).name('Update');
 	folderVoxel.add( buttons, 'clearVoxels' ).name('Clear');
@@ -102,8 +116,8 @@ Engine.Interface = function()
     
 	var folderLOD = folderOctree.addFolder('Local Level of Details');
 	folderLOD.add( parameters, 'exploreMode' ).name('Enabled').onChange(onChangeOptionOctree);
-	folderLOD.add( parameters, 'txt', Engine.lodManager.modes ).name('Mode').onChange(onChangeOptionOctree);
-	folderLOD.add( parameters, 'showHelper' ).name('Show Helper').onChange(onChangeOptionOctree);
+	folderLOD.add( parameters, 'txt', Engine.lodManager.modes ).name('Mode').onChange(onChangeMode);
+//	folderLOD.add( parameters, 'showHelper' ).name('Show Helper').onChange(onChangeOptionOctree);
 	folderLOD.add( parameters, 'distanceFactor' ).min(1).max(20).step(1).name('Scope Distance').onChange(onChangeOptionOctree);
 	// folderLOD.add( parameters, '' )
 	// folderLOD.add( parameters, 'distanceOffset' ).min(0).max(100).step(1).name('Offset Distance').onChange(onChangeOptionOctree);

@@ -11,7 +11,7 @@ Engine.Parameters =
 	modelColor: "#ff8800",
     
 	// Voxel Display
-	voxelVisible: true,
+	voxelVisible: false,
 	voxelWire: true,
 	voxelColorNormal: false,
 	voxelColor: "#88ff00",
@@ -24,10 +24,14 @@ Engine.Parameters =
 	octreeColor: "#0088ff",
     octreeColorEmpty: "#ff8800",
 
-	// Voxel options
+    // Model Options
 	modelScale: 4,
+    solidify: true,
+    
+	// Voxel options
 	voxelSliceHeight: 4,
 	voxelSlicePosition: 0,
+    minVoxelScale: 0.5,
 
 	// Octree options
 	exploreMode: false,
@@ -42,9 +46,8 @@ Engine.Parameters =
     showHelper: false,
 
     //
-	autoUpdate: false,
-    
-	// Controls
+	autoUpdate: true,
+	paintMode: true,
 	modeFPS: false,
     
     // Used to create list

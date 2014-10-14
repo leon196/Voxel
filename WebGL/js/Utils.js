@@ -44,7 +44,8 @@ Array.prototype.clone = function() { return this.slice(0); };
 // Used to calculate length of vector from center of box to corner of box
 var sqrt3 = Math.sqrt(3);
 
-
+//
+function distanceBetween(a, b) { return Math.sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y)+(a.z-b.z)*(a.z-b.z)); }
 
 // Thank to Tomas Akenine-Möller
 // For sharing his Triangle Box Overlaping algorithm
