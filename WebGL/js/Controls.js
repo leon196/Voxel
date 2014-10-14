@@ -87,16 +87,19 @@ Engine.Controls = function()
         Engine.controls.mousePosition.x = event.clientX;
         Engine.controls.mousePosition.y = event.clientY;
         
-        Engine.lodManager.onMouseMove(event);
+        if (Engine.ready && Engine.Parameters.exploreMode)
+        {
+            Engine.lodManager.UpdateExplorationPosition();
+        }
     };
     
-    this.onUpdate = function()
+    this.Paint = function()
     {
+        // PAINT MODE
         if (this.fireLastShot + this.fireRate < Engine.Clock.getElapsedTime())
         {
             this.fireLastShot = Engine.Clock.elapsedTime;
-            // Paint Mode
-            if (Engine.Parameters.paintMode && (this.mouseLeft || this.mouseRight))
+            if (this.mouseLeft || this.mouseRight)
             {            
                 // Intersect Test
                 var results = Engine.RayIntersection();
@@ -111,6 +114,7 @@ Engine.Controls = function()
                         {    
                             hitPoint.add(hitNormal.multiplyScalar(0.5));
 
+                            // ADD VOXEL
                             Engine.voxelManager.AddVoxelAt(hitPoint);
 
                             if (Engine.Parameters.autoUpdate) {
@@ -122,6 +126,7 @@ Engine.Controls = function()
                         {
                             hitPoint.sub(hitNormal.multiplyScalar(0.5));
 
+                            // DELETE VOXEL
                             Engine.voxelManager.SubVoxelAt(hitPoint);
 
                             if (Engine.Parameters.autoUpdate) {

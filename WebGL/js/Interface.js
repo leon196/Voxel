@@ -125,11 +125,15 @@ Engine.Interface = function()
 	folderLOD.add( parameters, 'exploreMode' ).name('Enabled').onChange(onChangeOptionOctree);
 	folderLOD.add( parameters, 'txt', Engine.lodManager.modes ).name('Mode').onChange(onChangeMode);
 //	folderLOD.add( parameters, 'showHelper' ).name('Show Helper').onChange(onChangeOptionOctree);
-	folderLOD.add( parameters, 'distanceFactor' ).min(1).max(20).step(1).name('Scope Distance').onChange(onChangeOptionOctree);
+	folderLOD.add( parameters, 'distanceFactor' ).min(1).max(100).step(1).name('Distance').onChange(onChangeOptionOctree);
+    folderLOD.add( parameters, 'vortexMode' ).name('Vortex').onChange(onChangeOptionOctree);
+    
+    var foldeLODAdvanced = folderLOD.addFolder('Distance Options');
+    foldeLODAdvanced.add( parameters, 'distancePower' ).min(1).max(4).step(1).name('Exponent').onChange(onChangeOptionOctree);
 	// folderLOD.add( parameters, '' )
-	// folderLOD.add( parameters, 'distanceOffset' ).min(0).max(100).step(1).name('Offset Distance').onChange(onChangeOptionOctree);
-	 folderLOD.add( parameters, 'distanceMax' ).min(1).max(100).step(1).name('Max Distance').onChange(onChangeOptionOctree);
-	 folderLOD.add( parameters, 'distanceVortex' ).min(0.01).max(2.0).step(0.1).name('Vortex Radius').onChange(onChangeOptionOctree);
+	 foldeLODAdvanced.add( parameters, 'distanceOffset' ).min(0).max(100).step(1).name('Offset').onChange(onChangeOptionOctree);
+	 foldeLODAdvanced.add( parameters, 'distanceMax' ).min(1).max(100).step(1).name('Max').onChange(onChangeOptionOctree);
+//	 folderLOD.add( parameters, 'distanceVortex' ).min(0.0).max(100.0).step(1.0).name('Vortex Radius').onChange(onChangeOptionOctree);
 	 folderLOD.open();
 	//
 

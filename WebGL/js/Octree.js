@@ -208,14 +208,18 @@ Engine.OctreeManager = function()
             x: octree.dimensionHalf.x * 2,
             y: octree.dimensionHalf.y * 2,
             z: octree.dimensionHalf.z * 2};
-        var distance = distanceBetween(position, octree.position) - Engine.Parameters.distanceFactor;
-        distance = distance/**distance*distance*distance + parameters.distanceOffset*/;
+        
+        // Distance
+        var distance = distanceBetween(position, octree.position);
+        
+        distance = Math.max(distance - Engine.Parameters.distanceFactor, 0);
+        distance = Math.pow(distance, Engine.Parameters.distancePower);
+        distance = Math.max(distance - Engine.Parameters.distanceOffset, 0);
         distance = Math.min(distance, Engine.Parameters.distanceMax);
 
-//         if (distance < parameters.distanceVortex) return;
 
         // Reached level of details or minimum size
-        if (distance > octree.dimensionHalf.x * sqrt3 || octree.dimensionHalf.x <= Engine.Parameters.minOctreeDimension) {
+        if (!Engine.Parameters.vortexMode && (distance > octree.dimensionHalf.x * sqrt3 || octree.dimensionHalf.x <= Engine.Parameters.minOctreeDimension)) {
             if (octree.hasChildren() || octree.data != undefined) {
                 this.AddCube(octree.position, octree.dimension, 0);
             }
@@ -230,9 +234,13 @@ Engine.OctreeManager = function()
                 else {
                     for (var i = 0; i < 8; ++i) {
                         var octreeChild = octree.children[i];
-                        distance = distanceBetween(position, octreeChild.position) - Engine.Parameters.distanceFactor;
-                        // distance =  distance*distance*distance*distance + parameters.distanceOffset;
-                         distance = Math.min(distance, Engine.Parameters.distanceMax);
+                        
+                        distance = distanceBetween(position, octreeChild.position);                        
+                        distance = Math.max(distance - Engine.Parameters.distanceFactor, 0);
+                        distance = Math.pow(distance, Engine.Parameters.distancePower);
+                        distance = Math.max(distance - Engine.Parameters.distanceOffset, 0);
+                        distance = Math.min(distance, Engine.Parameters.distanceMax);
+                        
                         // If we have reach level of details
                         if (distance > octreeChild.dimensionHalf.x * sqrt3) {
                             // If octree node has children or has data
@@ -246,19 +254,29 @@ Engine.OctreeManager = function()
                     }
                 }
             }
-            /*
             // Octree Node is a leaf and got data
             else if (octree.data != undefined) {
 
-                //
-                // var i = octree.getOctantContainingPoint(point);
-                octree.splitRandom();
-                for (var i = 0; i < 8; ++i) {
-                    var octreeChild = octree.children[i];
-                    ExploreOctree(octreeChild, position);
+                if (Engine.Parameters.distanceVortex >=  Engine.Parameters.minOctreeDimension)
+                {
+                    if (Engine.Parameters.generateMode)
+                    {
+                        // Generate children data
+                        octree.splitRandom();
+                    } 
+                    else 
+                    {
+                        // Split children and reinsert data
+                        octree.split();
+                    }
+
+                    // Reiterate
+                    for (var i = 0; i < 8; ++i) {
+                        var octreeChild = octree.children[i];
+                        this.Explore(octreeChild, position);
+                    }
                 }
             }
-            */
         }
         
     };

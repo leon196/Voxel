@@ -1,6 +1,6 @@
 Engine.LodManager = function()
 {
-    this.modes = ["Mouse", "Camera", "Helper"];
+    this.modes = ['Mouse', 'Camera', 'Helper'];
     this.currentMode = 0;
     
     this.position = new Engine.Vector3();
@@ -25,35 +25,45 @@ Engine.LodManager = function()
     
     this.ChangeMode = function(value)
     {
-        this.currentMode = this.modes.indexOf[value];
+        this.currentMode = this.modes.indexOf(value);
+        this.UpdateExplorationPosition();
     };
     
-    this.onMouseMove = function(event)
+    this.UpdateExplorationPosition = function()
     {
-        // Local Level of Details
-        if (Engine.Parameters.exploreMode)
-        {
+        if (this.IsModeMouse()) {
             // Intersect Test
             var results = Engine.RayIntersection();
             if (results != undefined) {
                 if(results.length > 0)
-                {
-                    var hitPoint = results[0].point;
-                                        
-                    this.position = hitPoint.round();
-                    if (this.position.x != this.positionLast.x
-                        || this.position.y != this.positionLast.y
-                        || this.position.z != this.positionLast.z) {
+                {                                        
+                    this.position = results[0].point.clone().round();
                     
+                    if (this.position.x != this.positionLast.x || this.position.y != this.positionLast.y || this.position.z != this.positionLast.z) {
                         this.positionLast.x = this.position.x;
                         this.positionLast.y = this.position.y;
                         this.positionLast.z = this.position.z;
                         
                         if (Engine.Parameters.autoUpdate) {
-                            Engine.Update();
+                            Engine.octreeManager.Update();
                         }
                     }
                 }
+            }
+        } else if (this.IsModeCamera())
+        {                   
+            this.position = Engine.camera.position.clone().round();
+
+            if (this.position.x != this.positionLast.x || this.position.y != this.positionLast.y || this.position.z != this.positionLast.z) {
+                this.positionLast.x = this.position.x;
+                this.positionLast.y = this.position.y;
+                this.positionLast.z = this.position.z;
+
+                if (Engine.Parameters.autoUpdate) {
+                    Engine.octreeManager.Update();
+                }
+            } else {
+                console.log("enough!");
             }
         }
     };

@@ -43,8 +43,11 @@ Engine.Init = function()
     Engine.helper.Init();
 };
 
+Engine.ready = false;
+
 Engine.OnLoadedMesh = function()
 {
+    Engine.ready = true;
     Engine.Update();
 };
 
@@ -75,8 +78,8 @@ Engine.RayIntersection = function()
     // var cameraDirection = new THREE.Vector3(0, 0, -1);
  //    cameraDirection.applyEuler(camera.rotation, camera.rotation.order);
 
-    if (Engine.lodManager.IsModeMouse())
-    {
+//    if (Engine.lodManager.IsModeMouse())
+//    {
         // Calculate direction from mouse position
         var vector = new THREE.Vector3(
             ( Engine.controls.mousePosition.x / window.innerWidth ) * 2 - 1,
@@ -88,14 +91,14 @@ Engine.RayIntersection = function()
         position = Engine.camera.position;
         direction = vector.sub( Engine.camera.position ).normalize();
         mesh = Engine.voxelManager.meshVoxel;
-    }
-    else if (Engine.lodManager.IsModeCamera()) 
-    {
-    }
-    // Helper
-    else
-    {
-    }
+//    }
+//    else if (Engine.lodManager.IsModeCamera()) 
+//    {
+//    }
+//    // Helper
+//    else
+//    {
+//    }
     
     return (new THREE.Raycaster(position, direction)).intersectObject(mesh);
 };
@@ -131,7 +134,9 @@ Engine.Render = function()
 		cameraLastPosition.z = Math.round(camera.position.z);
 	}*/
     
-    Engine.controls.onUpdate();
+    if (Engine.Parameters.paintMode) {
+        Engine.controls.Paint();
+    }
 
 	Engine.renderer.render(Engine.scene, Engine.camera);
 
