@@ -130,6 +130,8 @@ Engine.Render = function()
 		cameraLastPosition.y = Math.round(camera.position.y);
 		cameraLastPosition.z = Math.round(camera.position.z);
 	}*/
+    
+    Engine.controls.onUpdate();
 
 	Engine.renderer.render(Engine.scene, Engine.camera);
 

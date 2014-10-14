@@ -9,12 +9,19 @@ Engine.Controls = function()
     this.screenHeightHalf;    
     
     this.mousePosition;
-    this.mouseDown;
+    this.mouseLeft;
+    this.mouseRight;
     this.controlsOrbit;
     this.controlsFPS;
     
+    this.fireRate = 0.1;
+    this.fireLastShot = 0;
+    
     this.Init = function(camera_)
     {
+        this.mouseLeft = false;
+        this.mouseRight = false;
+        
         if (camera_ == undefined)
         { 
             alert("There is no camera attached to controls"); 
@@ -61,49 +68,14 @@ Engine.Controls = function()
 
     this.onMouseDown = function(event)
     {
-        this.mouseDown = true;
-        
-        // Paint Mode
-        if (Engine.Parameters.paintMode && event.button != 1)
-        {            
-            // Intersect Test
-            var results = Engine.RayIntersection();
-            if (results != undefined) {
-                if(results.length > 0)
-                {
-                    var hitPoint = results[0].point;
-                    var hitNormal = results[0].face.normal;
-                    
-                    // Left click
-                    if (event.button == 0)
-                    {    
-                        hitPoint.add(hitNormal.multiplyScalar(0.5));
-                        
-                        Engine.voxelManager.AddVoxelAt(hitPoint);
-                        
-                        if (Engine.Parameters.autoUpdate) {
-                            Engine.Update();
-                        }
-                    } 
-                    // Right click
-                    else if (event.button == 2)
-                    {
-                        hitPoint.sub(hitNormal.multiplyScalar(0.5));
-                        
-                        Engine.voxelManager.SubVoxelAt(hitPoint);
-                        
-                        if (Engine.Parameters.autoUpdate) {
-                            Engine.octreeManager.Update();
-                        }
-                    }
-                }
-            }
-        }
+        Engine.controls.mouseLeft = event.button == 0;
+        Engine.controls.mouseRight = event.button == 2;
     };
 
     this.onMouseUp = function(event)
     {
-        this.mouseDown = false;
+        Engine.controls.mouseLeft = false;
+        Engine.controls.mouseRight = false;
     };
 
     this.onMouseWheel = function(event)
@@ -116,5 +88,49 @@ Engine.Controls = function()
         Engine.controls.mousePosition.y = event.clientY;
         
         Engine.lodManager.onMouseMove(event);
+    };
+    
+    this.onUpdate = function()
+    {
+        if (this.fireLastShot + this.fireRate < Engine.Clock.getElapsedTime())
+        {
+            this.fireLastShot = Engine.Clock.elapsedTime;
+            // Paint Mode
+            if (Engine.Parameters.paintMode && (this.mouseLeft || this.mouseRight))
+            {            
+                // Intersect Test
+                var results = Engine.RayIntersection();
+                if (results != undefined) {
+                    if(results.length > 0)
+                    {
+                        var hitPoint = results[0].point;
+                        var hitNormal = results[0].face.normal;
+
+                        // Left click
+                        if (this.mouseLeft)
+                        {    
+                            hitPoint.add(hitNormal.multiplyScalar(0.5));
+
+                            Engine.voxelManager.AddVoxelAt(hitPoint);
+
+                            if (Engine.Parameters.autoUpdate) {
+                                Engine.Update();
+                            }
+                        } 
+                        // Right click
+                        else if (this.mouseRight)
+                        {
+                            hitPoint.sub(hitNormal.multiplyScalar(0.5));
+
+                            Engine.voxelManager.SubVoxelAt(hitPoint);
+
+                            if (Engine.Parameters.autoUpdate) {
+                                Engine.Update();
+                            }
+                        }
+                    }
+                }
+            }
+        }
     };
 };

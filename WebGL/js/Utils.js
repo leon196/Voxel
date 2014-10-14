@@ -16,6 +16,7 @@ Engine.MaxLength = Engine.MaxRange * Engine.MaxRange * Engine.MaxRange;
 
 // For elapsed time
 Engine.Clock = new THREE.Clock();
+Engine.Clock.start();
 
 // For calculate delta time
 Engine.elpasedTimeLastFrame = Date.now();
