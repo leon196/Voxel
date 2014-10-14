@@ -255,27 +255,24 @@ Engine.OctreeManager = function()
                 }
             }
             // Octree Node is a leaf and got data
-            else if (octree.data != undefined) {
-
-                if (Engine.Parameters.distanceVortex >=  Engine.Parameters.minOctreeDimension)
+            else if (octree.data != undefined)
+            {
+                if (Engine.Parameters.generateMode && octree.dimensionHalf.x >= Engine.Parameters.minOctreeDimension)
                 {
-                    if (Engine.Parameters.generateMode)
-                    {
-                        // Generate children data
-                        octree.splitRandom();
-                    } 
-                    else 
-                    {
-                        // Split children and reinsert data
-                        octree.split();
-                    }
+                    // Generate children data
+                    octree.splitRandom();
 
                     // Reiterate
                     for (var i = 0; i < 8; ++i) {
                         var octreeChild = octree.children[i];
                         this.Explore(octreeChild, position);
                     }
-                }
+                } 
+//                else 
+//                {
+//                    // Split children and reinsert data
+//                    octree.split();
+//                }
             }
         }
         

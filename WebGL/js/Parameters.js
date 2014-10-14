@@ -42,13 +42,13 @@ Engine.Parameters =
     generateMode: false,
 	exploreMode: true,
 	octreeLOD: 2,
-	distanceFactor: 4.0,
+	distanceFactor: 30.0,
 	distanceOffset: 0.0,
     minOctreeDimension: 0.5,
 	distanceMax: 40.0,
 	distanceVortex: 0.0,
     distancePower:1,
-    vortexMode: true,
+    vortexMode: false,
     
 	// Helper
 	helperDistanceFromCenter: 10,
@@ -57,6 +57,7 @@ Engine.Parameters =
     //
     autoClearOnChangeModel: true,
 	autoUpdate: true,
+    exploreModeAutoUpdate: true,
 	paintMode: true,
 	modeFPS: false,
     

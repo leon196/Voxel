@@ -27,6 +27,10 @@ function onChangeMode(value)
 {
     Engine.lodManager.ChangeMode(value);
 }
+function onChangeGenerationMode(value)
+{
+    Engine.lodManager.ChangeGenerationMode(value);
+}
 
 // OCTREE
 function onChangeOptionOctree(value)
@@ -105,9 +109,6 @@ Engine.Interface = function()
 	// Voxel Options
 	var folderVoxel = gui.addFolder('Voxel Options');
 	folderVoxel.add( parameters, 'paintMode' ).name('Paint Mode');
-	folderVoxel.add( parameters, 'autoUpdate' ).name('Auto Update');
-	folderVoxel.add( buttons, 'updateVoxels' ).name('Update');
-	folderVoxel.add( buttons, 'clearVoxels' ).name('Clear');
 //	folderVoxel.add( parameters, 'voxelSlicePosition').min(0).max(128).step(1).name('Voxel Slice Position');
 //	folderVoxel.add( parameters, 'voxelSliceHeight').min(1).max(128).step(1).name('Voxel Slice Height');
 //    folderVoxel.add( parameters, 'minVoxelScale' ).min(0.125).max(8).step(0.1).name('Scale Minimum');
@@ -119,13 +120,15 @@ Engine.Interface = function()
 	folderOctree.add( parameters, 'octreeLOD').min(0).max(12).step(1).name('Level of Details').onChange(onChangeOptionOctree);
     folderOctree.add( parameters, 'minOctreeDimension' ).min(0.125).max(0.5).step(0.1).name('Scale Minimum');
     folderOctree.add( parameters, 'generateMode' ).name('Generate Depth');
+    folderOctree.add( parameters, 'txt', Engine.lodManager.generationModes ).name('Generation').onChange(onChangeGenerationMode);
     folderOctree.open();
     
 	var folderLOD = folderOctree.addFolder('Local Level of Details');
 	folderLOD.add( parameters, 'exploreMode' ).name('Enabled').onChange(onChangeOptionOctree);
+	folderLOD.add( parameters, 'exploreModeAutoUpdate' ).name('Auto Update');
 	folderLOD.add( parameters, 'txt', Engine.lodManager.modes ).name('Mode').onChange(onChangeMode);
 //	folderLOD.add( parameters, 'showHelper' ).name('Show Helper').onChange(onChangeOptionOctree);
-	folderLOD.add( parameters, 'distanceFactor' ).min(1).max(100).step(1).name('Distance').onChange(onChangeOptionOctree);
+	folderLOD.add( parameters, 'distanceFactor' ).min(1).max(50).step(1).name('Distance').onChange(onChangeOptionOctree);
     folderLOD.add( parameters, 'vortexMode' ).name('Vortex').onChange(onChangeOptionOctree);
     
     var foldeLODAdvanced = folderLOD.addFolder('Distance Options');
@@ -139,7 +142,11 @@ Engine.Interface = function()
 
 	var folderControlsOption = gui.addFolder('Controls Options');
     folderControlsOption.add( parameters, 'modeFPS' ).name('Mode FPS').onChange(onChangeControlsMode);
-    folderControlsOption.open();
+//    folderControlsOption.open();
+    
+	gui.add( parameters, 'autoUpdate' ).name('Auto Update');
+	gui.add( buttons, 'updateVoxels' ).name('Update');
+	gui.add( buttons, 'clearVoxels' ).name('Clear');
     
     
 	gui.open();

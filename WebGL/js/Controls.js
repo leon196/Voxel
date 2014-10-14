@@ -76,6 +76,11 @@ Engine.Controls = function()
     {
         Engine.controls.mouseLeft = false;
         Engine.controls.mouseRight = false;
+        
+        if (Engine.ready && Engine.Parameters.exploreMode && !Engine.Parameters.exploreModeAutoUpdate)
+        {
+            Engine.lodManager.UpdateExplorationPosition();
+        }
     };
 
     this.onMouseWheel = function(event)
@@ -87,7 +92,7 @@ Engine.Controls = function()
         Engine.controls.mousePosition.x = event.clientX;
         Engine.controls.mousePosition.y = event.clientY;
         
-        if (Engine.ready && Engine.Parameters.exploreMode)
+        if (Engine.ready && Engine.Parameters.exploreMode && Engine.Parameters.exploreModeAutoUpdate)
         {
             Engine.lodManager.UpdateExplorationPosition();
         }
