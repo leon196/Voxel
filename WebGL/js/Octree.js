@@ -213,9 +213,13 @@ Engine.OctreeManager = function()
         var distance = distanceBetween(position, octree.position);
         
         distance = Math.max(distance - Engine.Parameters.distanceFactor, 0);
-        distance = Math.pow(distance, Engine.Parameters.distancePower);
-        distance = Math.max(distance - Engine.Parameters.distanceOffset, 0);
-        distance = Math.min(distance, Engine.Parameters.distanceMax);
+        if (Engine.Parameters.sqrt) {
+            distance = Math.sqrt(distance) * Engine.Parameters.distanceLogScale;
+        } else if (Engine.Parameters.pow) {
+            distance = Math.pow(distance, 2) * Engine.Parameters.distanceLogScale;
+        }
+//        distance = Math.max(distance - Engine.Parameters.distanceOffset, 0);
+//        distance = Math.min(distance, Engine.Parameters.distanceMax);
 
 
         // Reached level of details or minimum size
@@ -237,9 +241,13 @@ Engine.OctreeManager = function()
                         
                         distance = distanceBetween(position, octreeChild.position);                        
                         distance = Math.max(distance - Engine.Parameters.distanceFactor, 0);
-                        distance = Math.pow(distance, Engine.Parameters.distancePower);
-                        distance = Math.max(distance - Engine.Parameters.distanceOffset, 0);
-                        distance = Math.min(distance, Engine.Parameters.distanceMax);
+                        if (Engine.Parameters.sqrt) {
+                            distance = Math.sqrt(distance) * Engine.Parameters.distanceLogScale;
+                        } else if (Engine.Parameters.pow) {
+                            distance = Math.pow(distance, 2) * Engine.Parameters.distanceLogScale;
+                        }
+//                        distance = Math.max(distance - Engine.Parameters.distanceOffset, 0);
+//                        distance = Math.min(distance, Engine.Parameters.distanceMax);
                         
                         // If we have reach level of details
                         if (distance > octreeChild.dimensionHalf.x * sqrt3) {

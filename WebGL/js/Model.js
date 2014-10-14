@@ -1,5 +1,5 @@
 // Model Element
-Engine.Model = function(filePath)
+Engine.Model = function()
 {
 	this.mesh;
     this.scale;
@@ -104,25 +104,29 @@ Engine.ModelManager = function()
         
         // Names
         this.modelsNames = [
-            "Monkey", 
+            "Singe", 
+            "Cube",
             "Sphere", 
-            "Cube"];
-        
-        // Paths
-        this.modelsPaths = [
-            "models/mesh.mesh",
-            "models/sphere.mesh",
-            "models/cubeOriented.mesh"];
+            "Tasse",
+            "Gateau",
+            "Bidet",
+            "Chapeau",
+            "Personnage",
+            "Visage"
+        ];
     
         // Update mesh count
         this.meshLoaded = 0;
-        this.meshToLoad = this.modelsPaths.length;
+        this.meshToLoad = this.modelsNames.length;
         
         // Create, Load and Store models
         for (var m = 0; m < this.meshToLoad; ++m)
         {
-            var model = new Engine.Model(this.modelsPaths[m]);
-            this.LoadMesh(this.modelsPaths[m], model, this);
+            var model = new Engine.Model();
+            var path = "models/";
+            path = path.concat(this.modelsNames[m]).toLowerCase().concat(".mesh");
+            console.log(path);
+            this.LoadMesh(path, model, this);
             this.models.push(model);
         }
         

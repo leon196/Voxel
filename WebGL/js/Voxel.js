@@ -331,29 +331,33 @@ Engine.VoxelManager = function()
                 }
             }
         }
-        /*
+        
         // Fill Surfaces
         if (Engine.Parameters.solidify)
         {
-            var 
             var current = -1;
             var columns = [];
+            var size = model.size;
             // The first slice of the grid
-            var sliceCount = (meshSize.x * meshSize.z);
+            var sliceCount = (size.x * size.z);
             for (var s = 0; s < sliceCount; ++s) {
-                var positionX = s % meshSize.x;
-                var positionZ = Math.floor(s / meshSize.x) % meshSize.z;
+                var positionX = s % size.x;
+                var positionZ = Math.floor(s / size.x) % size.z;
                 current = -1;
                 columns = [];
                 // For each colum of the voxel picked from slice
-                for (var c = 0; c < meshSize.y; ++c) {
-                    var indexVoxel = Math.floor(s + c * meshSize.x * meshSize.z);
-                    // var pos = {x:positionX - meshHalfSize.x, y:c - meshHalfSize.y, z:positionZ - meshHalfSize.z};
-                    // var cube = AddCubeVoxel(pos, {x:1,y:1,z:1}, 0);
-                    // 		octree.insert(pos);
-                    var voxel = gridBuffer[indexVoxel];
-                    // If voxel
-                    if (voxel != undefined) {
+                for (var positionY = 0; positionY < size.y; ++positionY)
+                {
+                    var pos = new THREE.Vector3(
+                        positionX - model.sizeHalf.x,
+                        positionY - model.sizeHalf.y,
+                        positionZ - model.sizeHalf.z);
+                    pos.round();
+                    var gridIndex = this.GetGridFromPosition(pos);
+                    var voxelIndex = this.GetIndexFromPosition(pos);
+                    
+                    var voxel = this.grids[gridIndex][voxelIndex];
+                    if (voxel instanceof Engine.Voxel ) {
                         // Grab it
                         columns.push(voxel);
                     }
@@ -365,31 +369,41 @@ Engine.VoxelManager = function()
                         // 	current = voxel.index;
                         // } else if (voxel.normal.y > 0) {
                             if (current != -1) {
-                                var currentVoxel = voxels[current];
-                                if (currentVoxel != undefined) {
+                                var pastVoxel = columns[c];
+                                if (pastVoxel != undefined) {
 
-                                    for (var positionY = currentVoxel.y + 1; positionY < voxel.y; ++positionY)
+                                    for (var positionY = pastVoxel.y + 1; positionY < voxel.y; ++positionY)
                                     {
-                                        // Add Voxel Cube
-                                        var pos = { 
-                                            x: positionX - meshHalfSize.x, 
-                                            y: positionY, 
-                                            z: positionZ - meshHalfSize.z };
-                                        var cube = AddCubeVoxel(pos, {x:1,y:1,z:1}, 0);
+                                        var pos = new THREE.Vector3(
+                                            positionX - model.sizeHalf.x,
+                                            positionY,
+                                            positionZ - model.sizeHalf.z);
+                                        pos.round();
+                                        var gridIndex = this.GetGridFromPosition(pos);
+                                        var voxelIndex = this.GetIndexFromPosition(pos);
 
-                                        // Voxel taken
-                                        var indexVoxelColumn = Math.floor(s + positionY * meshSize.x * meshSize.z);
-                                        gridBuffer[indexVoxelColumn] = new Voxel(indexVoxelColumn, {x:positionX, y:positionY, z:positionZ}, {x:0, y:0, z:0	}, cube);
+                                        var voxel = this.grids[gridIndex][voxelIndex];
+                                        if (voxel == undefined )
+                                        {
+                                            // Create voxel
+                                            var voxel = new Engine.Voxel(voxelIndex, pos, new Engine.Vector3(1,1,1));
+
+                                            // Define the position (no duplicate)
+                                            this.grids[gridIndex][voxelIndex] = voxel;
+
+                                            // For optimizing iterations
+                                            this.voxels.push(voxel);
+                                        }
                                     }
                                 }
                                 //current = -1;
                             } else {
-                                current = voxel.index;
+                                current = c;
                             }
                         // }
                     }
                 }
             }
-        }*/
+        }
     };
 };

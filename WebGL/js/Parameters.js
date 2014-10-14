@@ -1,4 +1,4 @@
-Engine.MaxRange = 16;
+Engine.MaxRange = 128;
 Engine.MaxBounds = new Engine.Vector3(Engine.MaxRange, Engine.MaxRange, Engine.MaxRange);
 Engine.MaxLength = Engine.MaxRange * Engine.MaxRange * Engine.MaxRange;
 
@@ -10,21 +10,21 @@ Engine.Parameters =
     globalShininess: 10,
     
 	// Model Display
-	modelVisible: false, 
+	modelVisible: true, 
 	modelWire: false,
 	modelSmooth: true,
 	modelColor: "#ff8800",
     
 	// Voxel Display
-	voxelVisible: false,
+	voxelVisible: true,
 	voxelWire: true,
 	voxelColorNormal: false,
 	voxelColor: "#88ff00",
     
 	// Octree Display
 	octreeVisible: true,
-	octreeWire: false,
-    octreeColorNormal: true,
+	octreeWire: true,
+    octreeColorNormal: false,
 	octreeShowEmpty: false,
 	octreeColor: "#0088ff",
     octreeColorEmpty: "#ff8800",
@@ -42,12 +42,16 @@ Engine.Parameters =
     generateMode: false,
 	exploreMode: true,
 	octreeLOD: 2,
-	distanceFactor: 30.0,
+	distanceFactor: 1.0,
 	distanceOffset: 0.0,
     minOctreeDimension: 0.5,
 	distanceMax: 40.0,
 	distanceVortex: 0.0,
     distancePower:1,
+    distanceLog:1,
+    pow: false,
+    sqrt: false,
+    distanceLogScale: 4,
     vortexMode: false,
     
 	// Helper
@@ -58,8 +62,11 @@ Engine.Parameters =
     autoClearOnChangeModel: true,
 	autoUpdate: true,
     exploreModeAutoUpdate: true,
-	paintMode: true,
+	paintMode: false,
+    
+    controlsEnabled: true,
 	modeFPS: false,
+    
     
     // Used to create list
     txt: "...",

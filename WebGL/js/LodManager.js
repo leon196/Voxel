@@ -1,6 +1,6 @@
 Engine.LodManager = function()
 {
-    this.modes = ['Camera', 'Mouse', 'Helper'];
+    this.modes = ['Mouse', 'Camera', 'Helper'];
     this.currentMode = 0;
     this.GetMode = function() { return this.modes[this.currentMode]; };
     
