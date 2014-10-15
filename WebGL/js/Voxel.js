@@ -364,15 +364,15 @@ Engine.VoxelManager = function()
                 }
                 if (columns.length > 1) {
                     for (var c = 0; c < columns.length; ++c) {
-                        var voxel = columns[c];
-                        // if (voxel.normal.y <= 0) {
+                        var currentVoxel = columns[c];
+                         if (currentVoxel.normal.y <= 0) {
+                                current = c;
                         // 	current = voxel.index;
-                        // } else if (voxel.normal.y > 0) {
+                         } else if (currentVoxel.normal.y > 0) {
                             if (current != -1) {
-                                var pastVoxel = columns[c];
+                                var pastVoxel = columns[current];
                                 if (pastVoxel != undefined) {
-
-                                    for (var positionY = pastVoxel.y + 1; positionY < voxel.y; ++positionY)
+                                    for (var positionY = pastVoxel.position.y + 1; positionY < currentVoxel.position.y; ++positionY)
                                     {
                                         var pos = new THREE.Vector3(
                                             positionX - model.sizeHalf.x,
@@ -386,7 +386,7 @@ Engine.VoxelManager = function()
                                         if (voxel == undefined )
                                         {
                                             // Create voxel
-                                            var voxel = new Engine.Voxel(voxelIndex, pos, new Engine.Vector3(1,1,1));
+                                            var voxel = new Engine.Voxel(voxelIndex, pos, new Engine.Vector3(0,0,0));
 
                                             // Define the position (no duplicate)
                                             this.grids[gridIndex][voxelIndex] = voxel;
@@ -395,12 +395,15 @@ Engine.VoxelManager = function()
                                             this.voxels.push(voxel);
                                         }
                                     }
+                                    
+                                    current = -1;
                                 }
                                 //current = -1;
-                            } else {
-                                current = c;
                             }
-                        // }
+//                             else {
+//                                current = c;
+//                            }
+                         }
                     }
                 }
             }
