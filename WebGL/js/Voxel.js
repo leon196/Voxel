@@ -88,6 +88,15 @@ Engine.VoxelManager = function()
             Math.abs(position.x)
             + Math.abs(position.z) * Engine.MaxBounds.x
             + Math.abs(position.y) * (Engine.MaxBounds.x * Engine.MaxBounds.z));
+        
+        // Get index from position
+        round ( x + y * (sizeX * sizeZ) + z * sizeX )
+        
+        // Get position from index
+        x = index % sizeX
+        y = floor ( index / ( sizeX * sizeZ ) ) % sizeY
+        z = floor ( index / sizeX ) % sizeZ
+        
     };
     
     this.SubVoxelAt = function(position_)
