@@ -104,15 +104,19 @@ Engine.ModelManager = function()
         
         // Names
         this.modelsNames = [
-            "Singe", 
+            "Gateau",
             "Cube",
             "Sphere", 
+            "Singe", 
             "Tasse",
-            "Gateau",
             "Bidet",
             "Chapeau",
+            "Rose",
+            "Chaise",
+            "Velo",
             "Personnage",
-            "Visage"
+            "Visage",
+            "Scene"
         ];
     
         // Update mesh count

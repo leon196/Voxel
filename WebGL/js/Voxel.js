@@ -126,6 +126,13 @@ Engine.VoxelManager = function()
         var index = this.GetIndexFromPosition(position);        
         var gridIndex = this.GetGridFromPosition(position);
         
+        // Clean
+        var geometrySave = this.geometryVoxel.clone();
+        this.geometryVoxel = new THREE.Geometry();
+        Engine.scene.remove( this.meshVoxel );
+        
+        this.geometryVoxel = geometrySave;
+        
         if (gridIndex < Engine.MaxLength)
         {
             var voxel = this.grids[gridIndex][index];
@@ -135,12 +142,12 @@ Engine.VoxelManager = function()
                 voxel = new Engine.Voxel(index, position, {x:0, y:0, z:0});
                 this.voxels.push(voxel);
                 this.grids[gridIndex][index] = voxel;
-
-                this.UpdateVoxels();
+                
+                this.AddVoxel(position, 0);
             }
-        } else {
-            console.log("voxel out of domain");   
         }
+        
+        this.UpdateGeometry();
     };
     
     // Dynamic Construction Process
@@ -175,25 +182,33 @@ Engine.VoxelManager = function()
 //        }
     };
     
-    this.UpdateVoxels = function()
+    this.CleanGeometry = function()
     {
-        // Clean Geometry
         this.geometryVoxel.dispose();
         this.geometryVoxel = new THREE.Geometry();
         Engine.scene.remove( this.meshVoxel );
+    };
+    
+    this.UpdateVoxels = function()
+    {
+        this.CleanGeometry();
 
         // Voxelize
         this.BuildVoxels();
         Engine.Parameters.voxelCount = "" + this.voxels.length;
-
-        // Update Geometry
+        
+        this.UpdateGeometry();
+    };
+    
+    this.UpdateGeometry = function()
+    {
         this.geometryVoxel.computeFaceNormals();
         this.geometryVoxel.computeBoundingBox();
+        var bounds = this.geometryVoxel.boundingBox;
+        this.dimension = (bounds.max).sub(bounds.min);
         this.meshVoxel = new THREE.Mesh( this.geometryVoxel, Engine.Materials.voxel);
         this.meshVoxel.matrixAutoUpdate = false;
         this.meshVoxel.updateMatrix();
-
-        // Display
         this.UpdateDisplay();
         Engine.scene.add( this.meshVoxel );	
     };
@@ -207,29 +222,14 @@ Engine.VoxelManager = function()
     // Voxel Construction Process
     this.UpdateWithModel = function(model_)
     {
-        // Clean Geometry
-        this.geometryVoxel.dispose();
-        this.geometryVoxel = new THREE.Geometry();
-        Engine.scene.remove( this.meshVoxel );
+        this.CleanGeometry();
         
         // Voxelize
         this.VoxelizeModel(model_);
         this.BuildVoxels();
         Engine.Parameters.voxelCount = "" + this.voxels.length;
         
-        // Update Geometry
-        this.geometryVoxel.computeFaceNormals();
-        this.geometryVoxel.computeBoundingBox();
-        var bounds = this.geometryVoxel.boundingBox;
-        this.dimension = (bounds.max).sub(bounds.min);
-            
-        this.meshVoxel = new THREE.Mesh( this.geometryVoxel, Engine.Materials.normal);
-        this.meshVoxel.matrixAutoUpdate = false;
-        this.meshVoxel.updateMatrix();
-        
-        // Display
-        this.UpdateDisplay();
-        Engine.scene.add( this.meshVoxel );	
+        this.UpdateGeometry();
     };
     
     // Add geometry
@@ -242,6 +242,7 @@ Engine.VoxelManager = function()
             position.z + 0.5);
         cube.updateMatrix();
         this.geometryVoxel.merge(cube.geometry, cube.matrix, materialIndex);
+//        this.meshVoxel.geometry.merge(cube.geometry, cube.matrix, materialIndex);
     };
     
     // Material
@@ -374,11 +375,10 @@ Engine.VoxelManager = function()
                 if (columns.length > 1) {
                     for (var c = 0; c < columns.length; ++c) {
                         var currentVoxel = columns[c];
-                         if (currentVoxel.normal.y <= 0) {
+                         if (currentVoxel.normal.y <= 0 && currentVoxel == -1) {
                                 current = c;
                         // 	current = voxel.index;
-                         } else if (currentVoxel.normal.y > 0) {
-                            if (current != -1) {
+                         } else if (currentVoxel.normal.y > 0 && current != -1) {
                                 var pastVoxel = columns[current];
                                 if (pastVoxel != undefined) {
                                     for (var positionY = pastVoxel.position.y + 1; positionY < currentVoxel.position.y; ++positionY)
@@ -404,14 +404,8 @@ Engine.VoxelManager = function()
                                             this.voxels.push(voxel);
                                         }
                                     }
-                                    
                                     current = -1;
                                 }
-                                //current = -1;
-                            }
-//                             else {
-//                                current = c;
-//                            }
                          }
                     }
                 }

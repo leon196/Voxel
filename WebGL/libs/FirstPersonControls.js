@@ -52,6 +52,8 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 
 	this.viewHalfX = 0;
 	this.viewHalfY = 0;
+    
+	this.quat = new THREE.Quaternion().setFromUnitVectors( object.up, new THREE.Vector3( 0, 1, 0 ) );
 
 	if ( this.domElement !== document ) {
 
@@ -101,8 +103,8 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 */
 		
 		/* HOHO */
-		// this.viewHalfX = event.pageX;
-		// this.viewHalfY = event.pageY;
+		 this.viewHalfX = event.pageX;
+		 this.viewHalfY = event.pageY;
 
 		this.freezeLook = false;
 		this.mouseDragOn = true;
@@ -127,8 +129,8 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 */
 		
 		/* HOHO */
-		// this.viewHalfX = event.pageX;
-		// this.viewHalfY = event.pageY;
+		 this.viewHalfX = event.pageX;
+		 this.viewHalfY = event.pageY;
 
 		this.freezeLook = true;
 		this.mouseDragOn = false;
@@ -289,6 +291,26 @@ THREE.FirstPersonControls = function ( object, domElement ) {
 		this.mouseX = this.mouseY = 0;
 
 	};
+    
+    this.lookAtPoint = function(position)
+    {
+//        var offset = new THREE.Vector3();
+//		offset.copy( this.object.position ).sub( position );
+//
+//		// rotate offset to "y-axis-is-up" space
+//		offset.applyQuaternion( this.quat );
+//
+//		// angle from z-axis around y-axis
+//
+//		this.theta = Math.atan2( offset.x, offset.z );
+//
+//		// angle from y-axis
+//
+//		this.phi = Math.atan2( Math.sqrt( offset.x * offset.x + offset.z * offset.z ), offset.y );
+//        
+//        this.lat = THREE.Math.radToDeg(this.phi) - 90;
+//        this.lon = THREE.Math.radToDeg( this.theta );
+    };
 
 
 	this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );

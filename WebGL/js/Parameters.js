@@ -10,7 +10,7 @@ Engine.Parameters =
     globalShininess: 10,
     
 	// Model Display
-	modelVisible: false, 
+	modelVisible: true, 
 	modelWire: false,
 	modelSmooth: true,
 	modelColor: "#ff8800",
@@ -39,8 +39,6 @@ Engine.Parameters =
     minVoxelScale: 0.5,
 
 	// Octree options
-    generateMode: false,
-	exploreMode: true,
 	octreeLOD: 2,
 	distanceFactor: 1.0,
 	distanceOffset: 0.0,
@@ -59,10 +57,13 @@ Engine.Parameters =
     showHelper: false,
 
     //
+    generateMode: false,
+	exploreMode: false,
     autoClearOnChangeModel: true,
 	autoUpdate: true,
     exploreModeAutoUpdate: true,
 	paintMode: false,
+    octreeEnabled: false,
     
     controlsEnabled: true,
 	modeFPS: false,

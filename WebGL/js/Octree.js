@@ -1,5 +1,7 @@
 Engine.OctreeManager = function()
 {
+    this.enabled = true;
+    
     this.octreeRoot;
     
     this.geometryOctree;
@@ -27,26 +29,29 @@ Engine.OctreeManager = function()
     // Create the octree from the voxels
     this.UpdatePoints = function()
     {
-        var position = Engine.voxelManager.GetPosition();
-//        var position = new Engine.Vector3();
-        var dimension = Engine.voxelManager.GetDimension();
-        
-        // Find max size from bounds
-        var dimensionMax = Math.max(Math.ceil(dimension.x), Math.max(Math.ceil(dimension.y), Math.ceil(dimension.z)));
-        
-        // Find closest power of two
-        dimensionMax = Engine.ClosestPowerOfTwo(dimensionMax);
-        var octreeDimension = { x: dimensionMax, y: dimensionMax, z: dimensionMax };
+        if (this.enabled)
+        {
+            var position = Engine.voxelManager.GetPosition();
+    //        var position = new Engine.Vector3();
+            var dimension = Engine.voxelManager.GetDimension();
 
-        // Octree
-        this.octreeRoot = new Engine.Octree(position, octreeDimension);
-        
-        // Insert Voxels
-        var voxels = Engine.voxelManager.voxels;
-        for (var v = 0; v < voxels.length; ++v) {
-            var voxel = voxels[v];
-            if (voxel instanceof Engine.Voxel) {
-                this.octreeRoot.insert(voxel.position);
+            // Find max size from bounds
+            var dimensionMax = Math.max(Math.ceil(dimension.x), Math.max(Math.ceil(dimension.y), Math.ceil(dimension.z)));
+
+            // Find closest power of two
+            dimensionMax = Engine.ClosestPowerOfTwo(dimensionMax);
+            var octreeDimension = { x: dimensionMax, y: dimensionMax, z: dimensionMax };
+
+            // Octree
+            this.octreeRoot = new Engine.Octree(position, octreeDimension);
+
+            // Insert Voxels
+            var voxels = Engine.voxelManager.voxels;
+            for (var v = 0; v < voxels.length; ++v) {
+                var voxel = voxels[v];
+                if (voxel instanceof Engine.Voxel) {
+                    this.octreeRoot.insert(voxel.position);
+                }
             }
         }
     };
@@ -64,35 +69,38 @@ Engine.OctreeManager = function()
     // Update Octree
     this.Update = function()
     {
-        // Clean Geometry
-        this.geometryOctree.dispose();
-        this.geometryOctree = new THREE.Geometry();
-        Engine.scene.remove( this.meshOctree );
-        
-        // Voxelize Octree
-        if (Engine.Parameters.exploreMode) {
-            this.Explore(this.octreeRoot, Engine.lodManager.GetPosition());
-        }
-        else
+        if (this.enabled)
         {
-            this.Iterate(this.octreeRoot, Engine.Parameters.octreeLOD);
+            // Clean Geometry
+            this.geometryOctree.dispose();
+            this.geometryOctree = new THREE.Geometry();
+            Engine.scene.remove( this.meshOctree );
+
+            // Voxelize Octree
+            if (Engine.Parameters.exploreMode) {
+                this.Explore(this.octreeRoot, Engine.lodManager.GetPosition());
+            }
+            else
+            {
+                this.Iterate(this.octreeRoot, Engine.Parameters.octreeLOD);
+            }
+
+            // Update Geometry
+            this.geometryOctree.computeFaceNormals();
+            this.meshOctree = new THREE.Mesh( this.geometryOctree, Engine.Materials.octree);
+            this.meshOctree.matrixAutoUpdate = false;
+            this.meshOctree.updateMatrix();
+
+            // Display
+            this.UpdateDisplay();
+            Engine.scene.add( this.meshOctree );	
         }
-        
-        // Update Geometry
-        this.geometryOctree.computeFaceNormals();
-        this.meshOctree = new THREE.Mesh( this.geometryOctree, Engine.Materials.octree);
-        this.meshOctree.matrixAutoUpdate = false;
-        this.meshOctree.updateMatrix();
-        
-        // Display
-        this.UpdateDisplay();
-        Engine.scene.add( this.meshOctree );	
     };
     
     this.UpdateDisplay = function()
     {
         if (Engine.Parameters.octreeVisible) {
-        
+
             // Color Normal
             if (Engine.Parameters.octreeColorNormal) {
                 // Hot fix
@@ -124,13 +132,11 @@ Engine.OctreeManager = function()
                 this.meshOctree.material.materials[1].visible = Engine.Parameters.octreeShowEmpty;
                 this.meshOctree.material.materials[1].wireframe = Engine.Parameters.octreeWire;
             }
-            
+
         } else {
             // Visibility
             this.meshOctree.visible = Engine.Parameters.octreeVisible;
-        }
-            
-        
+        } 
     };
     
     // Octree Iteration

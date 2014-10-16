@@ -107,36 +107,11 @@ Engine.Render = function()
 {
 	requestAnimationFrame(Engine.Render);
 
-//	var delta = Date.now() - Engine.elpasedTimeLastFrame;
+    var delta = Date.now() - Engine.elpasedTimeLastFrame;
 
-	// var timer = 0.0005 * Date.now();
-
-	// camera.position.x = Math.cos( timer * 0.3 ) * 40;
-	// camera.position.z = Math.sin( timer * 0.3 ) * 40;
-
-	// dirLight.position.x = Math.cos( -timer ) * 600;
-	// dirLight.position.z = Math.sin( -timer ) * 600;
-
-	// camera.lookAt( scene.position );
-
-//	if (Engine.Parameters.modeFPS) {
-//		controlFPS.update(Engine.Clock.getDelta());
-//	}
-
-	// Update Local Level of Details
-	/*
-	if (Math.round(camera.position.x) != cameraLastPosition.x
-		|| Math.round(camera.position.y) != cameraLastPosition.y
-		|| Math.round(camera.position.z) != cameraLastPosition.z) {
-		updateLOD(camera.position);
-		cameraLastPosition.x = Math.round(camera.position.x);
-		cameraLastPosition.y = Math.round(camera.position.y);
-		cameraLastPosition.z = Math.round(camera.position.z);
-	}*/
-    
-    if (Engine.Parameters.paintMode) {
-        Engine.controls.Paint();
-    }
+	if (!Engine.controls.IsModeOrbit()) {
+		Engine.controls.Update();
+	}
 
 	Engine.renderer.render(Engine.scene, Engine.camera);
 

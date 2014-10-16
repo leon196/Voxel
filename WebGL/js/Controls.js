@@ -3,6 +3,24 @@ Engine.Controls = function()
     this.camera;
     this.cameraLastPosition;
     
+    this.modes = ["Orbit", "FPS"];
+    this.currentMode = 0;
+    this.GetMode = function() { return this.modes[this.currentMode]; };
+    
+    this.IsModeOrbit = function ()
+    {
+        return this.GetMode() === "Orbit";
+    };
+    
+    this.ChangeMode = function(value)
+    {
+        this.currentMode = this.modes.indexOf(value);
+        this.controlsOrbit.enabled = this.IsModeOrbit();
+        this.controlsFPS.enabled = !this.IsModeOrbit();
+        this.controlsFPS.lookAtPoint(Engine.scene.position);
+//        this.camera.lookAt(Engine.scene);
+    };
+    
     this.screenWidth;
     this.screenHeight;
     this.screenWidthHalf;
@@ -41,23 +59,38 @@ Engine.Controls = function()
 
             this.controlsOrbit = new THREE.OrbitControls( this.camera );
             this.controlsOrbit.damping = 0.2;
-            this.controlsOrbit.enabled = !Engine.Parameters.modeFPS;
+            this.controlsOrbit.enabled = this.IsModeOrbit();
             
             this.controlsFPS = new THREE.FirstPersonControls( this.camera );
-            this.controlsFPS.enabled = Engine.Parameters.modeFPS;
+            this.controlsFPS.enabled = !this.IsModeOrbit();
             
             // Events
 			Engine.renderer.domElement.addEventListener( 'mousemove', this.onMouseMove, false );
             Engine.renderer.domElement.addEventListener( 'mousedown', this.onMouseDown, false );
             Engine.renderer.domElement.addEventListener( 'mouseup', this.onMouseUp, false );
             Engine.renderer.domElement.addEventListener( 'mousewheel', this.onMouseWheel, false );
+            Engine.renderer.domElement.addEventListener( 'mousewheel', this.onMouseWheel, false );
         }
     }
     
+    this.Update = function()
+    {
+        this.controlsFPS.update(Engine.Clock.getDelta());
+        
+        if (Engine.Parameters.autoUpdate && Engine.Parameters.exploreMode) {
+            if (this.controlsFPS.moveForward || this.controlsFPS.moveBackward 
+                || this.controlsFPS.moveLeft || this.controlsFPS.moveRight
+                || this.controlsFPS.moveUp   || this.controlsFPS.moveDown)
+            {
+                Engine.lodManager.UpdateExplorationPosition();
+            }
+        }
+    };
+    
     this.ResetCamera = function()
     {
-        this.camera.position.set(20, 20, 20);
-        this.camera.lookAt(Engine.scene);
+        this.camera.position.set(40, 40, -40);
+//        this.camera.lookAt(Engine.scene);
         this.cameraLastPosition = this.camera.position;
     };    
     
@@ -70,6 +103,10 @@ Engine.Controls = function()
     {
         Engine.controls.mouseLeft = event.button == 0;
         Engine.controls.mouseRight = event.button == 2;
+        
+        if (Engine.Parameters.paintMode) {
+            Engine.controls.Paint();
+        }
     };
 
     this.onMouseUp = function(event)
@@ -96,14 +133,17 @@ Engine.Controls = function()
         {
             Engine.lodManager.UpdateExplorationPosition();
         }
+        
+    
+        
     };
     
     this.Paint = function()
     {
         // PAINT MODE
-        if (this.fireLastShot + this.fireRate < Engine.Clock.getElapsedTime())
-        {
-            this.fireLastShot = Engine.Clock.elapsedTime;
+//        if (this.fireLastShot + this.fireRate < Engine.Clock.getElapsedTime())
+//        {
+//            this.fireLastShot = Engine.Clock.elapsedTime;
             if (this.mouseLeft || this.mouseRight)
             {            
                 // Intersect Test
@@ -121,10 +161,6 @@ Engine.Controls = function()
 
                             // ADD VOXEL
                             Engine.voxelManager.AddVoxelAt(hitPoint);
-
-                            if (Engine.Parameters.autoUpdate) {
-                                Engine.Update();
-                            }
                         } 
                         // Right click
                         else if (this.mouseRight)
@@ -133,14 +169,10 @@ Engine.Controls = function()
 
                             // DELETE VOXEL
                             Engine.voxelManager.SubVoxelAt(hitPoint);
-
-                            if (Engine.Parameters.autoUpdate) {
-                                Engine.Update();
-                            }
                         }
                     }
                 }
             }
-        }
+//        }
     };
 };
