@@ -16,7 +16,7 @@ Engine.Parameters =
 	modelColor: "#ff8800",
     
 	// Voxel Display
-	voxelVisible: true,
+	voxelVisible: false,
 	voxelWire: true,
 	voxelColorNormal: false,
 	voxelColor: "#88ff00",
@@ -58,7 +58,7 @@ Engine.Parameters =
 
     //
     generateMode: false,
-	exploreMode: false,
+	exploreMode: true,
     autoClearOnChangeModel: true,
 	autoUpdate: true,
     exploreModeAutoUpdate: true,
